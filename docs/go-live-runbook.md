@@ -18,14 +18,15 @@ This runbook turns the local standalone repo into the live
 git status --short --branch
 pnpm install --frozen-lockfile
 pnpm verify
-pnpm preflight:live
+pnpm preflight:live -- --image-digest sha256:<published-image-digest>
 kubectl kustomize deploy/k8s/overlays/production >/tmp/complyeaze-tools.yaml
 kubectl get clusterissuer letsencrypt-prod
 dig +short tools.complyeaze.com
 ```
 
 `pnpm preflight:live` is read-only. It checks GitHub auth/repo access, Docker,
-DNS, cert-manager, the production Kustomize render, and namespace existence.
+published image pullability, DNS, cert-manager, the production Kustomize render,
+deploy-secret presence, and namespace existence.
 
 The production render must include:
 

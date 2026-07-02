@@ -15,15 +15,24 @@ describe("live preflight command", () => {
   it("checks required live-cutover surfaces without mutation", async () => {
     expect(existsSync(scriptPath)).toBe(true);
 
-    const { LIVE_PREFLIGHT_CHECKS } = (await import(scriptPath)) as {
-      LIVE_PREFLIGHT_CHECKS: Array<{ id: string; command: string[]; mutates: boolean }>;
+    const { buildLivePreflightChecks } = (await import(scriptPath)) as {
+      buildLivePreflightChecks: (options: { imageDigest: string }) => Array<{
+        id: string;
+        command: string[];
+        mutates: boolean;
+        expectedOutput?: string;
+      }>;
     };
+    const LIVE_PREFLIGHT_CHECKS = buildLivePreflightChecks({
+      imageDigest: "sha256:2a100524ebf35cf3fa5e6c2e5ccd40e144f0e3c9eda04432be652a748ebc1a2e",
+    });
     const ids = LIVE_PREFLIGHT_CHECKS.map((check) => check.id);
 
     expect(ids).toEqual([
       "github-auth",
       "github-repo",
-      "docker-daemon",
+      "github-deploy-secret",
+      "published-image",
       "dns-record",
       "clusterissuer",
       "kustomize-production",
@@ -37,6 +46,14 @@ describe("live preflight command", () => {
         expect.stringMatching(/\bpush\b/),
         expect.stringMatching(/\bdelete\b/),
       ]),
+    );
+    expect(
+      LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "github-deploy-secret")?.expectedOutput,
+    ).toBe("TOOLS_PROD_KUBECONFIG_B64");
+    expect(
+      LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "published-image")?.command.join(" "),
+    ).toContain(
+      "ghcr.io/lamemustafa/complyeaze-tools@sha256:2a100524ebf35cf3fa5e6c2e5ccd40e144f0e3c9eda04432be652a748ebc1a2e",
     );
   });
 });
