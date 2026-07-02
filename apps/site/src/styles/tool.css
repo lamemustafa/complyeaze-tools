@@ -31,8 +31,10 @@
 
 .workbench-guide {
   margin-bottom: 18px;
-  border-left: 3px solid var(--accent);
-  padding-left: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft);
+  padding: 14px;
 }
 
 .workbench-guide h2 {
@@ -68,6 +70,7 @@
 }
 
 .as-of-control input {
+  min-height: 44px;
   padding: 10px;
   font: inherit;
 }
@@ -90,6 +93,16 @@
   box-shadow: inset 0 1px 0 rgba(21, 32, 29, 0.04);
 }
 
+.as-of-control input:hover,
+.tool-textarea:hover {
+  border-color: #aebbb7;
+}
+
+.tool-textarea[aria-invalid="true"] {
+  border-color: var(--warning);
+}
+
+.as-of-control input:focus,
 .tool-textarea:focus {
   border-color: var(--accent);
   outline: 2px solid rgba(12, 107, 88, 0.16);
@@ -108,9 +121,18 @@
   cursor: pointer;
 }
 
+.primary-button:hover:not(:disabled) {
+  background: #095645;
+}
+
 .primary-button:disabled {
   cursor: not-allowed;
   opacity: 0.48;
+}
+
+.field-help-error {
+  color: var(--warning);
+  font-weight: 700;
 }
 
 .detail-grid {

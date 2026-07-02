@@ -13,4 +13,38 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </p>
     </div>
   </section>
+  <section class="detail-grid" aria-label="Security posture">
+    <article>
+      <h2>Runtime controls</h2>
+      <p>
+        Production runs a static container with a read-only filesystem, non-root
+        user, no workload secrets, no service account token, and a default-deny
+        egress NetworkPolicy.
+      </p>
+    </article>
+    <article>
+      <h2>Supply chain</h2>
+      <p>
+        Releases are built from the public repository, pushed to GHCR, and
+        deployed by immutable image digest. The publish workflow emits SBOM and
+        provenance evidence for the container image.
+      </p>
+    </article>
+    <article>
+      <h2>Report privately</h2>
+      <p>
+        Send security or privacy reports to security@complyeaze.com with
+        synthetic reproduction steps. Do not open public issues with taxpayer
+        identifiers, credentials, portal screenshots, or document contents.
+      </p>
+    </article>
+    <article>
+      <h2>Testing boundary</h2>
+      <p>
+        Good-faith testing should avoid denial-of-service, credential capture,
+        data exfiltration, persistence, social engineering, and access to data
+        that does not belong to you.
+      </p>
+    </article>
+  </section>
 </BaseLayout>

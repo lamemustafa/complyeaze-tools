@@ -7,7 +7,8 @@ This runbook turns the local standalone repo into the live
 
 - GitHub repository: public `lamemustafa/complyeaze-tools`.
 - GitHub Actions secret: `TOOLS_PROD_KUBECONFIG_B64` containing the production
-  kubeconfig.
+  namespace-scoped deployer kubeconfig. Do not use a workstation kubeconfig that
+  depends on `doctl` or another local exec credential plugin.
 - GHCR package: public `ghcr.io/lamemustafa/complyeaze-tools`.
 - Cluster: ingress-nginx installed, `letsencrypt-prod` ClusterIssuer ready.
 - DNS: `tools.complyeaze.com` points to the production ingress address.
@@ -53,6 +54,19 @@ git push -u origin tapish-codex/tools-v0
 Open a PR to `main`, wait for CI, merge, then run the `Publish Image` workflow.
 
 ## Production Promotion
+
+Apply deploy access once before the first GitHub Actions deployment:
+
+```bash
+kubectl apply -k deploy/k8s/deploy-access
+```
+
+Generate `TOOLS_PROD_KUBECONFIG_B64` from the
+`complyeaze-tools-deployer-token` service-account token, then set it with:
+
+```bash
+gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools --body "<base64-kubeconfig>"
+```
 
 1. Copy the digest printed by `Publish Image`; it must match
    `sha256:[0-9a-f]{64}`.

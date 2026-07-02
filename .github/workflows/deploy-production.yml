@@ -54,11 +54,25 @@ jobs:
               raise SystemExit("expected to replace exactly one image digest placeholder")
           path.write_text(rendered)
           PY
-          kubectl kustomize /tmp/complyeaze-tools-k8s/overlays/production > /tmp/complyeaze-tools.yaml
-      - name: Bootstrap namespace
+          kubectl kustomize /tmp/complyeaze-tools-k8s/overlays/production > /tmp/complyeaze-tools-full.yaml
+      - name: Drop bootstrap-only namespace document
         run: |
-          kubectl get namespace complyeaze-tools >/dev/null 2>&1 || kubectl create namespace complyeaze-tools
+          python3 - <<'PY'
+          from pathlib import Path
+
+          source = Path("/tmp/complyeaze-tools-full.yaml")
+          target = Path("/tmp/complyeaze-tools.yaml")
+          documents = [doc for doc in source.read_text().split("---\n") if doc.strip()]
+          workload_documents = [
+              doc
+              for doc in documents
+              if not ("kind: Namespace" in doc and "name: complyeaze-tools" in doc)
+          ]
+          if len(workload_documents) != len(documents) - 1:
+              raise SystemExit("expected to drop exactly one namespace document")
+          target.write_text("---\n".join(workload_documents))
+          PY
       - name: Apply
-        run: kubectl apply -f /tmp/complyeaze-tools.yaml
+        run: kubectl -n "${{ env.NAMESPACE }}" apply -f /tmp/complyeaze-tools.yaml
       - name: Rollout
         run: kubectl -n "${{ env.NAMESPACE }}" rollout status deployment/complyeaze-tools --timeout=180s

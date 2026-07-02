@@ -6,6 +6,11 @@ const {
   title = "ComplyEaze Tools",
   description = "Private browser tools that turn messy Indian compliance records into review-ready action packs.",
 } = Astro.props;
+
+const repositoryUrl = "https://github.com/lamemustafa/complyeaze-tools";
+const licenseUrl = `${repositoryUrl}/blob/main/LICENSE`;
+const releaseGatesUrl = `${repositoryUrl}/blob/main/docs/release-gates.md`;
+const provenanceUrl = `${repositoryUrl}/actions/workflows/publish-image.yml`;
 ---
 
 <!doctype html>
@@ -33,12 +38,19 @@ const {
         <a href="/privacy">Privacy</a>
         <a href="/security">Security</a>
         <a href="/status">Status</a>
+        <a href={repositoryUrl}>GitHub</a>
       </nav>
     </header>
     <main>
       <slot />
     </main>
     <footer class="site-footer">
+      <nav class="footer-links" aria-label="Open-source trust links">
+        <a href={repositoryUrl}>Source code</a>
+        <a href={licenseUrl}>Apache-2.0 license</a>
+        <a href={releaseGatesUrl}>Reproducible build gates</a>
+        <a href={provenanceUrl}>SBOM and provenance workflow</a>
+      </nav>
       <p>
         Files are processed in your browser. No account or file upload required.
       </p>

@@ -2,6 +2,16 @@
   "name": "@complyeaze-tools/site",
   "version": "0.0.0",
   "private": true,
+  "license": "Apache-2.0",
+  "homepage": "https://tools.complyeaze.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lamemustafa/complyeaze-tools.git",
+    "directory": "apps/site"
+  },
+  "bugs": {
+    "url": "https://github.com/lamemustafa/complyeaze-tools/issues"
+  },
   "type": "module",
   "scripts": {
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev --host 127.0.0.1",

@@ -9,7 +9,7 @@
   --accent-ink: #ffffff;
   --warning: #8a5a09;
   --soft: #eef5f2;
-  --shadow: 0 16px 44px rgba(21, 32, 29, 0.08);
+  --shadow: 0 1px 2px rgba(21, 32, 29, 0.06);
 }
 
 * {
@@ -26,6 +26,14 @@ body {
 
 a {
   color: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .site-header,
@@ -68,12 +76,15 @@ main {
 }
 
 .site-header nav a {
+  min-height: 44px;
   color: var(--muted);
+  display: inline-flex;
+  align-items: center;
   font-size: 14px;
+  padding: 8px 0;
   text-decoration: none;
 }
 
-.hero,
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
@@ -100,7 +111,7 @@ h1 {
   margin: 0;
   max-width: 900px;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(44px, 7vw, 86px);
+  font-size: 72px;
   font-weight: 500;
 }
 
@@ -186,6 +197,20 @@ h3 {
   font-size: 14px;
 }
 
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin-bottom: 18px;
+}
+
+.footer-links a {
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
 @media (max-width: 820px) {
   .site-header,
   .hero,
@@ -198,7 +223,12 @@ h3 {
     flex-direction: column;
   }
 
+  .site-header nav {
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+
   h1 {
-    font-size: 44px;
+    font-size: 42px;
   }
 }

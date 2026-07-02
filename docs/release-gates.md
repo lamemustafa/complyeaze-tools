@@ -33,4 +33,8 @@ To go live:
    `TOOLS_PROD_KUBECONFIG_B64`, ingress-nginx, cert-manager, and DNS are
    verified.
 
+`TOOLS_PROD_KUBECONFIG_B64` must use the namespace-scoped
+`complyeaze-tools-deployer` ServiceAccount from `deploy/k8s/deploy-access`, not
+a local admin kubeconfig.
+
 Use `docs/go-live-runbook.md` for the exact live cutover checks.

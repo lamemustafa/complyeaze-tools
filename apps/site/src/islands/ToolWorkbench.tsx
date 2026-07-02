@@ -74,6 +74,8 @@ export default function ToolWorkbench({ tool }: Props) {
   const config = configs[tool.slug] ?? configs["/privacy/review-copy-builder"];
   const [input, setInput] = useState(config.sample);
   const [asOfDate, setAsOfDate] = useState("");
+  const inputHelpId = "tool-input-help";
+  const outputStatusId = "tool-output-status";
 
   useEffect(() => {
     if (tool.slug === "/msme-45-day-payment-due-date-calculator" && !asOfDate) {
@@ -85,6 +87,10 @@ export default function ToolWorkbench({ tool }: Props) {
     () => buildOutput(tool.slug, input, config, asOfDate),
     [tool.slug, input, config, asOfDate],
   );
+  const blockedOutput = isBlockingOutput(output);
+  const outputStatus = blockedOutput
+    ? output
+    : "Draft output updated. Review it before downloading or sharing.";
 
   return (
     <div className="workbench-panel">
@@ -103,6 +109,7 @@ export default function ToolWorkbench({ tool }: Props) {
               type="date"
               value={asOfDate}
               onChange={(event) => setAsOfDate(event.currentTarget.value)}
+              aria-describedby={outputStatusId}
             />
           </label>
         ) : null}
@@ -114,8 +121,10 @@ export default function ToolWorkbench({ tool }: Props) {
           className={toolInputClass}
           value={input}
           onChange={(event) => setInput(event.currentTarget.value)}
+          aria-describedby={`${inputHelpId} ${outputStatusId}`}
+          aria-invalid={blockedOutput ? "true" : "false"}
         />
-        <p className="field-help">
+        <p className="field-help" id={inputHelpId}>
           This field stays in your browser. Use synthetic data while testing.
         </p>
       </div>
@@ -128,20 +137,33 @@ export default function ToolWorkbench({ tool }: Props) {
           className={toolInputClass}
           value={output}
           readOnly
+          aria-describedby={outputStatusId}
         />
+        <p
+          className={blockedOutput ? "field-help field-help-error" : "field-help"}
+          id={outputStatusId}
+          role="status"
+          aria-live="polite"
+        >
+          {outputStatus}
+        </p>
         <button
           className="primary-button"
           type="button"
           onClick={() =>
-            downloadText(`${tool.slug.split("/").filter(Boolean).pop()}.txt`, output)
+              downloadText(`${tool.slug.split("/").filter(Boolean).pop()}.txt`, output)
           }
-          disabled={output.startsWith("Paste rows")}
+          disabled={blockedOutput}
         >
           Download draft
         </button>
       </div>
     </div>
   );
+}
+
+function isBlockingOutput(output: string): boolean {
+  return output.startsWith("Paste ") || output.startsWith("Choose ");
 }
 
 function buildOutput(

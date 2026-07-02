@@ -138,7 +138,7 @@ export const TOOLS: ToolMeta[] = [
   {
     slug: "/ais-form-26as-mismatch-checker",
     h1: "AIS and Form 26AS Mismatch Checker",
-    seoTitle: "AIS, Form 168 and Form 26AS Mismatch Checker",
+    seoTitle: "AIS and Form 26AS Mismatch Checker",
     metaDescription:
       "Prepare an AIS/Form 26AS mismatch table and correction request drafts before filing review.",
     title: "AIS and Form 26AS Mismatch Checker",
@@ -169,7 +169,7 @@ export const TOOLS: ToolMeta[] = [
     h1: "GST Portal Issue Evidence Memo Builder",
     seoTitle: "GST Portal Issue Evidence Memo Builder",
     metaDescription:
-      "Create a user-observed GST filing-attempt memo from timestamps, screenshots, and retry notes.",
+      "Create a user-observed GST filing-attempt memo from manual timestamps, error labels, and retry notes.",
     title: "GST Portal Issue Evidence Memo Builder",
     status: "mvp",
     audiences: ["CAs", "GST consultants", "businesses"],

@@ -92,7 +92,38 @@ describe("Kubernetes static deployment policy", () => {
     expect(workflow).toContain(
       "kubectl kustomize /tmp/complyeaze-tools-k8s/overlays/production",
     );
-    expect(workflow).toContain("kubectl get namespace complyeaze-tools");
-    expect(workflow).toContain("kubectl create namespace complyeaze-tools");
+    expect(workflow).toContain("Drop bootstrap-only namespace document");
+    expect(workflow).toContain("expected to drop exactly one namespace document");
+    expect(workflow).toContain('kubectl -n "${{ env.NAMESPACE }}" apply');
+    expect(workflow).not.toContain("kubectl create namespace complyeaze-tools");
+  });
+
+  it("keeps GitHub deploy access namespace-scoped", () => {
+    const serviceAccount = readFileSync(
+      join(process.cwd(), "deploy", "k8s", "deploy-access", "service-account.yaml"),
+      "utf8",
+    );
+    const role = readFileSync(
+      join(process.cwd(), "deploy", "k8s", "deploy-access", "role.yaml"),
+      "utf8",
+    );
+    const roleBinding = readFileSync(
+      join(process.cwd(), "deploy", "k8s", "deploy-access", "rolebinding.yaml"),
+      "utf8",
+    );
+
+    expect(serviceAccount).toContain("name: complyeaze-tools-deployer");
+    expect(serviceAccount).toContain("namespace: complyeaze-tools");
+    expect(serviceAccount).toContain("automountServiceAccountToken: false");
+    expect(serviceAccount).toContain("kubernetes.io/service-account-token");
+    expect(role).toContain("kind: Role");
+    expect(role).not.toContain("kind: ClusterRole");
+    expect(role).toContain('resources: ["services"]');
+    expect(role).toContain('resources: ["deployments"]');
+    expect(role).toContain('resources: ["ingresses", "networkpolicies"]');
+    expect(role).not.toContain("secrets");
+    expect(role).not.toContain("namespaces");
+    expect(roleBinding).toContain("kind: RoleBinding");
+    expect(roleBinding).not.toContain("kind: ClusterRoleBinding");
   });
 });

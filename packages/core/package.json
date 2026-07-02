@@ -2,6 +2,16 @@
   "name": "@complyeaze-tools/core",
   "version": "0.0.0",
   "private": true,
+  "license": "Apache-2.0",
+  "homepage": "https://tools.complyeaze.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lamemustafa/complyeaze-tools.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/lamemustafa/complyeaze-tools/issues"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts"

@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: complyeaze-tools-deployer
+  namespace: complyeaze-tools
+  labels:
+    app.kubernetes.io/name: complyeaze-tools
+    app.kubernetes.io/component: deploy-access
+    app.kubernetes.io/part-of: complyeaze-tools
+subjects:
+  - kind: ServiceAccount
+    name: complyeaze-tools-deployer
+    namespace: complyeaze-tools
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: complyeaze-tools-deployer
