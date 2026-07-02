@@ -1,0 +1,4 @@
+Contact: mailto:security@complyeaze.com
+Policy: https://tools.complyeaze.com/security
+Preferred-Languages: en
+Canonical: https://tools.complyeaze.com/.well-known/security.txt

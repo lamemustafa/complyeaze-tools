@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: complyeaze-tools
+  labels:
+    app.kubernetes.io/name: complyeaze-tools
+    app.kubernetes.io/component: static-site

@@ -1,0 +1,34 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getLaunchTools } from "../lib/tools";
+
+const tools = getLaunchTools();
+---
+
+<BaseLayout title="Sources | ComplyEaze Tools">
+  <section class="hero">
+    <div>
+      <h1>Source register.</h1>
+      <p class="lede">
+        Each tool renders source freshness, unsupported cases, and review-only
+        boundaries. Official sources come first; news and community links are
+        demand signals only.
+      </p>
+    </div>
+  </section>
+  <section class="detail-grid">
+    {tools.map((tool) => (
+      <article>
+        <h2>{tool.h1}</h2>
+        <ul>
+          {tool.officialSources.map((source) => (
+            <li>
+              <a href={source.url}>{source.publisher}: {source.title}</a>
+              {" "}reviewed {source.lastReviewedAt}
+            </li>
+          ))}
+        </ul>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

@@ -1,0 +1,64 @@
+---
+import ToolWorkbench from "../islands/ToolWorkbench";
+import type { ToolMeta } from "@complyeaze-tools/source-register";
+
+const { tool }: { tool: ToolMeta } = Astro.props;
+const sourceSummary = tool.officialSources
+  .map((source) => `${source.publisher}: ${source.title}`)
+  .join("; ");
+---
+
+<section class="tool-hero">
+  <div>
+    <p class="domain-line">tools.complyeaze.com</p>
+    <h1>{tool.h1}</h1>
+    <p class="lede">{tool.metaDescription}</p>
+    <div class="trust-strip" aria-label="Trust posture">
+      {tool.trustCopy.map((line) => <span>{line}</span>)}
+    </div>
+  </div>
+</section>
+
+<section class="tool-workbench" aria-label={`${tool.h1} tool`}>
+  <ToolWorkbench client:load tool={tool} />
+</section>
+
+<section class="detail-grid">
+  <article>
+    <h2>Source posture</h2>
+    <p>Source last reviewed: {tool.officialSources[0]?.lastReviewedAt}</p>
+    <p>{sourceSummary}</p>
+  </article>
+  <article>
+    <h2>What this creates</h2>
+    <ul>
+      {tool.outputArtifacts.map((artifact) => <li>{artifact}</li>)}
+    </ul>
+  </article>
+  <article>
+    <h2>Supported inputs</h2>
+    <ul>
+      {tool.supportedInputs.map((input) => <li>{input}</li>)}
+    </ul>
+  </article>
+  <article>
+    <h2>What this does not decide</h2>
+    <ul>
+      {tool.unsupportedCases.map((item) => <li>{item}</li>)}
+    </ul>
+  </article>
+  <article>
+    <h2>Axal path</h2>
+    <p>{tool.axalUpgradePath}</p>
+  </article>
+</section>
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: tool.h1,
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Any",
+  url: `https://tools.complyeaze.com${tool.slug}`,
+  offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },
+})} />

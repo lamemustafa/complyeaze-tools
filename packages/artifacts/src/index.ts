@@ -1,0 +1,1 @@
+export { buildReviewFooter } from "./text";

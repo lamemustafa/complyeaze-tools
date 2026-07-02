@@ -1,0 +1,26 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getLaunchTools } from "../lib/tools";
+---
+
+<BaseLayout title="Status | ComplyEaze Tools">
+  <section class="hero">
+    <div>
+      <h1>Tool status.</h1>
+      <p class="lede">
+        The first release ships source-backed local artifact builders. MVP
+        means pasted text or CSV-style rows only; richer file import, OCR,
+        saved mappings, collaboration, and recurring workflows remain Axal
+        paths.
+      </p>
+    </div>
+  </section>
+  <section class="detail-grid">
+    {getLaunchTools().map((tool) => (
+      <article>
+        <h2>{tool.h1}</h2>
+        <p>Status: {tool.status}</p>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

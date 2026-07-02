@@ -1,0 +1,64 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_digest:
+        description: "Published image digest, for example sha256:..."
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_NAME: ghcr.io/lamemustafa/complyeaze-tools
+  NAMESPACE: complyeaze-tools
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - name: Validate digest input
+        run: |
+          [[ "${{ inputs.image_digest }}" =~ ^sha256:[0-9a-f]{64}$ ]] || {
+            echo "image_digest must be sha256 plus 64 lowercase hex characters" >&2
+            exit 1
+          }
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p "$HOME/.kube"
+          printf '%s' "${{ secrets.TOOLS_PROD_KUBECONFIG_B64 }}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+      - name: Render digest-pinned manifests
+        env:
+          IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ inputs.image_digest }}
+        run: |
+          cp -R deploy/k8s /tmp/complyeaze-tools-k8s
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path("/tmp/complyeaze-tools-k8s/base/deployment.yaml")
+          rendered, count = re.subn(
+              r"ghcr\.io/lamemustafa/complyeaze-tools@sha256:[0-9a-f]{64}",
+              os.environ["IMAGE_REF"],
+              path.read_text(),
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("expected to replace exactly one image digest placeholder")
+          path.write_text(rendered)
+          PY
+          kubectl kustomize /tmp/complyeaze-tools-k8s/overlays/production > /tmp/complyeaze-tools.yaml
+      - name: Bootstrap namespace
+        run: |
+          kubectl get namespace complyeaze-tools >/dev/null 2>&1 || kubectl create namespace complyeaze-tools
+      - name: Apply
+        run: kubectl apply -f /tmp/complyeaze-tools.yaml
+      - name: Rollout
+        run: kubectl -n "${{ env.NAMESPACE }}" rollout status deployment/complyeaze-tools --timeout=180s

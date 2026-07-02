@@ -1,0 +1,51 @@
+---
+import "../styles/global.css";
+import "../styles/tool.css";
+
+const {
+  title = "ComplyEaze Tools",
+  description = "Private browser tools that turn messy Indian compliance records into review-ready action packs.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index,follow" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url.href} />
+    <link rel="canonical" href={Astro.url.href} />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="ComplyEaze Tools home">
+        <span class="brand-mark">CE</span>
+        <span>ComplyEaze Tools</span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="/source">Sources</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/security">Security</a>
+        <a href="/status">Status</a>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>
+        Files are processed in your browser. No account or file upload required.
+      </p>
+      <p>
+        Not affiliated with GSTN, CBIC, the Income Tax Department, MCA, MSME
+        Samadhaan, or the Government of India.
+      </p>
+    </footer>
+  </body>
+</html>

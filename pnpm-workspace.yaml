@@ -1,0 +1,15 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+allowBuilds:
+  esbuild: true
+  sharp: true
+
+overrides:
+  baseline-browser-mapping: 2.10.40
+  electron-to-chromium: 1.5.383
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp

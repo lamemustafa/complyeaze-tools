@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: complyeaze-tools
+  labels:
+    app.kubernetes.io/name: complyeaze-tools
+    app.kubernetes.io/component: static-site
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: complyeaze-tools
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

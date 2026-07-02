@@ -1,0 +1,13 @@
+.git
+.github
+.astro
+apps/site/dist
+node_modules
+**/node_modules
+coverage
+.DS_Store
+*.log
+README.md
+docs
+tests
+deploy/k8s

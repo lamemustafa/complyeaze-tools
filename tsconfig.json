@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["node", "vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "@complyeaze-tools/artifacts": ["packages/artifacts/src/index.ts"],
+      "@complyeaze-tools/core": ["packages/core/src/index.ts"],
+      "@complyeaze-tools/parsers": ["packages/parsers/src/index.ts"],
+      "@complyeaze-tools/safety": ["packages/safety/src/index.ts"],
+      "@complyeaze-tools/source-register": [
+        "packages/source-register/src/index.ts"
+      ],
+      "@complyeaze-tools/ui-react": ["packages/ui-react/src/index.ts"]
+    }
+  },
+  "include": ["apps", "packages", "tests", "scripts", "vitest.config.ts"]
+}

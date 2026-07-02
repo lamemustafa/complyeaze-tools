@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getLaunchTools } from "../lib/tools";
+
+const tools = getLaunchTools();
+---
+
+<BaseLayout>
+  <section class="hero">
+    <div>
+      <p class="domain-line">tools.complyeaze.com</p>
+      <h1>Private browser tools for Indian compliance work.</h1>
+      <p class="lede">
+        Turn messy records into review-ready action packs: mismatch briefs,
+        payment due-date sheets, vendor follow-ups, evidence memos, and review
+        copies.
+      </p>
+      <div class="trust-strip">
+        <span>Files processed in your browser</span>
+        <span>No account required</span>
+        <span>No file upload required</span>
+        <span>Drafts for professional review</span>
+      </div>
+    </div>
+    <aside class="source-card">
+      <h2>Local-first posture</h2>
+      <p>
+        These tools create working artifacts from files or rows you provide.
+        Axal remains the place for saved mappings, clients, documents, tasks,
+        audit trails, and recurring workflows.
+      </p>
+    </aside>
+  </section>
+
+  <section class="tool-list" aria-label="ComplyEaze Tools">
+    {tools.map((tool) => (
+      <a class="tool-card" href={tool.slug}>
+        <h2>{tool.h1}</h2>
+        <p>{tool.metaDescription}</p>
+        <span class="tool-meta">{tool.outputArtifacts.join(" / ")}</span>
+      </a>
+    ))}
+  </section>
+</BaseLayout>
