@@ -1,10 +1,16 @@
 import { buildReviewFooter } from "@complyeaze-tools/artifacts";
 import {
+  buildDrc01bLiabilityMismatchReview,
   buildGstPortalEvidenceMemo,
   buildGstr2bReconciliationTriage,
   buildGstr2bSupplierFollowUps,
+  buildGstr3bPreLockGapCheck,
+  buildLabourCodeGratuityReview,
+  buildMahareraForm3WithdrawalWorksheet,
   buildMsmePayableReview,
+  buildSchedule112ARows,
   buildTaxStatementMismatchReview,
+  buildTdsSectionTranslation,
   parseDelimitedTable,
   type ParsedTable,
 } from "@complyeaze-tools/core";
@@ -31,6 +37,7 @@ export type WorkbenchConfig = {
 
 export type BuildOutputOptions = {
   strictGstrMatch?: boolean;
+  gstr3bAlreadyFiled?: boolean;
 };
 
 export const configs: Record<string, WorkbenchConfig> = {
@@ -92,6 +99,72 @@ export const configs: Record<string, WorkbenchConfig> = {
     sample:
       "Paste compliance review text here. Replace any taxpayer identifiers before sharing the draft.",
     reviewLabel: "review copy input",
+  },
+  "/gstr1-gstr3b-liability-mismatch-pre-checker": {
+    inputLabel: "Period-wise liability rows",
+    outputLabel: "Liability gap review draft",
+    guidance:
+      "Paste rows with gstin, period, gstr1Liability, and gstr3bLiability. This flags periods where GSTR-1 liability exceeds GSTR-3B liability for review, without claiming to know GSTN's undisclosed Rule 88C threshold.",
+    sample:
+      "gstin,period,gstr1Liability,gstr3bLiability\nSYNTH-ACME-GSTIN,2026-05,412000,398500\nSYNTH-NORTH-GSTIN,2026-05,275000,275000\nSYNTH-DELTA-GSTIN,2026-05,190000,215000",
+    requiredColumns: ["gstin", "period", "gstr1Liability", "gstr3bLiability"],
+    reviewLabel: "GSTR-1/GSTR-3B liability rows",
+  },
+  "/gstr3b-outward-liability-prelock-gap-checker": {
+    inputLabel: "Books vs auto-populated liability rows",
+    outputLabel: "Pre-lock gap review draft",
+    guidance:
+      "Paste rows with lineRef, table (3.1 or 3.2), booksValue, and autoPopulatedValue. Set whether GSTR-3B for the period is already filed, since that changes the correction path.",
+    sample:
+      "lineRef,table,booksValue,autoPopulatedValue\nB2B outward - 18%,3.1,412000,405000\nInter-state to unregistered,3.2,58000,58000\nB2C outward - 5%,3.1,76500,71200",
+    requiredColumns: ["lineRef", "table", "booksValue", "autoPopulatedValue"],
+    reviewLabel: "GSTR-3B pre-lock comparison rows",
+  },
+  "/income-tax-act-2025-tds-section-translator": {
+    inputLabel: "Old section numbers",
+    outputLabel: "Section translation draft",
+    guidance:
+      "Paste rows with oldSection, one old Income-tax Act, 1961 section per row, such as 194C. Only independently verified sections are matched; others are marked not verified.",
+    sample: "oldSection\n194C\n194J\n194N",
+    requiredColumns: ["oldSection"],
+    reviewLabel: "old TDS section rows",
+  },
+  "/schedule-112a-capital-gains-csv-builder": {
+    inputLabel: "Scrip-wise sale rows",
+    outputLabel: "Schedule 112A field draft",
+    guidance:
+      "Paste rows with scripName, isin, quantity, salePricePerUnit, saleDate, and costOfAcquisitionActual. Add fmv31Jan2018PerUnit only if grandfathering should apply.",
+    sample:
+      "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual,fmv31Jan2018PerUnit\nSample Equity Ltd,INSYNTH00001,100,420,2026-05-10,25000,32000\nSample Fund Units,INSYNTH00002,500,58,2024-06-01,20000,",
+    requiredColumns: ["scripName", "isin", "quantity", "salePricePerUnit", "saleDate", "costOfAcquisitionActual"],
+    reviewLabel: "Schedule 112A sale rows",
+  },
+  "/labour-code-gratuity-wage-recalculator": {
+    inputLabel: "Employee pay-component rows",
+    outputLabel: "Wage-test and gratuity comparison draft",
+    guidance:
+      "Paste rows with employeeName, basic, da, otherComponents, employmentType (permanent or fixed-term), and yearsOfService. Optional: retainingAllowance.",
+    sample:
+      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService\nSample Employee A,20000,0,0,56000,permanent,7\nSample Employee B,35000,5000,0,25000,fixed-term,1.2",
+    requiredColumns: ["employeeName", "basic", "da", "otherComponents", "employmentType", "yearsOfService"],
+    reviewLabel: "Labour Code wage/gratuity rows",
+  },
+  "/maharera-form-3-withdrawal-worksheet": {
+    inputLabel: "Project cost rows",
+    outputLabel: "Withdrawal ceiling worksheet draft",
+    guidance:
+      "Paste rows with projectName, totalEstimatedLandCost, totalEstimatedConstructionCost, landCostIncurred, constructionCostIncurred, and amountWithdrawnTillDate. Optional: financingCostIncurred, designatedAccountBalance.",
+    sample:
+      "projectName,totalEstimatedLandCost,totalEstimatedConstructionCost,landCostIncurred,constructionCostIncurred,amountWithdrawnTillDate,designatedAccountBalance\nSample Project A,20000000,80000000,8000000,32000000,18000000,25000000",
+    requiredColumns: [
+      "projectName",
+      "totalEstimatedLandCost",
+      "totalEstimatedConstructionCost",
+      "landCostIncurred",
+      "constructionCostIncurred",
+      "amountWithdrawnTillDate",
+    ],
+    reviewLabel: "MahaRERA Form 3 project rows",
   },
 };
 
@@ -179,6 +252,81 @@ export function buildOutput(
   if (tool.slug === "/gst-portal-issue-evidence-memo") {
     return [
       buildGstPortalEvidenceMemo(parsed.rows),
+      buildFooter(tool, config, parsed),
+    ].join("\n");
+  }
+
+  if (tool.slug === "/gstr1-gstr3b-liability-mismatch-pre-checker") {
+    const review = buildDrc01bLiabilityMismatchReview(parsed.rows);
+    return [
+      "GSTR-1 vs GSTR-3B liability gap review",
+      ...review.map(
+        (row) =>
+          `${row.gstin} | ${row.period} | GSTR-1 ${formatAmount(row.gstr1Liability)} | GSTR-3B ${formatAmount(row.gstr3bLiability)} | diff ${formatAmount(row.difference)} | ${row.flag} | ${row.note}`,
+      ),
+      buildFooter(tool, config, parsed),
+    ].join("\n");
+  }
+
+  if (tool.slug === "/gstr3b-outward-liability-prelock-gap-checker") {
+    const gstr3bAlreadyFiled = options.gstr3bAlreadyFiled ?? false;
+    const review = buildGstr3bPreLockGapCheck(parsed.rows, { gstr3bAlreadyFiled });
+    return [
+      "GSTR-3B outward liability pre-lock gap review",
+      `GSTR-3B already filed for this period: ${gstr3bAlreadyFiled ? "yes" : "no"}`,
+      ...review.map(
+        (row) =>
+          `Table ${row.table} | ${row.lineRef} | books ${formatAmount(row.booksValue)} | auto-populated ${formatAmount(row.autoPopulatedValue)} | diff ${formatAmount(row.difference)} | ${row.status} | ${row.correctionPath}`,
+      ),
+      buildFooter(tool, config, parsed, { gstr3bAlreadyFiled }),
+    ].join("\n");
+  }
+
+  if (tool.slug === "/income-tax-act-2025-tds-section-translator") {
+    const results = buildTdsSectionTranslation(parsed.rows);
+    return [
+      "Income-tax Act 2025 TDS section translation",
+      ...results.map((result) =>
+        result.mapping
+          ? `${result.input} -> ${result.mapping.newCitation} | ${result.mapping.paymentType} | rate ${result.mapping.rate} | threshold ${result.mapping.threshold} | ${result.note}`
+          : `${result.input} -> ${result.status} | ${result.note}`,
+      ),
+      buildFooter(tool, config, parsed),
+    ].join("\n");
+  }
+
+  if (tool.slug === "/schedule-112a-capital-gains-csv-builder") {
+    const rows = buildSchedule112ARows(parsed.rows);
+    return [
+      "Schedule 112A field draft",
+      ...rows.map(
+        (row) =>
+          `${row.scripName} | ISIN ${row.isin}${row.isinLooksValid ? "" : " (format looks invalid)"} | ${row.transferPeriod} | consideration ${formatAmount(row.fullValueOfConsideration)} | cost of acquisition ${formatAmount(row.costOfAcquisitionFinal)} | gain/loss ${formatAmount(row.gainOrLoss)}${row.flags.length ? ` | ${row.flags.join(" ")}` : ""}`,
+      ),
+      buildFooter(tool, config, parsed),
+    ].join("\n");
+  }
+
+  if (tool.slug === "/labour-code-gratuity-wage-recalculator") {
+    const rows = buildLabourCodeGratuityReview(parsed.rows);
+    return [
+      "Labour Code wage-test and gratuity comparison",
+      ...rows.map(
+        (row) =>
+          `${row.employeeName} | wages ${formatAmount(row.wages)} | 50% test exceeded: ${row.fiftyPercentTestExceeded ?? "unknown"} | effective wage base ${formatAmount(row.effectiveWageBase)} | eligible: ${row.eligibleForGratuity ?? "unknown"} | gratuity old ${formatAmount(row.gratuityOld)} -> new ${formatAmount(row.gratuityNew)} (delta ${formatAmount(row.gratuityDelta)}) | ${row.eligibilityBasis}${row.flags.length ? ` | ${row.flags.join(" ")}` : ""}`,
+      ),
+      buildFooter(tool, config, parsed),
+    ].join("\n");
+  }
+
+  if (tool.slug === "/maharera-form-3-withdrawal-worksheet") {
+    const rows = buildMahareraForm3WithdrawalWorksheet(parsed.rows);
+    return [
+      "MahaRERA Form 3 withdrawal ceiling worksheet",
+      ...rows.map(
+        (row) =>
+          `${row.projectName} | total estimated cost ${formatAmount(row.totalEstimatedCost)} | cost incurred ${formatAmount(row.costIncurred)} | proportion ${row.proportionOfCostIncurred !== null ? `${(row.proportionOfCostIncurred * 100).toFixed(2)}%` : "-"} | ceiling ${formatAmount(row.maxWithdrawableCeiling)} | withdrawn ${formatAmount(row.amountWithdrawnTillDate)} | net withdrawable ${formatAmount(row.netWithdrawableCappedByBalance)}${row.flags.length ? ` | ${row.flags.join(" ")}` : ""}`,
+      ),
       buildFooter(tool, config, parsed),
     ].join("\n");
   }

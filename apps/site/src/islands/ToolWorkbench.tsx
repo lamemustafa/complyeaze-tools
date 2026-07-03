@@ -20,12 +20,13 @@ export default function ToolWorkbench({ tool }: Props) {
       : "",
   );
   const [strictGstrMatch, setStrictGstrMatch] = useState(false);
+  const [gstr3bAlreadyFiled, setGstr3bAlreadyFiled] = useState(false);
   const inputHelpId = "tool-input-help";
   const outputStatusId = "tool-output-status";
 
   const output = useMemo(
-    () => buildOutput(tool, input, config, asOfDate, { strictGstrMatch }),
-    [tool, input, config, asOfDate, strictGstrMatch],
+    () => buildOutput(tool, input, config, asOfDate, { strictGstrMatch, gstr3bAlreadyFiled }),
+    [tool, input, config, asOfDate, strictGstrMatch, gstr3bAlreadyFiled],
   );
   const blockedOutput = isBlockingOutput(output);
   const outputStatus = blockedOutput
@@ -63,6 +64,18 @@ export default function ToolWorkbench({ tool }: Props) {
               aria-describedby={outputStatusId}
             />
             <span>Include invoice date and document type when present</span>
+          </label>
+        ) : null}
+        {tool.slug === "/gstr3b-outward-liability-prelock-gap-checker" ? (
+          <label className="option-control">
+            <span>Filing status</span>
+            <input
+              type="checkbox"
+              checked={gstr3bAlreadyFiled}
+              onChange={(event) => setGstr3bAlreadyFiled(event.currentTarget.checked)}
+              aria-describedby={outputStatusId}
+            />
+            <span>GSTR-3B for this period is already filed</span>
           </label>
         ) : null}
         <label className="field-label" htmlFor="tool-input">
