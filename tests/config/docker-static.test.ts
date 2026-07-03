@@ -10,6 +10,8 @@ describe("Docker static image policy", () => {
 
     expect(dockerfile).toContain("FROM node:22-alpine@sha256:");
     expect(dockerfile).toContain("FROM nginxinc/nginx-unprivileged:1.29-bookworm@sha256:");
+    expect(dockerfile).toContain("apt-get upgrade -y --no-install-recommends");
+    expect(dockerfile).toContain("USER 101");
     expect(dockerfile).toContain("ASTRO_TELEMETRY_DISABLED=1");
     expect(dockerfile).toContain("pnpm install --frozen-lockfile");
     expect(dockerfile).toContain("HEALTHCHECK");
