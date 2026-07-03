@@ -54,6 +54,37 @@ export function buildLivePreflightChecks({ imageDigest }) {
       command: ["kubectl", "get", "namespace", "complyeaze-tools"],
       mutates: false,
     },
+    {
+      id: "live-homepage-public-links",
+      label: "Live homepage does not emit stale :8080 public links",
+      command: ["curl", "-fsSL", "https://tools.complyeaze.com/"],
+      mutates: false,
+      requireOutput: true,
+      expectedOutput: "https://tools.complyeaze.com",
+      forbiddenOutput: [":8080"],
+    },
+    {
+      id: "live-tool-public-links",
+      label: "Live tool page does not emit stale :8080 public links",
+      command: [
+        "curl",
+        "-fsSL",
+        "https://tools.complyeaze.com/msme-45-day-payment-due-date-calculator/",
+      ],
+      mutates: false,
+      requireOutput: true,
+      expectedOutput: "https://tools.complyeaze.com/msme-45-day-payment-due-date-calculator",
+      forbiddenOutput: [":8080"],
+    },
+    {
+      id: "live-sitemap-public-links",
+      label: "Live sitemap does not emit stale :8080 public links",
+      command: ["curl", "-fsSL", "https://tools.complyeaze.com/sitemap.xml"],
+      mutates: false,
+      requireOutput: true,
+      expectedOutput: "https://tools.complyeaze.com",
+      forbiddenOutput: [":8080"],
+    },
   ];
 }
 
@@ -65,12 +96,15 @@ export function runCheck(check) {
   const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
   const hasRequiredOutput = !check.requireOutput || result.stdout.trim().length > 0;
   const hasExpectedOutput = !check.expectedOutput || output.includes(check.expectedOutput);
+  const hasForbiddenOutput = (check.forbiddenOutput ?? []).some((forbiddenOutput) =>
+    output.includes(forbiddenOutput),
+  );
 
   return {
     id: check.id,
     label: check.label,
     command: check.command.join(" "),
-    ok: result.status === 0 && hasRequiredOutput && hasExpectedOutput,
+    ok: result.status === 0 && hasRequiredOutput && hasExpectedOutput && !hasForbiddenOutput,
     output,
   };
 }
@@ -78,8 +112,16 @@ export function runCheck(check) {
 export function renderResult(result) {
   const status = result.ok ? "PASS" : "FAIL";
   const lines = [`[${status}] ${result.id} - ${result.label}`, `  $ ${result.command}`];
-  if (result.output) lines.push(`  ${result.output.split("\n").slice(0, 6).join("\n  ")}`);
+  if (result.output) {
+    lines.push(`  ${previewOutput(result.output).split("\n").slice(0, 6).join("\n  ")}`);
+  }
   return lines.join("\n");
+}
+
+function previewOutput(output) {
+  const maxOutputChars = 720;
+
+  return output.length > maxOutputChars ? `${output.slice(0, maxOutputChars)}...` : output;
 }
 
 function main() {

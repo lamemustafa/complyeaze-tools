@@ -21,6 +21,7 @@ describe("live preflight command", () => {
         command: string[];
         mutates: boolean;
         expectedOutput?: string;
+        forbiddenOutput?: string[];
       }>;
     };
     const LIVE_PREFLIGHT_CHECKS = buildLivePreflightChecks({
@@ -37,6 +38,9 @@ describe("live preflight command", () => {
       "clusterissuer",
       "kustomize-production",
       "namespace",
+      "live-homepage-public-links",
+      "live-tool-public-links",
+      "live-sitemap-public-links",
     ]);
     expect(LIVE_PREFLIGHT_CHECKS.every((check) => check.mutates === false)).toBe(true);
     expect(LIVE_PREFLIGHT_CHECKS.map((check) => check.command.join(" "))).not.toEqual(
@@ -55,5 +59,65 @@ describe("live preflight command", () => {
     ).toContain(
       "ghcr.io/lamemustafa/complyeaze-tools@sha256:2a100524ebf35cf3fa5e6c2e5ccd40e144f0e3c9eda04432be652a748ebc1a2e",
     );
+    for (const id of [
+      "live-homepage-public-links",
+      "live-tool-public-links",
+      "live-sitemap-public-links",
+    ]) {
+      const check = LIVE_PREFLIGHT_CHECKS.find((candidate) => candidate.id === id);
+
+      expect(check?.command[0]).toBe("curl");
+      expect(check?.forbiddenOutput).toEqual([":8080"]);
+    }
+  });
+
+  it("fails a check when forbidden output is present", async () => {
+    const { runCheck } = (await import(scriptPath)) as {
+      runCheck: (check: {
+        id: string;
+        label: string;
+        command: string[];
+        mutates: boolean;
+        forbiddenOutput?: string[];
+      }) => { ok: boolean; output: string };
+    };
+
+    const result = runCheck({
+      id: "bad-public-link",
+      label: "Bad public link",
+      command: [
+        process.execPath,
+        "-e",
+        "process.stdout.write('https://tools.complyeaze.com:8080/msme-45-day-payment-due-date-calculator')",
+      ],
+      mutates: false,
+      forbiddenOutput: [":8080"],
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.output).toContain(":8080");
+  });
+
+  it("truncates long command output in rendered summaries", async () => {
+    const { renderResult } = (await import(scriptPath)) as {
+      renderResult: (result: {
+        id: string;
+        label: string;
+        command: string;
+        ok: boolean;
+        output: string;
+      }) => string;
+    };
+
+    const rendered = renderResult({
+      id: "long-output",
+      label: "Long output",
+      command: "curl -fsSL https://tools.complyeaze.com/",
+      ok: true,
+      output: "x".repeat(1_200),
+    });
+
+    expect(rendered.length).toBeLessThan(900);
+    expect(rendered).toContain("...");
   });
 });
