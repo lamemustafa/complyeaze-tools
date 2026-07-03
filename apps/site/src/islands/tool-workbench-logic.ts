@@ -35,13 +35,13 @@ export type BuildOutputOptions = {
 
 export const configs: Record<string, WorkbenchConfig> = {
   "/msme-45-day-payment-due-date-calculator": {
-    inputLabel: "Payables rows",
-    outputLabel: "Payables age review draft",
+    inputLabel: "Payables review rows",
+    outputLabel: "MSME first-pass review draft",
     guidance:
-      "Paste CSV/TSV-style rows with vendor, amount, invoiceDate, and acceptanceDate. Dates should be YYYY-MM-DD.",
+      "Paste rows with vendor, amount, invoiceDate, acceptanceDate or deemedAcceptanceDate. Optional review fields: writtenAgreement, agreedPaymentDays, paymentDate, paidAmount, disputeStatus, udyamEvidence. This creates a browser-local triage draft only.",
     sample:
-      "vendor,amount,invoiceDate,acceptanceDate\nAcme Components,125000,2026-05-01,2026-05-03\nNorthline Supplies,42000,2026-06-20,2026-06-21",
-    requiredColumns: ["vendor", "amount", "invoiceDate", "acceptanceDate"],
+      "vendor,amount,invoiceDate,acceptanceDate,writtenAgreement,agreedPaymentDays,udyamEvidence,disputeStatus,paymentDate,paidAmount\nAcme Components,125000,2026-05-01,2026-05-03,no,,available,,,\nNorthline Supplies,42000,2026-06-20,2026-06-21,yes,30,missing,,,\nDelta Traders,54000,2026-05-02,2026-05-02,yes,60,available,disputed,,5000",
+    requiredColumns: ["vendor", "amount", "acceptanceDate"],
     reviewLabel: "MSME payable rows",
   },
   "/gstr-2b-missing-invoice-vendor-follow-up": {
@@ -118,13 +118,10 @@ export function buildOutput(
     if (!asOfDate) return "Choose an as-of date to calculate payment age.";
     const review = buildMsmePayableReview(parsed.rows, new Date(`${asOfDate}T00:00:00`));
     return [
-      "MSME payables age triage draft",
-      `As-of date: ${asOfDate}`,
-      ...review.map(
-        (row) =>
-          `${row.vendor}: ${row.ageDays ?? "missing"} days since acceptance; ${row.possibleFlag}`,
-      ),
-      buildFooter(tool, config, parsed, { asOfDate }),
+      "MSME payables first-pass triage draft",
+      `Review as-of date: ${asOfDate}`,
+      ...review.flatMap((row) => formatMsmeReviewRow(row)),
+      buildFooter(tool, config, parsed, { asOfDate }, msmeReviewCaveats),
     ].join("\n");
   }
 
@@ -219,6 +216,7 @@ function buildFooter(
   config: WorkbenchConfig,
   parsed?: ParsedTable,
   selectedOptions?: Record<string, string | number | boolean>,
+  extraCaveats?: string[],
 ): string {
   return buildReviewFooter({
     sourceLabel: config.reviewLabel,
@@ -236,12 +234,27 @@ function buildFooter(
     parseIssues: parsed?.issues,
     officialSources: tool.officialSources,
     unsupportedCases: tool.unsupportedCases,
+    extraCaveats,
   });
 }
 
 function formatAmount(value: number | null) {
   return value === null ? "-" : value.toFixed(2);
 }
+
+function formatMsmeReviewRow(row: ReturnType<typeof buildMsmePayableReview>[number]): string[] {
+  return [
+    `${row.vendor} | review-start age ${row.ageDays ?? "missing"} days | review date ${row.reviewDate ?? "missing"} | days past review date ${row.daysPastReviewDate ?? "missing"} | ${row.possibleFlag}`,
+    `Review basis: ${row.reviewBasis}`,
+    `Payment status: ${row.paymentStatus}; Udyam evidence entered: ${row.udyamEvidenceStatus}`,
+    row.evidenceChecks.length ? `Review checks: ${row.evidenceChecks.join(" ")}` : null,
+  ].filter((line): line is string => Boolean(line));
+}
+
+const msmeReviewCaveats = [
+  "Dates and statuses are based only on pasted rows.",
+  "This tool does not verify Udyam registration, resolve disputes, calculate statutory interest, or decide tax disallowance.",
+];
 
 function validateRows(
   input: string,

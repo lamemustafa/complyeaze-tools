@@ -44,7 +44,7 @@ export default function ToolWorkbench({ tool }: Props) {
         </div>
         {tool.slug === "/msme-45-day-payment-due-date-calculator" ? (
           <label className="as-of-control">
-            <span>As-of date</span>
+            <span>Review as-of date</span>
             <input
               type="date"
               value={asOfDate}
