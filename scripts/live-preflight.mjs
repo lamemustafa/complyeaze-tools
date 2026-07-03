@@ -68,6 +68,26 @@ export function buildLivePreflightChecks({ imageDigest }) {
       forbiddenOutput: [":8080"],
     },
     {
+      id: "live-tool-csp-hydration-compatible",
+      label: "Live tool page CSP allows required Astro inline hydration",
+      command: [
+        "curl",
+        "-fsSI",
+        "https://tools.complyeaze.com/gst-portal-issue-evidence-memo/",
+      ],
+      mutates: false,
+      requireOutput: true,
+      expectedOutput: "script-src 'self' 'unsafe-inline'",
+    },
+    {
+      id: "live-manifest-content-type",
+      label: "Live manifest has browser-readable content type",
+      command: ["curl", "-fsSI", "https://tools.complyeaze.com/site.webmanifest"],
+      mutates: false,
+      requireOutput: true,
+      expectedOutput: "content-type: application/manifest+json",
+    },
+    {
       id: "live-homepage-public-links",
       label: "Live homepage does not emit stale :8080 public links",
       command: ["curl", "-fsSL", "https://tools.complyeaze.com/"],
