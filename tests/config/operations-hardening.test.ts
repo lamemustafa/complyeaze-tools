@@ -18,7 +18,7 @@ describe("operations hardening", () => {
     expect(rotationDoc).toContain("TOOLS_PROD_KUBECONFIG_B64");
     expect(rotationDoc).toContain("Emergency Revocation");
     expect(rotationDoc).toContain("Prefer GitHub OIDC");
-    expect(workflow).toContain("cron: \"23 4 1 */2 *\"");
+    expect(workflow).toContain("cron: \"23 4 1 * *\"");
     expect(workflow).toContain("deploy-credential-rotation");
     expect(workflow).toContain("gh issue create");
     expect(workflow).not.toContain("${{ secrets.TOOLS_PROD_KUBECONFIG_B64 }}");

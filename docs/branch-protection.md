@@ -5,9 +5,9 @@ GitHub branch protection rule or repository ruleset with these requirements:
 
 - Require pull requests before merge.
 - Require the `verify` status check from `.github/workflows/ci.yml`.
-- After the first successful run, also require `CodeQL / Analyze` and
-  `Dependency Review / Review dependency changes` so code scanning and
-  dependency review block unsafe pull requests.
+- After the first successful run, also require the `Analyze` and
+  `Review dependency changes` check contexts so CodeQL and dependency review
+  block unsafe pull requests.
 - Require branches to be up to date before merge.
 - Require conversation resolution before merge. Codex and other automated review
   comments count through unresolved review threads, not through an approving
@@ -38,7 +38,7 @@ Suggested GitHub checks:
 
 ```text
 Required status check: verify
-Required security checks: CodeQL / Analyze, Dependency Review / Review dependency changes
+Required security checks: Analyze, Review dependency changes
 Required conversation gate: all current-head review threads resolved
 Sensitive owner paths: .github/, deploy/, packages/source-register/,
 packages/safety/, infra/cloudflare/, privacy/security/source pages,
@@ -65,8 +65,8 @@ Ruleset target:
 - Require linear history: enabled.
 - Require a pull request before merging: enabled.
 - Require status checks to pass: verify.
-- Add security status checks after their first run: CodeQL / Analyze,
-  Dependency Review / Review dependency changes.
+- Add security status checks after their first run: Analyze,
+  Review dependency changes.
 - Require branches to be up to date before merging: enabled.
 - Require conversation resolution before merging: enabled.
 - Required approving reviews / Code Owner reviews: disabled until a backup

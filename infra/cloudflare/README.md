@@ -18,15 +18,19 @@ Zaraz, Workers, Pages, R2, or redirect ownership here.
 - Review every plan manually. This repo must not add an automatic Cloudflare
   apply workflow until imported state, rollback, and reviewer controls are
   proven.
-- Keep every ruleset expression constrained to `tools.complyeaze.com`.
+- This Terraform package may manage the `tools.complyeaze.com` DNS record. It
+  must not declare `cloudflare_ruleset` zone phase resources unless the whole
+  Cloudflare phase is intentionally imported and represented in this repo's
+  state. The cache and WAF files are reviewed host-specific snippets only.
 
 ## Migration Sequence
 
 1. Create a Cloudflare API token with the minimum zone-scoped permissions needed
    for DNS and ruleset reads/writes.
 2. Export `CLOUDFLARE_API_TOKEN` locally.
-3. Import the existing DNS record and any existing cache/WAF rules that already
-   affect `tools.complyeaze.com`.
+3. Import the existing DNS record. Treat existing cache/WAF rules as
+   dashboard-managed unless a separate reviewed migration imports and preserves
+   every rule in the target Cloudflare phase.
 4. Run `terraform plan` and confirm the plan is a no-op or the exact intended
    change.
 5. Apply only after a reviewed PR updates this directory and the plan has been
@@ -43,10 +47,10 @@ terraform plan -var "cloudflare_zone_id=<zone_id>" -var "tools_origin_target=174
 ## Configured Surfaces
 
 - `dns.tf`: proxied `tools.complyeaze.com` DNS record.
-- `cache.tf`: long edge/browser cache for immutable Astro assets under
-  `/_astro/`.
-- `waf.tf`: host-scoped custom WAF rule to block non-standard edge ports on the
-  tools host.
+- `cache.tf`: host-specific cache rule snippet for immutable Astro assets under
+  `/_astro/`. It is not an applied Terraform resource.
+- `waf.tf`: host-specific custom WAF rule snippet to block non-standard edge
+  ports on the tools host. It is not an applied Terraform resource.
 
 External uptime monitoring is intentionally documented in
 `docs/uptime-monitoring.md` rather than configured here until the chosen monitor

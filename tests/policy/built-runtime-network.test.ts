@@ -74,7 +74,9 @@ describe("built runtime network scanner", () => {
         join(distDir, "index.html"),
         [
           "<script src=\"https://cdn.example.test/app.js\"></script>",
+          "<script src=https://cdn-unquoted.example.test/app.js></script>",
           "<link rel=\"preconnect\" href=\"https://fonts.example.test\">",
+          "<link rel=stylesheet href=https://css-unquoted.example.test/app.css>",
           "<link rel=\"stylesheet\" href=\"https://cdn.example.test/app.css\">",
           "<link rel=\"modulepreload\" href=\"https://cdn.example.test/chunk.js\">",
           "<img srcset=\"/local.png 1x, https://img.example.test/remote.png 2x\" alt=\"\">",
@@ -89,7 +91,9 @@ describe("built runtime network scanner", () => {
       expect(scanBuiltRuntimeNetwork({ distDir })).toEqual(
         expect.arrayContaining([
           expect.stringContaining("remote script src"),
+          expect.stringContaining("cdn-unquoted.example.test"),
           expect.stringContaining("remote link preconnect"),
+          expect.stringContaining("css-unquoted.example.test"),
           expect.stringContaining("remote link stylesheet"),
           expect.stringContaining("remote link modulepreload"),
           expect.stringContaining("remote srcset"),

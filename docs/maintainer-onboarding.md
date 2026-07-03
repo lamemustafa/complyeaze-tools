@@ -14,8 +14,7 @@ maintainer or GitHub team exists.
    `AGENTS.md`, and release/credential/uptime docs.
 3. Add the backup maintainer or team as a production environment reviewer.
 4. After the first successful checks for the new workflows, require `verify`,
-   `CodeQL / Analyze`, and `Dependency Review / Review dependency changes` in
-   branch protection.
+   `Analyze`, and `Review dependency changes` in branch protection.
 5. Enable required approving review or CODEOWNER review only after the backup
    reviewer or team is valid on GitHub and can review the latest pusher's work.
 6. Consider requiring two approvals for deploy, security, privacy, Cloudflare,

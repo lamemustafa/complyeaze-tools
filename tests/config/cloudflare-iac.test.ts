@@ -41,10 +41,12 @@ describe("Cloudflare IaC scaffold", () => {
     expect(terraform).toContain('default     = "tools.complyeaze.com"');
     expect(terraform).toContain('var.tools_hostname == "tools.complyeaze.com"');
     expect(terraform).toContain("cloudflare_dns_record");
-    expect(terraform).toContain("cloudflare_ruleset");
+    expect(terraform).toContain("tools_cache_rule_snippet");
+    expect(terraform).toContain("tools_non_standard_port_rule_snippet");
+    expect(terraform).not.toContain('resource "cloudflare_ruleset"');
     expect(terraform).toContain('zone_id = var.cloudflare_zone_id');
-    expect(terraform).toContain('phase   = "http_request_cache_settings"');
-    expect(terraform).toContain('phase   = "http_request_firewall_custom"');
+    expect(terraform).toContain('tools_cache_ruleset_phase = "http_request_cache_settings"');
+    expect(terraform).toContain('tools_waf_ruleset_phase = "http_request_firewall_custom"');
     expect(terraform).toContain('http.host eq \\"tools.complyeaze.com\\"');
     expect(terraform).toContain('proxied = true');
     expect(terraform).not.toContain("pack.complyeaze.com");

@@ -43,7 +43,9 @@ describe("security automation", () => {
     expect(workflow).toContain("provenance: true");
     expect(workflow).toContain("sbom: true");
     expect(workflow).toContain("aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25");
-    expect(workflow).toContain("image-ref: ${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}");
+    expect(workflow).toContain("load: true");
+    expect(workflow).toContain("image-ref: ${{ env.IMAGE_NAME }}:scan-${{ github.sha }}");
+    expect(workflow).toContain("push: true");
     expect(workflow).toContain("format: sarif");
     expect(workflow).toContain("severity: HIGH,CRITICAL");
     expect(workflow).toContain("exit-code: \"1\"");
@@ -54,8 +56,8 @@ describe("security automation", () => {
     const branchProtection = read("docs/branch-protection.md");
     const releaseGates = read("docs/release-gates.md");
 
-    expect(branchProtection).toContain("CodeQL / Analyze");
-    expect(branchProtection).toContain("Dependency Review / Review dependency changes");
+    expect(branchProtection).toContain("Analyze");
+    expect(branchProtection).toContain("Review dependency changes");
     expect(releaseGates).toContain("CodeQL");
     expect(releaseGates).toContain("dependency-review");
     expect(releaseGates).toContain("Trivy");

@@ -107,8 +107,11 @@ function scanCssResources(source, file) {
 }
 
 function readAttribute(tag, name) {
-  const match = new RegExp(`\\b${name}\\s*=\\s*(["'])(.*?)\\1`, "i").exec(tag);
-  return match?.[2];
+  const match = new RegExp(
+    `\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>` + "`" + `]+))`,
+    "i",
+  ).exec(tag);
+  return match?.[1] ?? match?.[2] ?? match?.[3];
 }
 
 function readSrcsetUrls(value) {
