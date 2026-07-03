@@ -104,8 +104,20 @@ jobs:
         run: kubectl -n "${{ env.NAMESPACE }}" apply -f /tmp/complyeaze-tools.yaml
       - name: Rollout
         run: kubectl -n "${{ env.NAMESPACE }}" rollout status deployment/complyeaze-tools --timeout=180s
-      - name: Live smoke checks
+      - name: Service smoke checks
         run: |
-          curl -fsSI https://tools.complyeaze.com/ | grep -i "content-security-policy"
-          curl -fsSL https://tools.complyeaze.com/-/health | grep -Fx "ok"
-          curl -fsSL https://tools.complyeaze.com/sitemap.xml | grep -F "https://tools.complyeaze.com"
+          kubectl -n "${{ env.NAMESPACE }}" port-forward service/complyeaze-tools 18080:8080 > /tmp/complyeaze-tools-port-forward.log 2>&1 &
+          port_forward_pid="$!"
+          trap 'kill "$port_forward_pid"' EXIT
+
+          for attempt in $(seq 1 20); do
+            if curl -fsSL http://127.0.0.1:18080/-/health | grep -Fx "ok"; then
+              healthy=1
+              break
+            fi
+            sleep 1
+          done
+
+          test "${healthy:-}" = "1"
+          curl -fsSI http://127.0.0.1:18080/ | grep -i "content-security-policy"
+          curl -fsSL http://127.0.0.1:18080/sitemap.xml | grep -F "https://tools.complyeaze.com"
