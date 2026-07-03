@@ -5,13 +5,14 @@
   <text x="142" y="153" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#ffffff">CE</text>
   <text x="208" y="137" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#0c6b58">tools.complyeaze.com</text>
   <text x="104" y="268" font-family="Georgia, 'Times New Roman', serif" font-size="68" fill="#15201d">Browser-local compliance tools</text>
-  <text x="104" y="336" font-family="Arial, sans-serif" font-size="32" fill="#52615d">Reconciliation triage, evidence memos, review copy, and vendor follow-up drafts.</text>
+  <text x="104" y="330" font-family="Arial, sans-serif" font-size="31" fill="#52615d">Reconciliation triage, evidence memos, review copy,</text>
+  <text x="104" y="372" font-family="Arial, sans-serif" font-size="31" fill="#52615d">and vendor follow-up drafts for professional review.</text>
   <g font-family="Arial, sans-serif" font-size="24" fill="#15201d">
-    <rect x="104" y="414" width="266" height="52" rx="26" fill="#eef5f2" stroke="#d7dfdc"/>
-    <text x="237" y="448" text-anchor="middle">No account required</text>
-    <rect x="392" y="414" width="318" height="52" rx="26" fill="#eef5f2" stroke="#d7dfdc"/>
-    <text x="551" y="448" text-anchor="middle">No file upload required</text>
-    <rect x="732" y="414" width="324" height="52" rx="26" fill="#eef5f2" stroke="#d7dfdc"/>
-    <text x="894" y="448" text-anchor="middle">Drafts for professional review</text>
+    <rect x="104" y="430" width="266" height="52" rx="26" fill="#eef5f2" stroke="#d7dfdc"/>
+    <text x="237" y="464" text-anchor="middle">No account required</text>
+    <rect x="392" y="430" width="318" height="52" rx="26" fill="#eef5f2" stroke="#d7dfdc"/>
+    <text x="551" y="464" text-anchor="middle">No file upload required</text>
+    <rect x="732" y="430" width="324" height="52" rx="26" fill="#eef5f2" stroke="#d7dfdc"/>
+    <text x="894" y="464" text-anchor="middle">Browser-local drafts</text>
   </g>
 </svg>

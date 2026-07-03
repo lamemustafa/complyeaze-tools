@@ -2,7 +2,10 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="Privacy | ComplyEaze Tools">
+<BaseLayout
+  title="Privacy | ComplyEaze Tools"
+  description="Privacy posture for ComplyEaze Tools: browser-local tool input handling, static hosting metadata, and Cloudflare security checks."
+>
   <section class="hero">
     <div>
       <h1>Browser-local by design.</h1>
@@ -24,11 +27,23 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </p>
     </article>
     <article>
-      <h2>What servers may see</h2>
+      <h2>What hosting may see</h2>
       <p>
         Static hosting, ingress, certificate, and security systems may process
         ordinary web request metadata such as IP address, user agent, request
         path, timestamp, and TLS details while serving pages and assets.
+      </p>
+    </article>
+    <article>
+      <h2>Cloudflare security checks</h2>
+      <p>
+        The public host may use Cloudflare security features, including
+        JavaScript Detections or challenge scripts served from
+        /cdn-cgi/challenge-platform, to evaluate automated traffic. Those
+        systems may set Cloudflare cookies such as cf_clearance and process
+        browser/security signals. They are not part of the tool workbench; the
+        tool code must not intentionally send pasted tool rows or generated
+        drafts to ComplyEaze or Cloudflare.
       </p>
     </article>
     <article>

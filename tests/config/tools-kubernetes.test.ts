@@ -15,6 +15,9 @@ describe("Kubernetes static deployment policy", () => {
 
     expect(namespace).toContain("kind: Namespace");
     expect(namespace).toContain("name: complyeaze-tools");
+    expect(namespace).toContain("pod-security.kubernetes.io/enforce: restricted");
+    expect(namespace).toContain("pod-security.kubernetes.io/audit: restricted");
+    expect(namespace).toContain("pod-security.kubernetes.io/warn: restricted");
     expect(kustomization).toContain("- namespace.yaml");
   });
 
@@ -85,6 +88,10 @@ describe("Kubernetes static deployment policy", () => {
     );
 
     expect(workflow).toContain("cp -R deploy/k8s /tmp/complyeaze-tools-k8s");
+    expect(workflow).toContain("source_sha");
+    expect(workflow).toContain("Verify reviewed publish run");
+    expect(workflow).toContain("--workflow publish-image.yml");
+    expect(workflow).toContain("docker buildx imagetools inspect");
     expect(workflow).toContain("complyeaze-tools@sha256");
     expect(workflow).not.toContain("perl -0pi");
     expect(workflow).toContain("IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ inputs.image_digest }}");
@@ -96,6 +103,8 @@ describe("Kubernetes static deployment policy", () => {
     expect(workflow).toContain("expected to drop exactly one namespace document");
     expect(workflow).toContain('kubectl -n "${{ env.NAMESPACE }}" apply');
     expect(workflow).not.toContain("kubectl create namespace complyeaze-tools");
+    expect(workflow).toContain("Live smoke checks");
+    expect(workflow).toContain("https://tools.complyeaze.com/-/health");
   });
 
   it("keeps GitHub deploy access namespace-scoped", () => {

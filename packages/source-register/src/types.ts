@@ -30,6 +30,7 @@ export type ToolMeta = {
   outputArtifacts: string[];
   officialSources: ToolSource[];
   demandSignals?: ToolSource[];
+  relatedSlugs: string[];
   axalUpgradePath: string;
   trustCopy: string[];
   bannedClaims: string[];

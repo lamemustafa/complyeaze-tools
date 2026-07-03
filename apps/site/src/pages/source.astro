@@ -3,9 +3,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { getLaunchTools } from "../lib/tools";
 
 const tools = getLaunchTools();
+const freshnessIssueUrl =
+  "https://github.com/lamemustafa/complyeaze-tools/issues/new?template=source_freshness.yml";
 ---
 
-<BaseLayout title="Sources | ComplyEaze Tools">
+<BaseLayout
+  title="Sources | ComplyEaze Tools"
+  description="Official source register for ComplyEaze Tools, including source review dates, refresh windows, unsupported cases, and stale-source reporting."
+>
   <section class="hero">
     <div>
       <h1>Source register.</h1>
@@ -20,14 +25,23 @@ const tools = getLaunchTools();
     {tools.map((tool) => (
       <article>
         <h2>{tool.h1}</h2>
+        <p>
+          Refresh policy: each source is reviewed again within its listed
+          stale-after window. Report stale or changed sources through the public
+          source freshness issue form using synthetic context only.
+        </p>
         <ul>
           {tool.officialSources.map((source) => (
             <li>
               <a href={source.url}>{source.publisher}: {source.title}</a>
-              {" "}reviewed {source.lastReviewedAt}
+              {" "}reviewed {source.lastReviewedAt}; refresh after{" "}
+              {source.staleAfterDays} days; used for {source.usedFor.join(", ")}
             </li>
           ))}
         </ul>
+        <p>
+          <a href={freshnessIssueUrl}>Report a stale source for this tool</a>
+        </p>
       </article>
     ))}
   </section>

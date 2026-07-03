@@ -5,7 +5,9 @@ review-ready action packs.
 
 Files are processed in your browser. No account or file upload is required.
 The site may receive normal web request metadata when serving pages and static
-assets; tool files are not intentionally sent to ComplyEaze by these tools.
+assets. Cloudflare security checks may also process browser/security signals on
+public page requests. Tool files are not intentionally sent to ComplyEaze by
+these tools.
 
 ## Launch Surface
 
@@ -44,6 +46,11 @@ trails.
   `https://tools.complyeaze.com/source/`
 - Release gates: `docs/release-gates.md`
 - Third-party license inventory: `docs/third-party-licenses.md`
+
+Search and AI crawlers may index public static pages, `robots.txt`,
+`sitemap.xml`, and `llms.txt`. Pasted tool inputs and generated drafts are not
+published content and must not be placed in public issues, examples, screenshots,
+or fixtures.
 
 ## Development
 

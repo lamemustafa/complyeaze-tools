@@ -1,0 +1,38 @@
+name: Source freshness review
+description: Report an official source that appears stale, moved, or changed.
+title: "Source freshness review: "
+labels:
+  - source-freshness
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use synthetic context only. Do not include taxpayer identifiers, portal screenshots, credentials, notices, ledgers, invoices, cookies, OTPs, CAPTCHA answers, or local file paths.
+  - type: input
+    id: tool-url
+    attributes:
+      label: Tool URL
+      placeholder: https://tools.complyeaze.com/source/
+    validations:
+      required: true
+  - type: input
+    id: source-url
+    attributes:
+      label: Official source URL
+      placeholder: https://...
+    validations:
+      required: true
+  - type: textarea
+    id: observed-change
+    attributes:
+      label: What changed?
+      description: Describe the stale link, changed rule text, moved page, or source review gap using synthetic context only.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I used synthetic context only and did not include taxpayer identifiers, credentials, screenshots, documents, ledgers, notices, OTPs, CAPTCHA answers, cookies, or local file paths.
+          required: true

@@ -11,6 +11,7 @@ Apache-2.0 distribution.
 | Package | Role | Declared license family |
 | --- | --- | --- |
 | Astro | Static site framework | MIT |
+| @astrojs/react | Astro React integration | MIT |
 | React | Tool workbench UI | MIT |
 | React DOM | Tool workbench UI | MIT |
 | Vite | Build tooling | MIT |
@@ -24,6 +25,10 @@ Before public releases, run a package-manager license inventory after
 dependencies are installed and review any non-permissive transitive dependency.
 Do not add GPL, AGPL, SSPL, BUSL, or proprietary dependencies without an explicit
 maintainer decision documented in a pull request.
+
+Run `pnpm audit:high` before release. High-severity dependency advisories block
+public deployment unless a maintainer documents why the affected package is not
+reachable in this static/browser-local runtime.
 
 ## Notes
 

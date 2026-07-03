@@ -1,0 +1,15 @@
+* @lamemustafa
+
+/.github/ @lamemustafa
+/deploy/ @lamemustafa
+/docs/privacy-local-first.md @lamemustafa
+/docs/logging-and-metadata.md @lamemustafa
+/docs/release-gates.md @lamemustafa
+/docs/source-policy.md @lamemustafa
+/packages/source-register/ @lamemustafa
+/packages/safety/ @lamemustafa
+/apps/site/src/pages/privacy.astro @lamemustafa
+/apps/site/src/pages/security.astro @lamemustafa
+/apps/site/src/pages/source.astro @lamemustafa
+/SECURITY.md @lamemustafa
+/AGENTS.md @lamemustafa

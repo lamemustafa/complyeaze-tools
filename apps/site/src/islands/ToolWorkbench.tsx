@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { buildReviewFooter } from "@complyeaze-tools/artifacts";
 import {
   buildGstr2bReconciliationTriage,
@@ -10,7 +10,7 @@ import { toolInputClass } from "@complyeaze-tools/ui-react";
 import type { ToolMeta } from "@complyeaze-tools/source-register";
 
 type Props = {
-  tool: ToolMeta;
+  tool: Pick<ToolMeta, "slug">;
 };
 
 type WorkbenchConfig = {
@@ -87,15 +87,13 @@ const configs: Record<string, WorkbenchConfig> = {
 export default function ToolWorkbench({ tool }: Props) {
   const config = configs[tool.slug] ?? configs["/privacy/review-copy-builder"];
   const [input, setInput] = useState(config.sample);
-  const [asOfDate, setAsOfDate] = useState("");
+  const [asOfDate, setAsOfDate] = useState(() =>
+    tool.slug === "/msme-45-day-payment-due-date-calculator"
+      ? new Date().toISOString().slice(0, 10)
+      : "",
+  );
   const inputHelpId = "tool-input-help";
   const outputStatusId = "tool-output-status";
-
-  useEffect(() => {
-    if (tool.slug === "/msme-45-day-payment-due-date-calculator" && !asOfDate) {
-      setAsOfDate(new Date().toISOString().slice(0, 10));
-    }
-  }, [asOfDate, tool.slug]);
 
   const output = useMemo(
     () => buildOutput(tool.slug, input, config, asOfDate),

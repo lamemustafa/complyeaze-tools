@@ -23,6 +23,10 @@ compliance artifact builders at `tools.complyeaze.com`.
 - Fixtures must be synthetic. Never commit real PAN, GSTIN, Aadhaar, bank
   account, taxpayer name, portal screenshots, notices, ledgers, invoices, local
   paths, or filenames.
+- If Cloudflare or another edge security layer injects JavaScript or sets
+  security cookies on the public host, disclose that on the privacy page and in
+  `docs/privacy-local-first.md`. The tool runtime boundary still forbids sending
+  pasted rows or generated drafts through application APIs.
 
 ## Repo Shape
 
@@ -55,6 +59,7 @@ pnpm build
 pnpm scan:k8s
 pnpm scan:copy
 pnpm scan:fixtures
+pnpm scan:source-freshness
 pnpm scan:source-register
 pnpm scan:runtime-network
 ```
@@ -62,3 +67,19 @@ pnpm scan:runtime-network
 If browser behavior changes, verify with Playwright or a real browser that no
 runtime data network calls occur and only same-origin static GET/HEAD asset
 requests are made.
+
+## Review Matrix
+
+- Privacy/security copy, Cloudflare behavior, CSP, logs, cookies, or public
+  support surfaces need a security/privacy review and copy-claim scan.
+- Tool metadata, statutory language, source URLs, stale-after windows, or
+  unsupported cases need source-register review and `pnpm scan:source-freshness`.
+- Deployment, Docker, Kubernetes, GitHub Actions, or branch-protection changes
+  need platform review, `pnpm scan:k8s`, and release-gate documentation updates.
+- Dependencies need a license/security review, `pnpm audit --audit-level high`,
+  and a reason they preserve static browser-local operation.
+- Public pages need metadata, sitemap, social image, internal-link, and
+  accessibility review. Keep PNG social previews in sync with the SVG source.
+
+The protected branch check name is `verify`. Do not rename the CI job without
+updating `docs/branch-protection.md` and GitHub branch protection.

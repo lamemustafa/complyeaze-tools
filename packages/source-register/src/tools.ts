@@ -105,6 +105,10 @@ export const TOOLS: ToolMeta[] = [
       "management review note",
     ],
     officialSources: [msmeSamadhaan, dcmsmeFaq],
+    relatedSlugs: [
+      "/gstr-2b-purchase-reconciliation-triage",
+      "/ais-form-26as-mismatch-checker",
+    ],
     axalUpgradePath:
       "Track recurring MSME payables, evidence, reminders, and review tasks in Axal.",
     trustCopy: STANDARD_TRUST_COPY,
@@ -130,6 +134,10 @@ export const TOOLS: ToolMeta[] = [
     ],
     outputArtifacts: ["supplier chase text", "email draft", "WhatsApp-ready draft text"],
     officialSources: [gstr2bManual],
+    relatedSlugs: [
+      "/gstr-2b-purchase-reconciliation-triage",
+      "/gst-portal-issue-evidence-memo",
+    ],
     axalUpgradePath:
       "Run recurring reconciliation, supplier tasks, IMS tracking, and review workflow in Axal.",
     trustCopy: STANDARD_TRUST_COPY,
@@ -163,6 +171,10 @@ export const TOOLS: ToolMeta[] = [
       "review checklist text",
     ],
     officialSources: [gstr2bManual],
+    relatedSlugs: [
+      "/gstr-2b-missing-invoice-vendor-follow-up",
+      "/gst-portal-issue-evidence-memo",
+    ],
     axalUpgradePath:
       "Use Axal for saved mappings, recurring reconciliation, IMS tracking, supplier tasks, and review workflow.",
     trustCopy: STANDARD_TRUST_COPY,
@@ -192,6 +204,10 @@ export const TOOLS: ToolMeta[] = [
       "deductor correction draft",
     ],
     officialSources: [aisFaq, incomeTaxTdsTransition],
+    relatedSlugs: [
+      "/msme-45-day-payment-due-date-calculator",
+      "/privacy/review-copy-builder",
+    ],
     axalUpgradePath:
       "Manage client evidence, review tasks, document vault, and tax-fact history in Axal.",
     trustCopy: STANDARD_TRUST_COPY,
@@ -217,6 +233,10 @@ export const TOOLS: ToolMeta[] = [
     ],
     outputArtifacts: ["attempt timeline text", "client note", "retry checklist"],
     officialSources: [gstSelfService],
+    relatedSlugs: [
+      "/privacy/review-copy-builder",
+      "/gstr-2b-missing-invoice-vendor-follow-up",
+    ],
     axalUpgradePath:
       "Attach evidence to obligations, matters, document vault, and task follow-up in Axal.",
     trustCopy: STANDARD_TRUST_COPY,
@@ -242,6 +262,10 @@ export const TOOLS: ToolMeta[] = [
     ],
     outputArtifacts: ["masked text draft", "review footer"],
     officialSources: [dpdpAct],
+    relatedSlugs: [
+      "/gst-portal-issue-evidence-memo",
+      "/ais-form-26as-mismatch-checker",
+    ],
     axalUpgradePath:
       "Use approved templates, source footers, evidence trails, and professional-controlled sends in Axal.",
     trustCopy: STANDARD_TRUST_COPY,

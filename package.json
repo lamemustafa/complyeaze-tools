@@ -15,9 +15,11 @@
   "packageManager": "pnpm@11.5.3",
   "scripts": {
     "build": "ASTRO_TELEMETRY_DISABLED=1 pnpm --filter @complyeaze-tools/site build",
+    "audit:high": "pnpm audit --audit-level high",
     "dev": "ASTRO_TELEMETRY_DISABLED=1 pnpm --filter @complyeaze-tools/site dev",
     "lint": "eslint .",
     "preflight:live": "node scripts/live-preflight.mjs",
+    "source:freshness": "node scripts/source-freshness.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
@@ -25,21 +27,22 @@
     "scan:fixtures": "vitest run tests/policy/fixtures.test.ts",
     "scan:k8s": "vitest run tests/config/tools-kubernetes.test.ts",
     "scan:runtime-network": "vitest run tests/policy/runtime-network.test.ts",
+    "scan:source-freshness": "node scripts/source-freshness.mjs --fail-on-stale",
     "scan:source-register": "vitest run tests/source-register/tools-meta.test.ts",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm scan:source-freshness && pnpm build"
   },
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@astrojs/react": "^4.3.0",
+    "@astrojs/react": "^6.0.0",
     "@eslint/js": "^9.23.0",
     "@types/node": "^22.13.14",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
-    "astro": "^5.9.3",
+    "astro": "^7.0.5",
     "eslint": "^9.23.0",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.47.0",

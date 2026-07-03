@@ -1,13 +1,61 @@
 ---
 import ToolWorkbench from "../islands/ToolWorkbench";
 import type { ToolMeta } from "@complyeaze-tools/source-register";
+import { getLaunchTools } from "../lib/tools";
 import { publicSiteUrl } from "../lib/public-url";
 
 const { tool }: { tool: ToolMeta } = Astro.props;
-const sourceSummary = tool.officialSources
-  .map((source) => `${source.publisher}: ${source.title}`)
-  .join("; ");
 const axalUrl = "https://complyeaze.com/axal";
+const allTools = getLaunchTools();
+const relatedTools = tool.relatedSlugs
+  .map((slug) => allTools.find((candidate) => candidate.slug === slug))
+  .filter((candidate): candidate is ToolMeta => Boolean(candidate));
+const faqItems = [
+  {
+    question: `What does ${tool.h1} create?`,
+    answer: `It creates ${tool.outputArtifacts.join(", ")} from ${tool.supportedInputs.join(", ")}.`,
+  },
+  {
+    question: `Does ${tool.h1} decide the final compliance position?`,
+    answer: `No. ${tool.unsupportedCases.join(" ")}`,
+  },
+  {
+    question: "Which sources should I verify before relying on the draft?",
+    answer: `Review the source register entries for ${tool.officialSources
+      .map((source) => `${source.publisher}: ${source.title}`)
+      .join("; ")}.`,
+  },
+  {
+    question: "When should this move into Axal?",
+    answer: tool.axalUpgradePath,
+  },
+];
+const toolSchema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: tool.h1,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Any",
+    url: publicSiteUrl(tool.slug),
+    description: tool.metaDescription,
+    isAccessibleForFree: true,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },
+    softwareRequirements: "Modern web browser",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  },
+];
 ---
 
 <section class="tool-hero">
@@ -22,14 +70,23 @@ const axalUrl = "https://complyeaze.com/axal";
 </section>
 
 <section class="tool-workbench" aria-label={`${tool.h1} tool`}>
-  <ToolWorkbench client:load tool={tool} />
+  <ToolWorkbench client:load tool={{ slug: tool.slug }} />
 </section>
 
 <section class="detail-grid">
   <article>
     <h2>Source posture</h2>
-    <p>Source last reviewed: {tool.officialSources[0]?.lastReviewedAt}</p>
-    <p>{sourceSummary}</p>
+    <ul>
+      {tool.officialSources.map((source) => (
+        <li>
+          <a href={source.url}>{source.publisher}: {source.title}</a>
+          <span>
+            Reviewed {source.lastReviewedAt}; refresh after {source.staleAfterDays} days.
+          </span>
+          <span>Used for: {source.usedFor.join(", ")}.</span>
+        </li>
+      ))}
+    </ul>
   </article>
   <article>
     <h2>What this creates</h2>
@@ -55,6 +112,61 @@ const axalUrl = "https://complyeaze.com/axal";
   </article>
 </section>
 
+<section class="seo-depth" aria-labelledby="tool-review-workflow">
+  <div class="section-heading">
+    <p class="domain-line">Review workflow</p>
+    <h2 id="tool-review-workflow">Use the draft as a starting point, not a decision.</h2>
+    <p>
+      This page is meant for a one-off local review pass. Keep source documents
+      beside the output and verify identities, dates, amounts, and assumptions
+      before sending or filing anything.
+    </p>
+  </div>
+  <div class="workflow-grid">
+    <article class="workflow-panel">
+      <h3>When to use this</h3>
+      <p>
+        Useful for {tool.audiences.join(", ")} when the immediate need is a
+        browser-local draft from {tool.supportedInputs.join(", ")}.
+      </p>
+    </article>
+    <article class="workflow-panel">
+      <h3>Review steps</h3>
+      <ol>
+        <li>Paste only the minimum rows needed for the draft.</li>
+        <li>Compare the output against the listed official sources.</li>
+        <li>Check unsupported cases before sharing the draft.</li>
+        <li>Move recurring or client-owned work into Axal.</li>
+      </ol>
+    </article>
+    <article class="workflow-panel">
+      <h3>Related local tools</h3>
+      <ul>
+        {relatedTools.map((relatedTool) => (
+          <li>
+            <a href={publicSiteUrl(relatedTool.slug)}>{relatedTool.h1}</a>
+          </li>
+        ))}
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section class="faq-section" aria-labelledby="tool-faqs">
+  <div class="section-heading">
+    <p class="domain-line">Common questions</p>
+    <h2 id="tool-faqs">Boundaries before you rely on the output.</h2>
+  </div>
+  <div class="faq-list">
+    {faqItems.map((item) => (
+      <details>
+        <summary>{item.question}</summary>
+        <p>{item.answer}</p>
+      </details>
+    ))}
+  </div>
+</section>
+
 <section class="upgrade-band" aria-label="Axal upgrade path">
   <div>
     <h2>Need this as a recurring workflow?</h2>
@@ -67,12 +179,4 @@ const axalUrl = "https://complyeaze.com/axal";
   <a class="text-button" href={axalUrl}>Open Axal</a>
 </section>
 
-<script type="application/ld+json" set:html={JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  name: tool.h1,
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Any",
-  url: publicSiteUrl(tool.slug),
-  offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },
-})} />
+<script type="application/ld+json" set:html={JSON.stringify(toolSchema)} />
