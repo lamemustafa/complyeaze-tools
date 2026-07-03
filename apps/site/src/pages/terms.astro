@@ -1,0 +1,87 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { publicSiteUrl } from "../lib/public-url";
+
+const repositoryUrl = "https://github.com/lamemustafa/complyeaze-tools";
+const privacyUrl = publicSiteUrl("/privacy");
+const sourceUrl = publicSiteUrl("/source");
+---
+
+<BaseLayout
+  title="Terms and Disclaimer | ComplyEaze Tools"
+  description="Terms and disclaimer for ComplyEaze Tools: browser-local draft artifacts, professional-review boundaries, source limitations, and open-source use."
+>
+  <section class="hero">
+    <div>
+      <h1>Terms and disclaimer.</h1>
+      <p class="lede">
+        ComplyEaze Tools creates browser-local draft artifacts for review. The
+        tools do not provide tax, legal, accounting, filing, audit, or portal
+        submission advice.
+      </p>
+    </div>
+  </section>
+
+  <section class="detail-grid" aria-label="Terms and disclaimer">
+    <article>
+      <h2>Draft artifacts only</h2>
+      <p>
+        Outputs are working drafts based on the rows or text you enter. Treat
+        them as preparation aids for a qualified professional or internal review
+        workflow, not as conclusions about statutory positions, filings,
+        liability, interest, eligibility, refunds, penalties, or portal relief.
+      </p>
+    </article>
+    <article>
+      <h2>User responsibility</h2>
+      <p>
+        You are responsible for checking source documents, client context,
+        dates, amounts, identities, applicable law, portal status, and filing
+        facts before relying on, sending, or submitting any output.
+      </p>
+    </article>
+    <article>
+      <h2>Sources and freshness</h2>
+      <p>
+        Tool pages list source URLs and review dates. Sources may change after
+        review, and tool copy should be treated as stale when a source changes
+        or the listed refresh window expires. Review the source register before
+        relying on any draft.
+      </p>
+      <p>
+        <a href={sourceUrl}>Open the source register</a>
+      </p>
+    </article>
+    <article>
+      <h2>Privacy boundary</h2>
+      <p>
+        Tool inputs are processed by browser code and are not intentionally sent
+        through a ComplyEaze application API. Static hosting and security layers
+        may still process ordinary web request metadata while serving pages and
+        assets.
+      </p>
+      <p>
+        <a href={privacyUrl}>Read the privacy posture</a>
+      </p>
+    </article>
+    <article>
+      <h2>No government affiliation</h2>
+      <p>
+        ComplyEaze Tools is not affiliated with GSTN, CBIC, the Income Tax
+        Department, MCA, MSME Samadhaan, or the Government of India. Government
+        and portal names are used only to describe user workflows and sources.
+      </p>
+    </article>
+    <article>
+      <h2>Open-source code</h2>
+      <p>
+        The code is published under the Apache-2.0 license in the public
+        repository. The license governs code use; it does not turn generated
+        outputs into professional advice or official records.
+      </p>
+      <p>
+        <a href={repositoryUrl}>Open the repository</a>
+      </p>
+    </article>
+  </section>
+</BaseLayout>

@@ -26,6 +26,7 @@ describe("open-source trust surface", () => {
     expect(layout).toContain("https://github.com/lamemustafa/complyeaze-tools");
     expect(layout).toContain("Source code");
     expect(layout).toContain("Apache-2.0 license");
+    expect(layout).toContain("Terms and disclaimer");
     expect(layout).toContain("Reproducible build gates");
     expect(layout).toContain("Image scan and digest workflow");
     expect(readme).toContain("| Tool | Workflow | Supported input | Output | Source posture |");
@@ -39,6 +40,7 @@ describe("open-source trust surface", () => {
 
     expect(securityPage).toContain("security at complyeaze dot com");
     expect(securityPage).not.toContain("security@complyeaze.com");
+    expect(existsSync(join(root, "apps", "site", "src", "pages", "terms.astro"))).toBe(true);
     expect(securityPolicy).toContain("security@complyeaze.com");
     expect(securityPolicy).toContain("Supported Versions");
     expect(securityPolicy).toContain("Safe Harbor");
@@ -63,7 +65,10 @@ describe("open-source trust surface", () => {
     for (const source of [privacyPage, privacyDoc, loggingDoc]) {
       expect(source).toContain("Cloudflare");
       expect(source).toContain("cf_clearance");
+      expect(source).toContain("not product analytics");
     }
+    expect(privacyPage).toContain("Ray IDs");
+    expect(loggingDoc).toContain("retention settings");
   });
 
   it("documents protected branch and review gates", () => {

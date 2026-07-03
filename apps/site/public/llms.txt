@@ -30,9 +30,12 @@ controllers, founders, executives, and business owners.
   digest-pinning, privacy, security, and source-register pages.
 - Cloudflare security checks may run on public HTML requests; this is disclosed
   on the privacy page and is separate from product analytics.
+- Downloaded drafts include local artifact metadata, source references, row
+  diagnostics, and Terms/Disclaimer links.
 
 Repository: https://github.com/lamemustafa/complyeaze-tools
 Source register: https://tools.complyeaze.com/source/
 Security: https://tools.complyeaze.com/security/
 Privacy: https://tools.complyeaze.com/privacy/
+Terms and disclaimer: https://tools.complyeaze.com/terms/
 Axal upgrade path: https://complyeaze.com/axal
