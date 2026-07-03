@@ -15,5 +15,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@complyeaze-tools/core": "workspace:*",
+    "@complyeaze-tools/safety": "workspace:*"
   }
 }

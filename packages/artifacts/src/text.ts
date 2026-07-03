@@ -9,10 +9,12 @@ export type ArtifactParseIssue = {
   rowNumber: number;
   code: string;
   message: string;
+  column?: string;
 };
 
 export type ArtifactRowCounts = {
   parsedRows?: number;
+  acceptedRows?: number;
   skippedBlankRows?: number;
   skippedInvalidRows?: number;
 };
@@ -119,6 +121,7 @@ function formatOptions(options: ReviewFooterOptions["selectedOptions"]): string 
 function formatRowCounts(rowCounts: ArtifactRowCounts): string {
   return [
     `Rows parsed: ${rowCounts.parsedRows ?? 0}`,
+    `rows accepted for output: ${rowCounts.acceptedRows ?? rowCounts.parsedRows ?? 0}`,
     `blank rows skipped: ${rowCounts.skippedBlankRows ?? 0}`,
     `invalid rows needing review: ${rowCounts.skippedInvalidRows ?? 0}.`,
   ].join("; ");

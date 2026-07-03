@@ -63,6 +63,44 @@ describe("parseDelimitedTable", () => {
     ]);
   });
 
+  it("preserves source row numbers beside normalized rows", () => {
+    const parsed = parseDelimitedTable(
+      ["source,supplier,invoice", "purchase,Acme Components,INV-102", "", "2b,Metro Inputs,INV-777"].join("\n"),
+    );
+
+    expect(parsed.rowRecords).toEqual([
+      {
+        rowNumber: 2,
+        row: {
+          source: "purchase",
+          supplier: "Acme Components",
+          invoice: "INV-102",
+        },
+      },
+      {
+        rowNumber: 4,
+        row: {
+          source: "2b",
+          supplier: "Metro Inputs",
+          invoice: "INV-777",
+        },
+      },
+    ]);
+  });
+
+  it("reports duplicate normalized headers before values can silently overwrite", () => {
+    const parsed = parseDelimitedTable("Invoice,Invoice #\nINV-102,INV-103");
+
+    expect(parsed.headers).toEqual(["invoice", "invoice"]);
+    expect(parsed.issues).toContainEqual(
+      expect.objectContaining({
+        code: "duplicate-header",
+        rowNumber: 1,
+        column: "invoice",
+      }),
+    );
+  });
+
   it("keeps parseSimpleCsv as a compatibility wrapper over normalized rows", () => {
     expect(parseSimpleCsv("Invoice Date,Tax Amount\n2026-05-01,18000")).toEqual([
       {

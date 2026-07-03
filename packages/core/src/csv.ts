@@ -2,7 +2,11 @@ export type CsvRow = Record<string, string>;
 
 export type Delimiter = "," | "\t" | ";";
 
-export type ParseIssueCode = "missing-cell" | "extra-cell" | "unterminated-quote";
+export type ParseIssueCode =
+  | "missing-cell"
+  | "extra-cell"
+  | "unterminated-quote"
+  | "duplicate-header";
 
 export type ParseIssue = {
   rowNumber: number;
@@ -13,11 +17,17 @@ export type ParseIssue = {
 
 export type ParsedTable = {
   rows: CsvRow[];
+  rowRecords: CsvRowRecord[];
   headers: string[];
   originalHeaders: string[];
   delimiter: Delimiter;
   issues: ParseIssue[];
   skippedBlankRows: number;
+};
+
+export type CsvRowRecord = {
+  rowNumber: number;
+  row: CsvRow;
 };
 
 type ParsedRecord = {
@@ -69,6 +79,7 @@ export function parseDelimitedTable(input: string): ParsedTable {
   if (!headerRecord) {
     return {
       rows: [],
+      rowRecords: [],
       headers: [],
       originalHeaders: [],
       delimiter,
@@ -80,7 +91,9 @@ export function parseDelimitedTable(input: string): ParsedTable {
   const dataRecords = records.records.slice(records.records.indexOf(headerRecord) + 1);
   const originalHeaders = headerRecord.cells.map((header) => cleanCell(header));
   const headers = originalHeaders.map(normalizeHeaderKey);
+  issues.push(...findDuplicateHeaderIssues(headers, headerRecord.rowNumber));
   const rows: CsvRow[] = [];
+  const rowRecords: CsvRowRecord[] = [];
   let skippedBlankRows = 0;
 
   for (const record of dataRecords) {
@@ -111,10 +124,12 @@ export function parseDelimitedTable(input: string): ParsedTable {
     }
 
     rows.push(row);
+    rowRecords.push({ rowNumber: record.rowNumber, row });
   }
 
   return {
     rows,
+    rowRecords,
     headers,
     originalHeaders,
     delimiter,
@@ -247,4 +262,24 @@ function cleanCell(cell: string): string {
 
 function isBlankRecord(record: ParsedRecord): boolean {
   return record.cells.every((cell) => !cell.trim());
+}
+
+function findDuplicateHeaderIssues(headers: string[], rowNumber: number): ParseIssue[] {
+  const seen = new Set<string>();
+  const issues: ParseIssue[] = [];
+
+  for (const header of headers) {
+    if (seen.has(header)) {
+      issues.push({
+        rowNumber,
+        code: "duplicate-header",
+        column: header,
+        message: `Duplicate normalized header ${header}. Rename one of the columns before using this output.`,
+      });
+      continue;
+    }
+    seen.add(header);
+  }
+
+  return issues;
 }
