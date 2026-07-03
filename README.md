@@ -1,7 +1,6 @@
 # ComplyEaze Tools
 
-Private browser tools that turn messy Indian compliance records into
-review-ready action packs.
+Browser-local draft tools for first-pass Indian compliance review.
 
 Files are processed in your browser. No account or file upload is required.
 The site may receive normal web request metadata when serving pages and static
@@ -42,6 +41,7 @@ trails.
 - Security policy: `SECURITY.md` and `https://tools.complyeaze.com/security/`
 - Privacy posture: `docs/privacy-local-first.md` and
   `https://tools.complyeaze.com/privacy/`
+- Terms and disclaimer: `https://tools.complyeaze.com/terms/`
 - Source register: `packages/source-register` and
   `https://tools.complyeaze.com/source/`
 - Release gates: `docs/release-gates.md`

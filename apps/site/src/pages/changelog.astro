@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { publicSiteUrl } from "../lib/public-url";
 ---
 
 <BaseLayout
@@ -10,10 +11,54 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <div>
       <h1>Changelog.</h1>
       <p class="lede">
-        Initial local scaffold: source-backed landing pages, browser-local
-        workbench foundations, policy tests, and static Kubernetes deployment
-        manifests.
+        Public release notes for source-backed local tools, trust-surface
+        changes, and static deployment updates.
       </p>
     </div>
+  </section>
+  <section class="detail-grid" aria-label="Release notes">
+    <article>
+      <h2>2026-07-03: artifact trust references</h2>
+      <p>
+        Added a public Terms and Disclaimer page, linked tool outputs to privacy,
+        source, terms, and repository references, and expanded downloaded draft
+        metadata with local artifact IDs, page URLs, detected input shape, and
+        row diagnostics.
+      </p>
+      <p>
+        <a href={publicSiteUrl("/terms")}>Read terms and disclaimer</a>
+      </p>
+    </article>
+    <article>
+      <h2>2026-07-03: review-copy safety hardening</h2>
+      <p>
+        Broadened Review Copy Builder masking checks and added found, checked,
+        not-checked, and manual-review sections so the output is clear about
+        what was and was not automatically reviewed.
+      </p>
+      <p>
+        <a href={publicSiteUrl("/privacy/review-copy-builder")}>Open Review Copy Builder</a>
+      </p>
+    </article>
+    <article>
+      <h2>2026-07-03: browser-local tool depth</h2>
+      <p>
+        Expanded the launch tools with richer MSME payables triage, supplier
+        follow-ups, GSTR-2B reconciliation buckets, AIS/Form 26AS review drafts,
+        GST portal evidence memos, parser diagnostics, source-backed SEO
+        sections, and Axal upgrade paths.
+      </p>
+      <p>
+        <a href={publicSiteUrl("/")}>Browse the tools</a>
+      </p>
+    </article>
+    <article>
+      <h2>2026-07-03: initial static launch posture</h2>
+      <p>
+        Shipped source-backed landing pages, browser-local workbench
+        foundations, policy tests, open-source governance files, and static
+        Kubernetes deployment manifests.
+      </p>
+    </article>
   </section>
 </BaseLayout>

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getLaunchTools } from "../lib/tools";
+import { publicSiteUrl } from "../lib/public-url";
 ---
 
 <BaseLayout
@@ -30,8 +31,11 @@ import { getLaunchTools } from "../lib/tools";
     </article>
     {getLaunchTools().map((tool) => (
       <article>
-        <h2>{tool.h1}</h2>
+        <h2><a href={publicSiteUrl(tool.slug)}>{tool.h1}</a></h2>
         <p>Status: {tool.status}</p>
+        <p>
+          <a href={publicSiteUrl(tool.slug)}>Open this tool</a>
+        </p>
       </article>
     ))}
   </section>

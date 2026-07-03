@@ -56,6 +56,12 @@ describe("tool workbench logic", () => {
     expect(output).toContain("Udyam evidence entered: missing");
     expect(output).toContain("Dates and statuses are based only on pasted rows.");
     expect(output).toContain("Draft local review artifact only.");
+    expect(output).toContain("Tool page: https://tools.complyeaze.com/msme-45-day-payment-due-date-calculator/");
+    expect(output).toContain("Tool package: complyeaze-tools@0.0.0");
+    expect(output).toContain("Terms and disclaimer: https://tools.complyeaze.com/terms/");
+    expect(output).toContain("Privacy notes: https://tools.complyeaze.com/privacy/");
+    expect(output).toContain("Detected delimiter: comma");
+    expect(output).toContain("Input headers: vendor, amount, acceptanceDate, writtenAgreement, agreedPaymentDays, udyamEvidence");
     expect(output.toLowerCase()).not.toContain("interest payable");
     expect(output.toLowerCase()).not.toContain("verified udyam");
   });
@@ -79,6 +85,8 @@ describe("tool workbench logic", () => {
     expect(output).toContain("Not checked automatically");
     expect(output).toContain("Manual review checklist");
     expect(output).toContain("Re-read names, addresses, and free-form client context.");
+    expect(output).toContain("Terms and disclaimer: https://tools.complyeaze.com/terms/");
+    expect(output).toContain("Source register: https://tools.complyeaze.com/source/");
     expect(output.toLowerCase()).not.toContain("forensic redaction");
     expect(output.toLowerCase()).not.toContain("permanent redaction");
   });

@@ -11,6 +11,10 @@ import {
 import { maskIndianIdentifiersWithReport } from "@complyeaze-tools/safety";
 import type { ToolMeta } from "@complyeaze-tools/source-register";
 
+const PUBLIC_SITE_ORIGIN = "https://tools.complyeaze.com";
+const REPOSITORY_URL = "https://github.com/lamemustafa/complyeaze-tools";
+const TOOLKIT_VERSION = "complyeaze-tools@0.0.0";
+
 type WorkbenchSource = Pick<
   ToolMeta["officialSources"][number],
   "publisher" | "title" | "url" | "lastReviewedAt"
@@ -232,8 +236,16 @@ function buildFooter(
     sourceLabel: config.reviewLabel,
     toolSlug: tool.slug,
     toolTitle: tool.h1,
+    toolUrl: publicToolUrl(tool.slug),
+    toolkitVersion: TOOLKIT_VERSION,
+    repositoryUrl: REPOSITORY_URL,
+    termsUrl: publicToolUrl("/terms"),
+    privacyUrl: publicToolUrl("/privacy"),
+    sourceRegisterUrl: publicToolUrl("/source"),
     selectedOptions,
     requiredColumns: config.requiredColumns,
+    detectedDelimiter: parsed?.delimiter,
+    inputHeaders: parsed?.originalHeaders,
     rowCounts: parsed
       ? {
           parsedRows: parsed.rows.length,
@@ -246,6 +258,14 @@ function buildFooter(
     unsupportedCases: tool.unsupportedCases,
     extraCaveats,
   });
+}
+
+function publicToolUrl(path: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  const withSlash = /\.[a-zA-Z0-9]+$/.test(normalized)
+    ? normalized
+    : `${normalized.replace(/\/+$/, "")}/`;
+  return `${PUBLIC_SITE_ORIGIN}${withSlash}`;
 }
 
 function formatAmount(value: number | null) {
