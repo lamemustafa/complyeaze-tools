@@ -69,4 +69,26 @@ describe("tool source register", () => {
       "Does not resolve disputed, partly paid, settled, or admissibility positions.",
     );
   });
+
+  it("documents Review Copy mask report and checklist artifacts without redaction overclaims", () => {
+    const reviewCopyTool = TOOLS.find((tool) => tool.slug === "/privacy/review-copy-builder");
+
+    expect(reviewCopyTool?.outputArtifacts).toEqual(
+      expect.arrayContaining([
+        "masked text draft",
+        "mask report",
+        "manual review checklist",
+        "review footer",
+      ]),
+    );
+    expect(reviewCopyTool?.seoDepth.reviewChecklist.join(" ")).toContain(
+      "Manually inspect names, addresses",
+    );
+    expect(reviewCopyTool?.seoDepth.reviewChecklist.join(" ")).toContain("CIN");
+    expect(reviewCopyTool?.seoDepth.exampleWorkflow.join(" ")).toContain(
+      "found/masked/not-checked report",
+    );
+    expect(reviewCopyTool?.seoDepth.faqItems.map((item) => item.answer).join(" ").toLowerCase())
+      .not.toContain("forensic redaction");
+  });
 });

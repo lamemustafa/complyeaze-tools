@@ -3,6 +3,10 @@ export type IdentifierMaskCounts = {
   pan: number;
   tan: number;
   aadhaar: number;
+  cin: number;
+  udyam: number;
+  dinDpin: number;
+  llpin: number;
   email: number;
   phone: number;
   ifsc: number;
@@ -10,10 +14,20 @@ export type IdentifierMaskCounts = {
   bankAccount: number;
 };
 
+export type IdentifierMaskCheckStatus = "found-and-masked" | "checked-not-found";
+
+export type IdentifierMaskCheckedEntry = {
+  key: keyof IdentifierMaskCounts;
+  count: number;
+  status: IdentifierMaskCheckStatus;
+};
+
 export type IdentifierMaskReport = {
   text: string;
   counts: IdentifierMaskCounts;
+  checked: IdentifierMaskCheckedEntry[];
   notChecked: string[];
+  manualReviewChecklist: string[];
   warning: string;
 };
 
@@ -40,6 +54,28 @@ const detectors: Detector[] = [
     replacement: "[TAN masked]",
   },
   {
+    key: "cin",
+    pattern: /\b[UL][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}\b/gi,
+    replacement: "[CIN masked]",
+  },
+  {
+    key: "udyam",
+    pattern: /\bUDYAM-[A-Z]{2}-[0-9]{2}-[0-9]{7}\b/gi,
+    replacement: "[Udyam registration masked]",
+  },
+  {
+    key: "dinDpin",
+    pattern: /\b((?:DIN|DPIN)\s*(?:no\.?|number)?\s*[:#-]?\s*)[0-9]{8}\b/gi,
+    replacement: (_match, prefix: string) =>
+      `${prefix.trimEnd()} [DIN/DPIN-like number masked]`,
+  },
+  {
+    key: "llpin",
+    pattern: /\b((?:LLPIN|LLP\s*IN)\s*(?:no\.?|number)?\s*[:#-]?\s*)[A-Z]{3}-?[0-9]{4}\b/gi,
+    replacement: (_match, prefix: string) =>
+      `${prefix.trimEnd()} [LLPIN-like identifier masked]`,
+  },
+  {
     key: "email",
     pattern: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
     replacement: "[email masked]",
@@ -62,7 +98,7 @@ const detectors: Detector[] = [
   },
   {
     key: "aadhaar",
-    pattern: /\b[0-9]{4}\s?[0-9]{4}\s?[0-9]{4}\b/g,
+    pattern: /\b[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}\b/g,
     replacement: "[Aadhaar-like number masked]",
   },
   {
@@ -70,6 +106,22 @@ const detectors: Detector[] = [
     pattern: /\b(?:\+91[\s-]?)?[6-9][0-9]{4}[\s-]?[0-9]{5}\b/g,
     replacement: "[phone-like number masked]",
   },
+];
+
+const notCheckedAutomatically = [
+  "names",
+  "addresses",
+  "PDFs",
+  "screenshots",
+  "scanned text",
+  "free-form client context",
+];
+
+const manualReviewChecklist = [
+  "Re-read names, addresses, and free-form client context.",
+  "Check whether screenshots, PDFs, scanned text, or attachments were reviewed outside this text box.",
+  "Confirm masked placeholders did not change the meaning of the review note.",
+  "Share only the smallest excerpt needed for professional review.",
 ];
 
 export function maskIndianIdentifiers(input: string): string {
@@ -93,16 +145,15 @@ export function maskIndianIdentifiersWithReport(input: string): IdentifierMaskRe
   return {
     text,
     counts,
-    notChecked: [
-      "names",
-      "addresses",
-      "PDFs",
-      "screenshots",
-      "scanned text",
-      "free-form client context",
-    ],
+    checked: detectors.map((detector) => ({
+      key: detector.key,
+      count: counts[detector.key],
+      status: counts[detector.key] > 0 ? "found-and-masked" : "checked-not-found",
+    })),
+    notChecked: notCheckedAutomatically,
+    manualReviewChecklist,
     warning:
-      "Review Copy Builder masks common text patterns only; this is not irreversible redaction.",
+      "Not a redaction certificate: Review Copy Builder masks common text patterns only; this is not irreversible redaction.",
   };
 }
 
@@ -112,6 +163,10 @@ function emptyCounts(): IdentifierMaskCounts {
     pan: 0,
     tan: 0,
     aadhaar: 0,
+    cin: 0,
+    udyam: 0,
+    dinDpin: 0,
+    llpin: 0,
     email: 0,
     phone: 0,
     ifsc: 0,
