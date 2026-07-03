@@ -39,6 +39,8 @@ describe("live preflight command", () => {
       "kustomize-production",
       "namespace",
       "live-no-slash-redirect",
+      "live-tool-csp-hydration-compatible",
+      "live-manifest-content-type",
       "live-homepage-public-links",
       "live-tool-public-links",
       "live-sitemap-public-links",
@@ -71,6 +73,14 @@ describe("live preflight command", () => {
       expect(check?.command[0]).toBe("curl");
       expect(check?.forbiddenOutput).toEqual([":8080"]);
     }
+    expect(
+      LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "live-tool-csp-hydration-compatible")
+        ?.expectedOutput,
+    ).toBe("script-src 'self' 'unsafe-inline'");
+    expect(
+      LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "live-manifest-content-type")
+        ?.expectedOutput,
+    ).toBe("content-type: application/manifest+json");
   });
 
   it("fails a check when forbidden output is present", async () => {

@@ -24,6 +24,23 @@ describe("Docker static image policy", () => {
     expect(nginxConfig).toContain("port_in_redirect off;");
   });
 
+  it("serves static tools with headers compatible with Astro islands", () => {
+    const nginxConfig = readFileSync(join(dockerRoot, "nginx.conf"), "utf8");
+
+    expect(nginxConfig).toContain("script-src 'self' 'unsafe-inline'");
+    expect(nginxConfig).toContain("script-src-attr 'none'");
+    expect(nginxConfig).toContain("style-src 'self' 'unsafe-inline'");
+    expect(nginxConfig).toContain("style-src-attr 'none'");
+    expect(nginxConfig).toContain("connect-src 'none'");
+  });
+
+  it("serves the web manifest with a browser-readable content type", () => {
+    const nginxConfig = readFileSync(join(dockerRoot, "nginx.conf"), "utf8");
+
+    expect(nginxConfig).toContain("location = /site.webmanifest");
+    expect(nginxConfig).toContain("default_type application/manifest+json;");
+  });
+
   it("keeps Docker build context tight", () => {
     const dockerignore = readFileSync(join(process.cwd(), ".dockerignore"), "utf8");
 
