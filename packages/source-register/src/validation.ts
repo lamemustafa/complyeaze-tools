@@ -42,6 +42,14 @@ export function validateToolMeta(
   if (!tool.outputArtifacts.length) errors.push("outputArtifacts are required");
   if (!tool.trustCopy.length) errors.push("trustCopy is required");
   if (!tool.bannedClaims.length) errors.push("bannedClaims are required");
+  if (tool.relatedSlugs.length < 2) {
+    errors.push("at least two relatedSlugs are required");
+  }
+  for (const relatedSlug of tool.relatedSlugs) {
+    if (!relatedSlug.startsWith("/") || relatedSlug === tool.slug) {
+      errors.push(`invalid relatedSlug: ${relatedSlug}`);
+    }
+  }
 
   for (const source of tool.officialSources) {
     if (source.sourceType !== "official") {

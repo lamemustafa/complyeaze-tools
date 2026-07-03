@@ -10,22 +10,26 @@ advice, submit portal actions, or decide final compliance positions.
 Primary audiences include CAs, CSs, CMAs, GST teams, accountants, finance
 controllers, founders, executives, and business owners.
 
-Current tool clusters:
+## Canonical Tools
 
-- Reconciliation and vendor follow-up: GSTR-2B purchase reconciliation triage
-  and missing invoice follow-up drafts.
-- Tax review: AIS and Form 26AS mismatch review drafts.
-- Evidence and review copy: GST portal issue evidence memos and privacy review
-  copy drafts.
-- MSME payables: MSME 45-day payment due-date review drafts.
+| Tool | URL | Purpose | Inputs | Outputs | Source review | Limits |
+| --- | --- | --- | --- | --- | --- | --- |
+| MSME 45-Day Payment Due Date Calculator | https://tools.complyeaze.com/msme-45-day-payment-due-date-calculator/ | Prepare possible MSME delayed-payment review drafts. | Pasted CSV rows or manual payables table. | Due-date review draft, Udyam request text, management review note. | MSME Samadhaan and DC-MSME reviewed 2026-07-02. | Does not verify Udyam status or decide final interest, disallowance, or default. |
+| GSTR-2B Purchase Reconciliation Triage | https://tools.complyeaze.com/gstr-2b-purchase-reconciliation-triage/ | Compare pasted purchase-register and GSTR-2B rows into exception buckets. | Pasted purchase-register rows, GSTR-2B rows, tax amount comparison table. | Exception bucket summary, supplier follow-up basis, review checklist. | GSTR-2B manual reviewed 2026-07-02. | Does not determine ITC eligibility or replace recurring reconciliation. |
+| GSTR-2B Missing Invoice Follow-up Generator | https://tools.complyeaze.com/gstr-2b-missing-invoice-vendor-follow-up/ | Create supplier-wise follow-up drafts for missing or mismatched invoices. | Pasted supplier issue rows or manual purchase-register table. | Supplier chase text, email draft, WhatsApp-ready draft text. | GSTR-2B manual reviewed 2026-07-02. | Does not decide ITC eligibility or produce filing numbers for submission. |
+| AIS and Form 26AS Mismatch Checker | https://tools.complyeaze.com/ais-form-26as-mismatch-checker/ | Prepare mismatch tables and correction request drafts before tax review. | Pasted AIS summary rows or manual Form 26AS comparison table. | Mismatch table, review checklist, deductor correction draft. | Income Tax AIS/TDS sources reviewed 2026-07-02. | Does not compute ITR tax payable, refunds, or upload AIS feedback. |
+| GST Portal Issue Evidence Memo Builder | https://tools.complyeaze.com/gst-portal-issue-evidence-memo/ | Create a user-observed GST filing-attempt timeline memo. | Manual timestamps, error labels, and retry notes. | Attempt timeline, client note, retry checklist. | GST self-service complaint portal reviewed 2026-07-02. | Does not prove global portal downtime or guarantee extension, waiver, or condonation. |
+| Review Copy Builder | https://tools.complyeaze.com/privacy/review-copy-builder/ | Flatten and mask common identifiers in review text before professional handoff. | Plain text. | Masked text draft and review footer. | DPDP Act source reviewed 2026-07-02. | Does not perform OCR or provide forensic or legally irreversible redaction. |
 
-Trust posture:
+## Trust Posture
 
 - Files are processed in your browser.
 - No account or file upload required.
 - No analytics or telemetry in V0.
 - Static site deployment with source, license, release-gate, SBOM, provenance,
   privacy, security, and source-register pages.
+- Cloudflare security checks may run on public HTML requests; this is disclosed
+  on the privacy page and is separate from product analytics.
 
 Repository: https://github.com/lamemustafa/complyeaze-tools
 Source register: https://tools.complyeaze.com/source/

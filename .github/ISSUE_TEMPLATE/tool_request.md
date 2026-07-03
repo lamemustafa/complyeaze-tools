@@ -20,3 +20,9 @@ portal behavior.
 ## Privacy boundary
 
 What should stay browser-local?
+
+## Safety confirmation
+
+Confirm that this request uses synthetic examples only and does not include real
+taxpayer identifiers, credentials, portal screenshots, documents, ledgers,
+notices, OTPs, CAPTCHA answers, cookies, or local file paths.

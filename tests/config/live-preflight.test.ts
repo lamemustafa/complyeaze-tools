@@ -41,6 +41,9 @@ describe("live preflight command", () => {
       "live-no-slash-redirect",
       "live-tool-csp-hydration-compatible",
       "live-manifest-content-type",
+      "live-hashed-assets-immutable",
+      "live-privacy-cloudflare-disclosure",
+      "live-security-no-email-obfuscation",
       "live-homepage-public-links",
       "live-tool-public-links",
       "live-sitemap-public-links",
@@ -81,6 +84,18 @@ describe("live preflight command", () => {
       LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "live-manifest-content-type")
         ?.expectedOutput,
     ).toBe("content-type: application/manifest+json");
+    expect(
+      LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "live-hashed-assets-immutable")
+        ?.expectedOutput,
+    ).toBe("immutable");
+    expect(
+      LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "live-privacy-cloudflare-disclosure")
+        ?.expectedOutput,
+    ).toBe("Cloudflare security checks");
+    expect(
+      LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "live-security-no-email-obfuscation")
+        ?.forbiddenOutput,
+    ).toEqual(["email-decode.min.js"]);
   });
 
   it("fails a check when forbidden output is present", async () => {

@@ -23,6 +23,20 @@ Before opening a pull request:
    waiver, extension, eligibility, or legal conclusions.
 5. Run `pnpm verify` and include the result in the PR.
 
+## Review Routing
+
+- Source metadata, rule text, deadline, form, portal behavior, or unsupported
+  case changes require official-source review and `pnpm scan:source-freshness`.
+- Privacy, security, CSP, Cloudflare, logging, issue-template, or support-copy
+  changes require privacy/security review and a copy-claim scan.
+- GitHub Actions, Docker, Kubernetes, deploy, branch-protection, or environment
+  changes require platform review and release-gate updates.
+- Dependency changes require license review, `pnpm audit --audit-level high`,
+  and confirmation that no runtime telemetry, upload, backend, or remote worker
+  behavior was added.
+- Public page changes require title/description, sitemap/social preview,
+  internal-link, source-boundary, and accessibility review.
+
 ## Dependency Policy
 
 Do not add new runtime dependencies unless the behavior cannot be implemented

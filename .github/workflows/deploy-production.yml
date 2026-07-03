@@ -3,13 +3,23 @@ name: Deploy Production
 on:
   workflow_dispatch:
     inputs:
+      source_sha:
+        description: "Reviewed source commit SHA that produced the image"
+        required: true
+        type: string
       image_digest:
         description: "Published image digest, for example sha256:..."
         required: true
         type: string
 
 permissions:
+  actions: read
   contents: read
+  packages: read
+
+concurrency:
+  group: tools-production
+  cancel-in-progress: false
 
 env:
   IMAGE_NAME: ghcr.io/lamemustafa/complyeaze-tools
@@ -20,14 +30,32 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
-      - uses: azure/setup-kubectl@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: azure/setup-kubectl@c0c8b32d33a5244f1e5947304550403b63930415 # v4
       - name: Validate digest input
         run: |
+          [[ "${{ inputs.source_sha }}" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "source_sha must be a 40-character lowercase git SHA" >&2
+            exit 1
+          }
           [[ "${{ inputs.image_digest }}" =~ ^sha256:[0-9a-f]{64}$ ]] || {
             echo "image_digest must be sha256 plus 64 lowercase hex characters" >&2
             exit 1
           }
+      - name: Verify reviewed publish run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run list \
+            --repo "${{ github.repository }}" \
+            --workflow publish-image.yml \
+            --commit "${{ inputs.source_sha }}" \
+            --status success \
+            --json databaseId,headSha,conclusion \
+            --jq '.[0].headSha' | grep -Fx "${{ inputs.source_sha }}"
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Verify published image digest
+        run: docker buildx imagetools inspect "${{ env.IMAGE_NAME }}@${{ inputs.image_digest }}"
       - name: Configure kubeconfig
         run: |
           mkdir -p "$HOME/.kube"
@@ -76,3 +104,8 @@ jobs:
         run: kubectl -n "${{ env.NAMESPACE }}" apply -f /tmp/complyeaze-tools.yaml
       - name: Rollout
         run: kubectl -n "${{ env.NAMESPACE }}" rollout status deployment/complyeaze-tools --timeout=180s
+      - name: Live smoke checks
+        run: |
+          curl -fsSI https://tools.complyeaze.com/ | grep -i "content-security-policy"
+          curl -fsSL https://tools.complyeaze.com/-/health | grep -Fx "ok"
+          curl -fsSL https://tools.complyeaze.com/sitemap.xml | grep -F "https://tools.complyeaze.com"

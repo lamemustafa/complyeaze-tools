@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security or privacy report
+    url: https://tools.complyeaze.com/security/
+    about: Report privately using synthetic reproduction steps only.
+  - name: Source register
+    url: https://tools.complyeaze.com/source/
+    about: Review official source dates before opening a source freshness issue.

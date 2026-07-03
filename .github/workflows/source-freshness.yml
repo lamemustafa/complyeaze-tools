@@ -1,0 +1,84 @@
+name: Source Freshness
+
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      create_pr_report:
+        description: "Create a PR with docs/source-freshness-report.md"
+        required: false
+        default: false
+        type: boolean
+
+permissions: {}
+
+concurrency:
+  group: source-freshness
+  cancel-in-progress: false
+
+jobs:
+  stale-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.5.3
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - id: freshness
+        name: Check source freshness
+        continue-on-error: true
+        run: node scripts/source-freshness.mjs --write-md source-freshness-report.md --write-json source-freshness-report.json --fail-on-stale
+      - name: Open or update source freshness issue
+        if: steps.freshness.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create source-freshness --color 0c6b58 --description "Official source review required" --force
+          issue_number="$(gh issue list --state open --label source-freshness --json number --jq '.[0].number')"
+          if [ -n "$issue_number" ]; then
+            gh issue edit "$issue_number" --title "Source freshness review required" --body-file source-freshness-report.md
+          else
+            gh issue create --title "Source freshness review required" --label source-freshness --body-file source-freshness-report.md
+          fi
+      - name: Fail when stale
+        if: steps.freshness.outcome == 'failure'
+        run: exit 1
+
+  report-pr:
+    if: github.event_name == 'workflow_dispatch' && inputs.create_pr_report == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 11.5.3
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/source-freshness.mjs --write-md docs/source-freshness-report.md
+      - name: Create report PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="source-freshness-report-${{ github.run_id }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add docs/source-freshness-report.md
+          git commit -m "chore: update source freshness report"
+          git push origin "$branch"
+          gh pr create --title "chore: update source freshness report" --body-file docs/source-freshness-report.md --head "$branch" --base main

@@ -41,6 +41,13 @@ describe("Docker static image policy", () => {
     expect(nginxConfig).toContain("default_type application/manifest+json;");
   });
 
+  it("serves hashed Astro assets with immutable caching", () => {
+    const nginxConfig = readFileSync(join(dockerRoot, "nginx.conf"), "utf8");
+
+    expect(nginxConfig).toContain("location /_astro/");
+    expect(nginxConfig).toContain('Cache-Control "public, max-age=31536000, immutable"');
+  });
+
   it("keeps Docker build context tight", () => {
     const dockerignore = readFileSync(join(process.cwd(), ".dockerignore"), "utf8");
 
