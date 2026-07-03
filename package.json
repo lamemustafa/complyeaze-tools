@@ -31,7 +31,8 @@
     "scan:runtime-network": "vitest run tests/policy/runtime-network.test.ts",
     "scan:source-freshness": "node scripts/source-freshness.mjs --fail-on-stale",
     "scan:source-register": "vitest run tests/source-register/tools-meta.test.ts",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm scan:source-freshness && pnpm scan:cloudflare:iac && pnpm build && pnpm scan:built-runtime-network"
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm scan:source-freshness && pnpm scan:cloudflare:iac && pnpm build && pnpm scan:built-runtime-network",
+    "review:gate": "node scripts/check-pr-review-gate.mjs"
   },
   "dependencies": {
     "react": "^19.0.0",

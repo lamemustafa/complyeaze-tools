@@ -78,7 +78,9 @@ describe("open-source trust surface", () => {
     expect(codeowners).toContain("/deploy/");
     expect(codeowners).toContain("/packages/source-register/");
     expect(prTemplate).toContain("Branch Protection Impact");
-    expect(agents).toContain("The protected branch check name is `verify`");
+    expect(branchProtection).toContain("Required review findings check: Review gate");
+    expect(prTemplate).toContain("Required check impact: `verify`, `Review gate`");
+    expect(agents).toContain("protected review-findings");
   });
 
   it("keeps public issue intake synthetic and disables blank issues", () => {

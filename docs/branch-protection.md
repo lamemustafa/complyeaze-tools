@@ -5,6 +5,10 @@ GitHub branch protection rule or repository ruleset with these requirements:
 
 - Require pull requests before merge.
 - Require the `verify` status check from `.github/workflows/ci.yml`.
+- Require the `Review gate` status check from
+  `.github/workflows/review-gate.yml`; this blocks unresolved current-head
+  review findings without requiring an approving reviewer. Branch protection
+  should block on review findings, not on an approving reviewer count.
 - After the first successful run, also require the `Analyze` and
   `Review dependency changes` check contexts so CodeQL and dependency review
   block unsafe pull requests.
@@ -38,6 +42,7 @@ Suggested GitHub checks:
 
 ```text
 Required status check: verify
+Required review findings check: Review gate
 Required security checks: Analyze, Review dependency changes
 Required conversation gate: all current-head review threads resolved
 Sensitive owner paths: .github/, deploy/, packages/source-register/,
@@ -64,7 +69,7 @@ Ruleset target:
 - Restrict deletions: enabled.
 - Require linear history: enabled.
 - Require a pull request before merging: enabled.
-- Require status checks to pass: verify.
+- Require status checks to pass: verify, Review gate.
 - Add security status checks after their first run: Analyze,
   Review dependency changes.
 - Require branches to be up to date before merging: enabled.

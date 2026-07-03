@@ -87,8 +87,9 @@ requests are made.
 - Public pages need metadata, sitemap, social image, internal-link, and
   accessibility review. Keep PNG social previews in sync with the SVG source.
 
-The protected branch check name is `verify`. Do not rename the CI job without
-updating `docs/branch-protection.md` and GitHub branch protection.
+The primary protected CI check name is `verify`; the protected review-findings
+check name is `Review gate`. Do not rename either job without updating
+`docs/branch-protection.md` and GitHub branch protection.
 
 While this repo has only one eligible maintainer, branch protection should block
 on required checks and unresolved review conversations, not on an approving
