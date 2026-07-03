@@ -8,8 +8,8 @@ describe("Docker static image policy", () => {
   it("builds a static nginx image with no runtime app server", () => {
     const dockerfile = readFileSync(join(dockerRoot, "Dockerfile"), "utf8");
 
-    expect(dockerfile).toContain("FROM node:22-alpine AS build");
-    expect(dockerfile).toContain("FROM nginxinc/nginx-unprivileged:1.27-alpine");
+    expect(dockerfile).toContain("FROM node:22-alpine@sha256:");
+    expect(dockerfile).toContain("FROM nginxinc/nginx-unprivileged:1.27-alpine@sha256:");
     expect(dockerfile).toContain("ASTRO_TELEMETRY_DISABLED=1");
     expect(dockerfile).toContain("pnpm install --frozen-lockfile");
     expect(dockerfile).toContain("HEALTHCHECK");
@@ -44,8 +44,19 @@ describe("Docker static image policy", () => {
   it("serves hashed Astro assets with immutable caching", () => {
     const nginxConfig = readFileSync(join(dockerRoot, "nginx.conf"), "utf8");
 
+    expect(nginxConfig).toContain("map $uri $cache_control");
     expect(nginxConfig).toContain("location /_astro/");
-    expect(nginxConfig).toContain('Cache-Control "public, max-age=31536000, immutable"');
+    expect(nginxConfig).toContain('~^/_astro/ "public, max-age=31536000, immutable"');
+    expect(nginxConfig).toContain("add_header Cache-Control $cache_control always;");
+  });
+
+  it("sets explicit cache policy for public metadata assets", () => {
+    const nginxConfig = readFileSync(join(dockerRoot, "nginx.conf"), "utf8");
+
+    expect(nginxConfig).toContain('=/social-card.png "public, max-age=86400"');
+    expect(nginxConfig).toContain('=/site.webmanifest "public, max-age=3600"');
+    expect(nginxConfig).toContain('=/robots.txt "public, max-age=300, must-revalidate"');
+    expect(nginxConfig).toContain('=/sitemap.xml "public, max-age=300, must-revalidate"');
   });
 
   it("keeps Docker build context tight", () => {

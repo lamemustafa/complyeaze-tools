@@ -104,7 +104,8 @@ describe("Kubernetes static deployment policy", () => {
     expect(workflow).toContain('kubectl -n "${{ env.NAMESPACE }}" apply');
     expect(workflow).not.toContain("kubectl create namespace complyeaze-tools");
     expect(workflow).toContain("Service smoke checks");
-    expect(workflow).toContain("port-forward service/complyeaze-tools 18080:8080");
+    expect(workflow).toContain("port-forward service/complyeaze-tools 18080:80");
+    expect(workflow).toContain("complyeaze-tools-port-forward.log");
     expect(workflow).toContain("http://127.0.0.1:18080/-/health");
   });
 

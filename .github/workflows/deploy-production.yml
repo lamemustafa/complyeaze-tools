@@ -106,14 +106,18 @@ jobs:
         run: kubectl -n "${{ env.NAMESPACE }}" rollout status deployment/complyeaze-tools --timeout=180s
       - name: Service smoke checks
         run: |
-          kubectl -n "${{ env.NAMESPACE }}" port-forward service/complyeaze-tools 18080:8080 > /tmp/complyeaze-tools-port-forward.log 2>&1 &
+          kubectl -n "${{ env.NAMESPACE }}" port-forward service/complyeaze-tools 18080:80 > /tmp/complyeaze-tools-port-forward.log 2>&1 &
           port_forward_pid="$!"
-          trap 'kill "$port_forward_pid"' EXIT
+          trap 'kill "$port_forward_pid" 2>/dev/null || true' EXIT
 
           for attempt in $(seq 1 20); do
             if curl -fsSL http://127.0.0.1:18080/-/health | grep -Fx "ok"; then
               healthy=1
               break
+            fi
+            if ! kill -0 "$port_forward_pid" 2>/dev/null; then
+              cat /tmp/complyeaze-tools-port-forward.log >&2
+              exit 1
             fi
             sleep 1
           done
