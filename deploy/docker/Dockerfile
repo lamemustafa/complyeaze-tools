@@ -12,7 +12,7 @@ COPY packages ./packages
 RUN pnpm install --frozen-lockfile
 RUN pnpm build
 
-FROM nginxinc/nginx-unprivileged:mainline-alpine@sha256:a8d5564c3354241473c1e152d5dd3281ab4224edb61b23c291e0bfd9854687a1
+FROM nginxinc/nginx-unprivileged:1.29-bookworm@sha256:593a17dc61d117d1bfb208246903265abe0047c5bd4508b6e790895924b24c31
 
 COPY deploy/docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /workspace/apps/site/dist /usr/share/nginx/html
