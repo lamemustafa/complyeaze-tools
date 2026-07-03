@@ -4,6 +4,7 @@
 
 - [ ] `pnpm verify`
 - [ ] `pnpm scan:source-freshness`
+- [ ] `pnpm review:gate -- --repo lamemustafa/complyeaze-tools --pr <number> --strict-head-review --required-review-author chatgpt-codex-connector --allow-missing-head-review` when checking local PR readiness, or reason not run:
 - [ ] Live preflight updated or run when deployment/runtime behavior changed
 
 ## Safety Checks
@@ -30,3 +31,5 @@ List dependency, license, audit, or GitHub Action changes. Write "none" if not a
 ## Branch Protection Impact
 
 Does this rename required checks, CODEOWNER paths, deployment environments, or protected-branch assumptions?
+
+Required check impact: `verify`, `Review gate`, `Analyze`, `Review dependency changes`, or none.

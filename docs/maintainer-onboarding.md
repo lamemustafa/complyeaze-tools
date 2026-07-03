@@ -14,7 +14,8 @@ maintainer or GitHub team exists.
    `AGENTS.md`, and release/credential/uptime docs.
 3. Add the backup maintainer or team as a production environment reviewer.
 4. After the first successful checks for the new workflows, require `verify`,
-   `Analyze`, and `Review dependency changes` in branch protection.
+   `Review gate`, `Analyze`, and `Review dependency changes` in branch
+   protection.
 5. Enable required approving review or CODEOWNER review only after the backup
    reviewer or team is valid on GitHub and can review the latest pusher's work.
 6. Consider requiring two approvals for deploy, security, privacy, Cloudflare,
@@ -24,9 +25,10 @@ maintainer or GitHub team exists.
 
 Until a backup reviewer exists, branch protection should block on required
 checks and unresolved review conversations, not on an approving-review count.
-Codex and other automated review comments are considered through the
-conversation-resolution gate: fix valid findings, resolve stale threads with
-evidence, and document any accepted follow-up before merge.
+Codex and other automated review comments are considered through the `Review
+gate` check plus GitHub's native conversation-resolution gate: fix valid
+findings, resolve stale threads with evidence, and document any accepted
+follow-up before merge.
 
 Sensitive PRs must document why the change is safe to merge under the
 solo-maintainer model, link passing verification, and note any manual post-merge
