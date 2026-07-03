@@ -47,6 +47,21 @@ const msmeSamadhaan: ToolSource = {
   usedFor: ["Delayed payment workflow", "MSEFC review context"],
 };
 
+const msmeSamadhaanFaq: ToolSource = {
+  title: "MSME Samadhaan delayed payment FAQ",
+  publisher: "Ministry of MSME",
+  url: "https://samadhaan.msme.gov.in/MyMsme/MSEFC/FAQ.aspx",
+  sourceType: "official",
+  jurisdiction: "IN",
+  lastReviewedAt: reviewedAt,
+  staleAfterDays: 30,
+  usedFor: [
+    "Udyam evidence context",
+    "prior-registration review prompt",
+    "work-order and dispute caveats",
+  ],
+};
+
 const dcmsmeFaq: ToolSource = {
   title: "DC-MSME FAQ",
   publisher: "Development Commissioner MSME",
@@ -94,17 +109,23 @@ export const TOOLS: ToolMeta[] = [
     accountRequired: false,
     fileUploadRequired: false,
     telemetry: "none",
-    supportedInputs: ["pasted CSV rows", "manual payables table"],
+    supportedInputs: [
+      "pasted CSV/TSV rows",
+      "manual payables table",
+      "optional agreement, payment, dispute, and Udyam evidence columns",
+    ],
     unsupportedCases: [
-      "Does not verify Udyam status on government portals.",
-      "Does not decide final interest, disallowance, or legal default.",
+      "Does not verify Udyam registration or supplier MSE status on government portals.",
+      "Does not decide statutory interest, default, tax disallowance, or legal recovery action.",
+      "Does not resolve disputed, partly paid, settled, or admissibility positions.",
+      "Does not prepare an MSEFC or ODR filing package.",
     ],
     outputArtifacts: [
       "plain-text payables age review draft",
       "Udyam confirmation request text",
       "management review note",
     ],
-    officialSources: [msmeSamadhaan, dcmsmeFaq],
+    officialSources: [msmeSamadhaan, msmeSamadhaanFaq, dcmsmeFaq],
     relatedSlugs: [
       "/gstr-2b-purchase-reconciliation-triage",
       "/ais-form-26as-mismatch-checker",
@@ -113,14 +134,14 @@ export const TOOLS: ToolMeta[] = [
       "Track recurring MSME payables, evidence, reminders, and review tasks in Axal.",
     seoDepth: {
       inputGuide: [
-        "Use one row per payable with vendor, amount, invoiceDate, and acceptanceDate.",
+        "Use one row per payable with vendor, amount, and acceptanceDate or deemedAcceptanceDate.",
+        "Optional columns include writtenAgreement, agreedPaymentDays, paymentDate, paidAmount, disputeStatus, and udyamEvidence.",
         "Use YYYY-MM-DD dates where possible; blank or invalid dates are kept for manual review.",
-        "Keep Udyam evidence and agreement terms outside the pasted sample unless needed for the draft.",
       ],
       exampleWorkflow: [
         "Paste the open-payables rows from a spreadsheet export.",
-        "Set the as-of date for the review meeting or management note.",
-        "Download the draft and attach source invoices, Udyam evidence, and agreement terms separately.",
+        "Set the review as-of date for the meeting or management note.",
+        "Download the first-pass draft and attach invoices, Udyam evidence, agreements, payments, and dispute correspondence separately.",
       ],
       commonMistakes: [
         "Treating invoice date as acceptance date when acceptance or deemed acceptance needs separate review.",
@@ -132,12 +153,12 @@ export const TOOLS: ToolMeta[] = [
         "Review disputed, paid, or partly paid invoices separately before sending a management note.",
       ],
       sourceExplainer:
-        "MSME source links are used to frame delayed-payment review boundaries and evidence requests, not to decide final interest or default outcomes.",
+        "MSME source links are used to frame delayed-payment review boundaries, Udyam evidence prompts, and dispute caveats, not to decide final interest, tax, or recovery outcomes.",
       faqItems: [
         {
           question: "Why is this called age triage instead of a due-date calculator?",
           answer:
-            "The V0 output compares pasted dates against a review window and keeps agreement terms, Udyam status, disputes, and payments for professional review.",
+            "The V0 output uses pasted dates and user-entered agreement/payment context to create review prompts. It keeps Udyam status, disputes, payments, and tax treatment for professional review.",
         },
         {
           question: "Can I use this for 43B(h) conclusions?",

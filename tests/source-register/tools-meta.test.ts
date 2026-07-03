@@ -50,4 +50,23 @@ describe("tool source register", () => {
 
     expect(errors).toContain("MSME Samadhaan delayed payment monitoring system source review is stale");
   });
+
+  it("keeps MSME triage boundaries explicit when richer review fields are present", () => {
+    const msmeTool = TOOLS.find(
+      (tool) => tool.slug === "/msme-45-day-payment-due-date-calculator",
+    );
+
+    expect(msmeTool?.officialSources.map((source) => source.url)).toContain(
+      "https://samadhaan.msme.gov.in/MyMsme/MSEFC/FAQ.aspx",
+    );
+    expect(msmeTool?.unsupportedCases.join(" ")).toContain(
+      "Does not verify Udyam registration or supplier MSE status on government portals.",
+    );
+    expect(msmeTool?.unsupportedCases.join(" ")).toContain(
+      "Does not decide statutory interest, default, tax disallowance, or legal recovery action.",
+    );
+    expect(msmeTool?.unsupportedCases.join(" ")).toContain(
+      "Does not resolve disputed, partly paid, settled, or admissibility positions.",
+    );
+  });
 });

@@ -28,6 +28,7 @@ export type ReviewFooterOptions = {
   parseIssues?: ArtifactParseIssue[];
   officialSources?: ArtifactSource[];
   unsupportedCases?: string[];
+  extraCaveats?: string[];
 };
 
 export function buildReviewFooter(sourceLabel: string): string;
@@ -45,6 +46,7 @@ export function buildReviewFooter(input: string | ReviewFooterOptions): string {
   const selectedOptions = formatOptions(input.selectedOptions);
   const sources = input.officialSources ?? [];
   const unsupportedCases = input.unsupportedCases ?? [];
+  const extraCaveats = input.extraCaveats ?? [];
   const parseIssues = input.parseIssues ?? [];
 
   return [
@@ -72,6 +74,8 @@ export function buildReviewFooter(input: string | ReviewFooterOptions): string {
     ),
     unsupportedCases.length ? "Tool boundary:" : null,
     ...unsupportedCases.map((item) => `- ${item}`),
+    extraCaveats.length ? "Additional review caveats:" : null,
+    ...extraCaveats.map((item) => `- ${item}`),
     "Browser-local draft: files are processed in your browser. No account or file upload required.",
     "Draft local review artifact only. Not a filing instruction or final tax position.",
     "Verify against official sources and professional judgment before use.",

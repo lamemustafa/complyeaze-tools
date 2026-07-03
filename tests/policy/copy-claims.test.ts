@@ -18,4 +18,31 @@ describe("public copy claims", () => {
       expect(publicText.toLowerCase()).not.toContain(claim.toLowerCase());
     }
   });
+
+  it("blocks MSME-specific overclaims in public metadata", () => {
+    const publicText = TOOLS.map((tool) =>
+      [
+        tool.h1,
+        tool.seoTitle,
+        tool.metaDescription,
+        tool.outputArtifacts.join(" "),
+        tool.seoDepth.inputGuide.join(" "),
+        tool.seoDepth.exampleWorkflow.join(" "),
+        tool.seoDepth.faqItems.map((item) => `${item.question} ${item.answer}`).join(" "),
+      ].join(" "),
+    )
+      .join("\n")
+      .toLowerCase();
+
+    for (const claim of [
+      "msefc-ready",
+      "statutory interest calculated",
+      "udyam verified",
+      "43b(h) compliant",
+      "legal default",
+      "recoverable amount",
+    ]) {
+      expect(publicText).not.toContain(claim);
+    }
+  });
 });

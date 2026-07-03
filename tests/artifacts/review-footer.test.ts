@@ -31,6 +31,7 @@ describe("buildReviewFooter", () => {
         },
       ],
       unsupportedCases: ["Does not determine ITC eligibility."],
+      extraCaveats: ["Dates and statuses are based only on pasted rows."],
     });
 
     expect(footer).toContain("Generated at: 2026-07-03T12:00:00.000Z");
@@ -41,6 +42,10 @@ describe("buildReviewFooter", () => {
     expect(footer).toContain("Row 4: missing-cell - Missing value for invoice.");
     expect(footer).toContain("GST Tutorials: GSTR-2B User Manual (reviewed 2026-07-02)");
     expect(footer).toContain("https://tutorial.gst.gov.in/userguide/returns/Manual_gstr2b.htm");
+    expect(footer).toContain("Tool boundary:");
+    expect(footer).toContain("Does not determine ITC eligibility.");
+    expect(footer).toContain("Additional review caveats:");
+    expect(footer).toContain("Dates and statuses are based only on pasted rows.");
     expect(footer).toContain("Draft local review artifact only. Not a filing instruction or final tax position.");
   });
 
