@@ -1,11 +1,18 @@
 * @lamemustafa
 
+# Add the backup maintainer or tools-maintainers team here after GitHub access
+# is granted. Keep comments until the account/team exists to avoid invalid
+# CODEOWNER entries.
+
 /.github/ @lamemustafa
 /deploy/ @lamemustafa
 /docs/privacy-local-first.md @lamemustafa
 /docs/logging-and-metadata.md @lamemustafa
 /docs/release-gates.md @lamemustafa
 /docs/source-policy.md @lamemustafa
+/docs/deploy-credential-rotation.md @lamemustafa
+/docs/uptime-monitoring.md @lamemustafa
+/infra/cloudflare/ @lamemustafa
 /packages/source-register/ @lamemustafa
 /packages/safety/ @lamemustafa
 /apps/site/src/pages/privacy.astro @lamemustafa

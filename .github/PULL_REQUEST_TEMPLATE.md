@@ -13,6 +13,7 @@
 - [ ] Adds or updates tests for source/copy/privacy/security impact
 - [ ] Does not add telemetry, backend upload, accounts, or document storage
 - [ ] Does not weaken CSP, branch protection, or GitHub Actions permissions without review
+- [ ] Sensitive deploy, security, privacy, source, or Cloudflare changes have maintainer/platform review or a documented solo-maintainer exception
 
 ## Source Review
 

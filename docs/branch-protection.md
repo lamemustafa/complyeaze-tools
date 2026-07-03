@@ -5,6 +5,9 @@ GitHub branch protection rule or repository ruleset with these requirements:
 
 - Require pull requests before merge.
 - Require the `verify` status check from `.github/workflows/ci.yml`.
+- After the first successful run, also require `CodeQL / Analyze` and
+  `Dependency Review / Review dependency changes` so code scanning and
+  dependency review block unsafe pull requests.
 - Require branches to be up to date before merge.
 - Require conversation resolution before merge.
 - Require CODEOWNER review for paths listed in `.github/CODEOWNERS`.
@@ -24,12 +27,18 @@ maintainer reviewer. The `Deploy Production` workflow must be run with both the
 reviewed source SHA and the digest produced by the `Publish Image` workflow for
 that SHA.
 
+Use `docs/maintainer-onboarding.md` before adding a second maintainer or
+tools-maintainers team to CODEOWNERS, branch protection, or the production
+environment. Do not add placeholder owners that do not exist on GitHub.
+
 Suggested GitHub checks:
 
 ```text
 Required status check: verify
+Required security checks: CodeQL / Analyze, Dependency Review / Review dependency changes
 Required review paths: .github/, deploy/, packages/source-register/,
-packages/safety/, privacy/security/source pages, SECURITY.md, AGENTS.md
+packages/safety/, infra/cloudflare/, privacy/security/source pages,
+SECURITY.md, AGENTS.md
 ```
 
 After enabling the rules, verify:
@@ -52,6 +61,8 @@ Ruleset target:
 - Require linear history: enabled.
 - Require a pull request before merging: enabled.
 - Require status checks to pass: verify.
+- Add security status checks after their first run: CodeQL / Analyze,
+  Dependency Review / Review dependency changes.
 - Require branches to be up to date before merging: enabled.
 - Require conversation resolution before merging: enabled.
 - Require review from Code Owners: enabled.

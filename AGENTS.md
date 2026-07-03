@@ -59,9 +59,12 @@ pnpm build
 pnpm scan:k8s
 pnpm scan:copy
 pnpm scan:fixtures
+pnpm scan:cloudflare:iac
 pnpm scan:source-freshness
 pnpm scan:source-register
 pnpm scan:runtime-network
+pnpm build
+pnpm scan:built-runtime-network
 ```
 
 If browser behavior changes, verify with Playwright or a real browser that no
@@ -76,6 +79,9 @@ requests are made.
   unsupported cases need source-register review and `pnpm scan:source-freshness`.
 - Deployment, Docker, Kubernetes, GitHub Actions, or branch-protection changes
   need platform review, `pnpm scan:k8s`, and release-gate documentation updates.
+- Cloudflare DNS/cache/WAF changes must stay under `infra/cloudflare`, remain
+  scoped to `tools.complyeaze.com`, avoid committed state/secrets, and document
+  import-first review before apply.
 - Dependencies need a license/security review, `pnpm audit --audit-level high`,
   and a reason they preserve static browser-local operation.
 - Public pages need metadata, sitemap, social image, internal-link, and

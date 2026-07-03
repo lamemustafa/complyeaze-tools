@@ -23,13 +23,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "scan:built-runtime-network": "node scripts/scan-built-runtime-network.mjs",
+    "scan:cloudflare:iac": "vitest run tests/config/cloudflare-iac.test.ts",
     "scan:copy": "vitest run tests/policy/copy-claims.test.ts",
     "scan:fixtures": "vitest run tests/policy/fixtures.test.ts",
     "scan:k8s": "vitest run tests/config/tools-kubernetes.test.ts",
     "scan:runtime-network": "vitest run tests/policy/runtime-network.test.ts",
     "scan:source-freshness": "node scripts/source-freshness.mjs --fail-on-stale",
     "scan:source-register": "vitest run tests/source-register/tools-meta.test.ts",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm scan:source-freshness && pnpm build"
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm scan:source-freshness && pnpm scan:cloudflare:iac && pnpm build && pnpm scan:built-runtime-network"
   },
   "dependencies": {
     "react": "^19.0.0",

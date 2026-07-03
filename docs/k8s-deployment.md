@@ -47,6 +47,8 @@ kubectl apply -k deploy/k8s/deploy-access
 Then create `TOOLS_PROD_KUBECONFIG_B64` from the
 `complyeaze-tools-deployer-token` service-account token. Rotate it by deleting
 and recreating that token secret, then updating the GitHub Actions secret.
+Use `docs/deploy-credential-rotation.md` for the required cadence, validation,
+and emergency revocation procedure.
 
 To repair an existing namespace that predates the restricted labels:
 

@@ -13,15 +13,20 @@ Policy scans are part of `pnpm verify`, but can be run individually:
 ```bash
 pnpm scan:copy
 pnpm scan:fixtures
+pnpm scan:cloudflare:iac
 pnpm scan:k8s
 pnpm scan:runtime-network
 pnpm scan:source-freshness
 pnpm scan:source-register
+pnpm build
+pnpm scan:built-runtime-network
 ```
 
 Deployment should use a reviewed image digest. Do not promote a build if source
 metadata is stale, public copy includes banned claims, fixture scans fail, or the
-runtime gains data network APIs.
+runtime gains data network APIs. The final published image must also pass Trivy
+HIGH/CRITICAL scanning and upload SARIF evidence from
+`.github/workflows/publish-image.yml`.
 
 `main` must be protected before production promotion. Required branch controls
 are listed in `docs/branch-protection.md`; the required CI check name is
@@ -42,9 +47,19 @@ To go live:
 
 `TOOLS_PROD_KUBECONFIG_B64` must use the namespace-scoped
 `complyeaze-tools-deployer` ServiceAccount from `deploy/k8s/deploy-access`, not
-a local admin kubeconfig.
+a local admin kubeconfig. Rotate it with `docs/deploy-credential-rotation.md`.
 
-Use `docs/go-live-runbook.md` for the exact live cutover checks.
+CodeQL and dependency-review workflows run independently from `verify` because
+they depend on GitHub code scanning and dependency graph services. Keep them as
+required or reviewer-visible checks once GitHub exposes their stable check names
+for this repository.
+
+Cloudflare edge configuration lives under `infra/cloudflare` as import-first
+Terraform. Do not apply it until the existing dashboard-managed DNS/cache/WAF
+state has been imported and the plan is attached to the deployment notes.
+
+Use `docs/go-live-runbook.md` for the exact live cutover checks and
+`docs/uptime-monitoring.md` for external monitor targets.
 
 ## CSP Direction
 
