@@ -38,6 +38,7 @@ describe("live preflight command", () => {
       "clusterissuer",
       "kustomize-production",
       "namespace",
+      "live-no-slash-redirect",
       "live-homepage-public-links",
       "live-tool-public-links",
       "live-sitemap-public-links",
@@ -60,6 +61,7 @@ describe("live preflight command", () => {
       "ghcr.io/lamemustafa/complyeaze-tools@sha256:2a100524ebf35cf3fa5e6c2e5ccd40e144f0e3c9eda04432be652a748ebc1a2e",
     );
     for (const id of [
+      "live-no-slash-redirect",
       "live-homepage-public-links",
       "live-tool-public-links",
       "live-sitemap-public-links",

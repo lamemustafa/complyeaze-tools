@@ -17,6 +17,13 @@ describe("Docker static image policy", () => {
     expect(dockerfile).not.toContain("REDIS");
   });
 
+  it("does not expose the internal nginx port in public redirects", () => {
+    const nginxConfig = readFileSync(join(dockerRoot, "nginx.conf"), "utf8");
+
+    expect(nginxConfig).toContain("absolute_redirect off;");
+    expect(nginxConfig).toContain("port_in_redirect off;");
+  });
+
   it("keeps Docker build context tight", () => {
     const dockerignore = readFileSync(join(process.cwd(), ".dockerignore"), "utf8");
 

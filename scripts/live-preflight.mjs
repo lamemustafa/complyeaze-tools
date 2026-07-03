@@ -55,6 +55,19 @@ export function buildLivePreflightChecks({ imageDigest }) {
       mutates: false,
     },
     {
+      id: "live-no-slash-redirect",
+      label: "Live no-slash tool redirect does not expose internal :8080",
+      command: [
+        "curl",
+        "-fsSI",
+        "https://tools.complyeaze.com/gst-portal-issue-evidence-memo",
+      ],
+      mutates: false,
+      requireOutput: true,
+      expectedOutput: "gst-portal-issue-evidence-memo/",
+      forbiddenOutput: [":8080"],
+    },
+    {
       id: "live-homepage-public-links",
       label: "Live homepage does not emit stale :8080 public links",
       command: ["curl", "-fsSL", "https://tools.complyeaze.com/"],
