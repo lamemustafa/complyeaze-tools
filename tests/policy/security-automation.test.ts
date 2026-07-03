@@ -40,16 +40,17 @@ describe("security automation", () => {
     const workflow = read(".github/workflows/publish-image.yml");
 
     expect(workflow).toContain("security-events: write");
-    expect(workflow).toContain("provenance: true");
-    expect(workflow).toContain("sbom: true");
     expect(workflow).toContain("aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25");
     expect(workflow).toContain("load: true");
-    expect(workflow).toContain("image-ref: ${{ env.IMAGE_NAME }}:scan-${{ github.sha }}");
-    expect(workflow).toContain("push: true");
+    expect(workflow).toContain("image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}");
+    expect(workflow).toContain("docker push \"${IMAGE_NAME}:${GITHUB_SHA}\"");
     expect(workflow).toContain("format: sarif");
     expect(workflow).toContain("severity: HIGH,CRITICAL");
     expect(workflow).toContain("exit-code: \"1\"");
     expect(workflow).toContain("github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a");
+    expect(workflow.indexOf("aquasecurity/trivy-action")).toBeLessThan(
+      workflow.indexOf("Push scanned image"),
+    );
   });
 
   it("documents security checks in branch protection and release gates", () => {

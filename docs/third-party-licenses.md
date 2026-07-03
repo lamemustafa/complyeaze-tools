@@ -32,6 +32,6 @@ reachable in this static/browser-local runtime.
 
 ## Notes
 
-The production container is a static site image. The publish workflow emits SBOM
-and provenance evidence for the image, and production deploys must use an
-immutable digest.
+The production container is a static site image. The publish workflow scans the
+image with Trivy before pushing the same tag, uploads SARIF evidence, and
+production deploys must use an immutable digest.

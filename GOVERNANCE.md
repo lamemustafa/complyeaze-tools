@@ -31,8 +31,8 @@ CI, source, and runtime evidence for later audit.
 
 ## Release Policy
 
-Production releases must pass `pnpm verify`, publish a GHCR image with SBOM and
-provenance evidence, and deploy by immutable image digest.
+Production releases must pass `pnpm verify`, publish a Trivy-scanned GHCR image,
+upload SARIF evidence, and deploy by immutable image digest.
 
 ## Data Policy
 

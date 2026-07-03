@@ -29,8 +29,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       <h2>Supply chain</h2>
       <p>
         Releases are built from the public repository, pushed to GHCR, and
-        deployed by immutable image digest. The publish workflow emits SBOM and
-        provenance evidence for the container image.
+        deployed by immutable image digest. The publish workflow scans the image
+        with Trivy before pushing the same tag and uploads SARIF evidence.
       </p>
     </article>
     <article>

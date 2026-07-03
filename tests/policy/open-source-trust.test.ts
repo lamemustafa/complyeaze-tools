@@ -27,7 +27,7 @@ describe("open-source trust surface", () => {
     expect(layout).toContain("Source code");
     expect(layout).toContain("Apache-2.0 license");
     expect(layout).toContain("Reproducible build gates");
-    expect(layout).toContain("SBOM and provenance workflow");
+    expect(layout).toContain("Image scan and digest workflow");
     expect(readme).toContain("| Tool | Workflow | Supported input | Output | Source posture |");
     expect(readme).toContain("https://tools.complyeaze.com");
     expect(readme).toContain("https://complyeaze.com/axal");
