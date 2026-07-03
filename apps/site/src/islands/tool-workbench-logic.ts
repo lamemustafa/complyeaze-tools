@@ -193,9 +193,12 @@ function buildReviewCopyOutput(
 ): string {
   if (!input.trim()) return "Paste plain text to create a review copy.";
   const report = maskIndianIdentifiersWithReport(input);
-  const countLines = Object.entries(report.counts).map(
-    ([label, count]) => `- ${label}: ${count}`,
-  );
+  const foundLines = report.checked
+    .filter((entry) => entry.status === "found-and-masked")
+    .map((entry) => `- ${entry.key}: ${entry.count}`);
+  const notFoundLines = report.checked
+    .filter((entry) => entry.status === "checked-not-found")
+    .map((entry) => `- ${entry.key}: checked, not found`);
 
   return [
     "Review copy draft",
@@ -203,10 +206,17 @@ function buildReviewCopyOutput(
     "",
     report.text,
     "",
-    "Mask report",
-    ...countLines,
-    `Not checked automatically: ${report.notChecked.join(", ")}.`,
-    "Manual review still required before sharing.",
+    "Found and masked",
+    ...(foundLines.length ? foundLines : ["- No supported identifier-like patterns found."]),
+    "",
+    "Checked, not found",
+    ...notFoundLines,
+    "",
+    "Not checked automatically",
+    ...report.notChecked.map((item) => `- ${item}`),
+    "",
+    "Manual review checklist",
+    ...report.manualReviewChecklist.map((item) => `- ${item}`),
     buildFooter(tool, config),
   ].join("\n");
 }

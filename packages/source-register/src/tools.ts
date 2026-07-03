@@ -452,7 +452,12 @@ export const TOOLS: ToolMeta[] = [
       "Does not perform browser OCR in V0.",
       "Does not provide forensic or legally irreversible redaction.",
     ],
-    outputArtifacts: ["masked text draft", "review footer"],
+    outputArtifacts: [
+      "masked text draft",
+      "mask report",
+      "manual review checklist",
+      "review footer",
+    ],
     officialSources: [dpdpAct],
     relatedSlugs: [
       "/gst-portal-issue-evidence-memo",
@@ -467,7 +472,7 @@ export const TOOLS: ToolMeta[] = [
       ],
       exampleWorkflow: [
         "Paste the smallest review excerpt needed for handoff.",
-        "Check the masked text and the detector counts.",
+        "Check the masked text and the found/masked/not-checked report.",
         "Remove or rewrite any remaining personal or client context before sharing.",
       ],
       commonMistakes: [
@@ -475,7 +480,7 @@ export const TOOLS: ToolMeta[] = [
         "Sharing the draft before checking whether the placeholders changed the meaning.",
       ],
       reviewChecklist: [
-        "Check PAN, TAN, GSTIN, Aadhaar-like, bank, email, phone, and UPI placeholders.",
+        "Check PAN, TAN, GSTIN, CIN, Udyam, DIN/DPIN, LLPIN, Aadhaar-like, bank, email, phone, and UPI placeholders.",
         "Manually inspect names, addresses, file names, and contextual identifiers.",
         "Use Axal templates and review trails for controlled recurring handoffs.",
       ],

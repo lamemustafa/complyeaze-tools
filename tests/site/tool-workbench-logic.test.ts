@@ -19,6 +19,23 @@ const msmeTool: WorkbenchTool = {
   unsupportedCases: ["Does not decide final interest, disallowance, or legal default."],
 };
 
+const reviewCopyTool: WorkbenchTool = {
+  slug: "/privacy/review-copy-builder",
+  h1: "Review Copy Builder",
+  officialSources: [
+    {
+      publisher: "Government of India eGazette",
+      title: "Digital Personal Data Protection Act, 2023",
+      url: "https://egazette.gov.in/WriteReadData/2023/248045.pdf",
+      lastReviewedAt: "2026-07-02",
+    },
+  ],
+  unsupportedCases: [
+    "Does not perform browser OCR in V0.",
+    "Does not provide forensic or legally irreversible redaction.",
+  ],
+};
+
 describe("tool workbench logic", () => {
   it("surfaces MSME review basis, review dates, and evidence checks in the draft", () => {
     const output = buildOutput(
@@ -41,5 +58,28 @@ describe("tool workbench logic", () => {
     expect(output).toContain("Draft local review artifact only.");
     expect(output.toLowerCase()).not.toContain("interest payable");
     expect(output.toLowerCase()).not.toContain("verified udyam");
+  });
+
+  it("makes Review Copy masking limits and manual checks visible in the draft", () => {
+    const output = buildOutput(
+      reviewCopyTool,
+      "PAN abcde1234f, email owner@example.com, phone +91 98765 43210",
+      configs["/privacy/review-copy-builder"],
+      "",
+    );
+
+    expect(output).toContain("Review copy draft");
+    expect(output).toContain("Not a redaction certificate");
+    expect(output).toContain("Found and masked");
+    expect(output).toContain("- pan: 1");
+    expect(output).toContain("- email: 1");
+    expect(output).toContain("- phone: 1");
+    expect(output).toContain("Checked, not found");
+    expect(output).toContain("- gstin");
+    expect(output).toContain("Not checked automatically");
+    expect(output).toContain("Manual review checklist");
+    expect(output).toContain("Re-read names, addresses, and free-form client context.");
+    expect(output.toLowerCase()).not.toContain("forensic redaction");
+    expect(output.toLowerCase()).not.toContain("permanent redaction");
   });
 });
