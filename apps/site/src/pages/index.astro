@@ -4,6 +4,35 @@ import { getLaunchTools } from "../lib/tools";
 import { publicSiteUrl } from "../lib/public-url";
 
 const tools = getLaunchTools();
+const axalUrl = "https://complyeaze.com/axal";
+const clusters = [
+  {
+    title: "Reconciliation and vendor follow-up",
+    description:
+      "Triage GSTR-2B mismatches and turn supplier gaps into review-ready follow-up drafts.",
+    slugs: [
+      "/gstr-2b-purchase-reconciliation-triage",
+      "/gstr-2b-missing-invoice-vendor-follow-up",
+    ],
+  },
+  {
+    title: "Evidence and review copy",
+    description:
+      "Prepare portal issue timelines, privacy-conscious review copies, and professional handoff notes.",
+    slugs: ["/gst-portal-issue-evidence-memo", "/privacy/review-copy-builder"],
+  },
+  {
+    title: "Tax and payables review",
+    description:
+      "Create first-pass mismatch and due-date review drafts before professional verification.",
+    slugs: ["/ais-form-26as-mismatch-checker", "/msme-45-day-payment-due-date-calculator"],
+  },
+].map((cluster) => ({
+  ...cluster,
+  tools: cluster.slugs
+    .map((slug) => tools.find((tool) => tool.slug === slug))
+    .filter(Boolean),
+}));
 ---
 
 <BaseLayout>
@@ -41,5 +70,44 @@ const tools = getLaunchTools();
         <span class="tool-meta">{tool.outputArtifacts.join(" / ")}</span>
       </a>
     ))}
+  </section>
+
+  <section class="workflow-section" aria-labelledby="workflow-heading">
+    <div class="section-heading">
+      <p class="domain-line">Workflows</p>
+      <h2 id="workflow-heading">Choose by the work on your desk.</h2>
+      <p>
+        Each tool stays focused on one browser-local artifact. Axal is the path
+        when the work needs clients, saved mappings, documents, tasks, and audit
+        trails.
+      </p>
+    </div>
+    <div class="workflow-grid">
+      {clusters.map((cluster) => (
+        <article class="workflow-panel">
+          <h3>{cluster.title}</h3>
+          <p>{cluster.description}</p>
+          <ul>
+            {cluster.tools.map((tool) => (
+              <li>
+                <a href={publicSiteUrl(tool.slug)}>{tool.h1}</a>
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="upgrade-band" aria-label="Axal upgrade path">
+    <div>
+      <h2>Need saved mappings, evidence trails, and recurring workflows?</h2>
+      <p>
+        Use these tools for one-off drafts. Use Axal when the same work needs
+        clients, documents, assignments, credential-safe workflows, and review
+        history.
+      </p>
+    </div>
+    <a class="text-button" href={axalUrl}>Open Axal</a>
   </section>
 </BaseLayout>

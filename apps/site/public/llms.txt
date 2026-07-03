@@ -1,0 +1,34 @@
+# ComplyEaze Tools
+
+ComplyEaze Tools is an open-source, browser-local static site at
+https://tools.complyeaze.com for Indian compliance review workflows.
+
+The tools create draft working artifacts from pasted rows or plain text. They do
+not create accounts, upload files, call an application API, provide legal or tax
+advice, submit portal actions, or decide final compliance positions.
+
+Primary audiences include CAs, CSs, CMAs, GST teams, accountants, finance
+controllers, founders, executives, and business owners.
+
+Current tool clusters:
+
+- Reconciliation and vendor follow-up: GSTR-2B purchase reconciliation triage
+  and missing invoice follow-up drafts.
+- Tax review: AIS and Form 26AS mismatch review drafts.
+- Evidence and review copy: GST portal issue evidence memos and privacy review
+  copy drafts.
+- MSME payables: MSME 45-day payment due-date review drafts.
+
+Trust posture:
+
+- Files are processed in your browser.
+- No account or file upload required.
+- No analytics or telemetry in V0.
+- Static site deployment with source, license, release-gate, SBOM, provenance,
+  privacy, security, and source-register pages.
+
+Repository: https://github.com/lamemustafa/complyeaze-tools
+Source register: https://tools.complyeaze.com/source/
+Security: https://tools.complyeaze.com/security/
+Privacy: https://tools.complyeaze.com/privacy/
+Axal upgrade path: https://complyeaze.com/axal

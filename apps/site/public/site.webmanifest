@@ -1,0 +1,16 @@
+{
+  "name": "ComplyEaze Tools",
+  "short_name": "CE Tools",
+  "description": "Browser-local Indian compliance tools for review-ready action drafts.",
+  "start_url": "/",
+  "display": "minimal-ui",
+  "background_color": "#fbfcfb",
+  "theme_color": "#0c6b58",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

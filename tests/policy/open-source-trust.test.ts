@@ -20,12 +20,16 @@ function readJson(path: string) {
 describe("open-source trust surface", () => {
   it("shows source, license, build, and provenance links publicly", () => {
     const layout = read("apps/site/src/layouts/BaseLayout.astro");
+    const readme = read("README.md");
 
     expect(layout).toContain("https://github.com/lamemustafa/complyeaze-tools");
     expect(layout).toContain("Source code");
     expect(layout).toContain("Apache-2.0 license");
     expect(layout).toContain("Reproducible build gates");
     expect(layout).toContain("SBOM and provenance workflow");
+    expect(readme).toContain("| Tool | Workflow | Supported input | Output | Source posture |");
+    expect(readme).toContain("https://tools.complyeaze.com");
+    expect(readme).toContain("https://complyeaze.com/axal");
   });
 
   it("publishes security and governance routes with private reporting guidance", () => {
@@ -43,12 +47,22 @@ describe("open-source trust surface", () => {
     expect(existsSync(join(root, ".github", "PULL_REQUEST_TEMPLATE.md"))).toBe(true);
   });
 
+  it("uses canonical Apache licensing with a separate notice file", () => {
+    const license = read("LICENSE");
+    const notice = read("NOTICE");
+
+    expect(license.startsWith("Apache License\nVersion 2.0, January 2004")).toBe(true);
+    expect(notice).toContain("ComplyEaze Tools");
+    expect(notice).toContain("SPMS Comply Eaze Solutions LLP");
+  });
+
   it("keeps package metadata license-aware", () => {
     const packagePaths = [
       "package.json",
       "apps/site/package.json",
       "packages/artifacts/package.json",
       "packages/core/package.json",
+      "packages/parsers/package.json",
       "packages/safety/package.json",
       "packages/source-register/package.json",
       "packages/ui-react/package.json",

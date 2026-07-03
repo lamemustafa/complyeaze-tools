@@ -19,6 +19,10 @@ describe("canonical public links", () => {
     );
   });
 
+  it("does not add trailing slashes to static asset URLs", () => {
+    expect(publicSiteUrl("/social-card.svg")).toBe("https://tools.complyeaze.com/social-card.svg");
+  });
+
   it("keeps sitemap loc entries on trailing-slash URLs", () => {
     const sitemap = readFileSync(
       join(process.cwd(), "apps", "site", "public", "sitemap.xml"),
