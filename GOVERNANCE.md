@@ -16,17 +16,18 @@ Maintainers are responsible for:
 ## Decision Policy
 
 Changes that affect privacy posture, security posture, source claims, public
-copy, official-source metadata, deployment, or generated artifacts require a
-maintainer review before merge.
+copy, official-source metadata, deployment, or generated artifacts require
+passing CI/security checks and resolved review conversations before merge.
 
 Small copy, documentation, fixture, and test-only changes may merge after one
-maintainer review when CI is green.
+maintainer pass when CI is green.
 
 Deploy, security, privacy, Cloudflare, source-register, and public trust-surface
 changes should receive a second maintainer or platform/security review once a
 backup maintainer or GitHub team is configured. Until then, PRs must document
-the solo-maintainer exception and leave enough CI, source, and runtime evidence
-for later audit.
+the solo-maintainer exception, treat Codex/automated review findings as blocking
+until the review thread is resolved or answered with evidence, and leave enough
+CI, source, and runtime evidence for later audit.
 
 ## Release Policy
 

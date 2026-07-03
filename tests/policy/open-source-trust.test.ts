@@ -73,7 +73,8 @@ describe("open-source trust surface", () => {
     const agents = read("AGENTS.md");
 
     expect(branchProtection).toContain("Required status check: verify");
-    expect(branchProtection).toContain("Require CODEOWNER review");
+    expect(branchProtection).toContain("Required conversation gate");
+    expect(branchProtection).toContain("Required approving reviews / Code Owner reviews: disabled");
     expect(codeowners).toContain("/deploy/");
     expect(codeowners).toContain("/packages/source-register/");
     expect(prTemplate).toContain("Branch Protection Impact");

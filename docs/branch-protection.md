@@ -9,8 +9,11 @@ GitHub branch protection rule or repository ruleset with these requirements:
   `Dependency Review / Review dependency changes` so code scanning and
   dependency review block unsafe pull requests.
 - Require branches to be up to date before merge.
-- Require conversation resolution before merge.
-- Require CODEOWNER review for paths listed in `.github/CODEOWNERS`.
+- Require conversation resolution before merge. Codex and other automated review
+  comments count through unresolved review threads, not through an approving
+  reviewer requirement.
+- Do not require an approving human review while the repo has only one eligible
+  maintainer. A required self-review creates a permanent merge deadlock.
 - Block force pushes and branch deletion.
 - Prefer squash merge and delete branches after merge.
 - Keep admin bypass disabled except for documented break-glass recovery.
@@ -36,7 +39,8 @@ Suggested GitHub checks:
 ```text
 Required status check: verify
 Required security checks: CodeQL / Analyze, Dependency Review / Review dependency changes
-Required review paths: .github/, deploy/, packages/source-register/,
+Required conversation gate: all current-head review threads resolved
+Sensitive owner paths: .github/, deploy/, packages/source-register/,
 packages/safety/, infra/cloudflare/, privacy/security/source pages,
 SECURITY.md, AGENTS.md
 ```
@@ -65,5 +69,6 @@ Ruleset target:
   Dependency Review / Review dependency changes.
 - Require branches to be up to date before merging: enabled.
 - Require conversation resolution before merging: enabled.
-- Require review from Code Owners: enabled.
+- Required approving reviews / Code Owner reviews: disabled until a backup
+  maintainer or valid tools-maintainers team exists.
 ```

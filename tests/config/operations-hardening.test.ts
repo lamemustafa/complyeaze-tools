@@ -71,6 +71,8 @@ describe("operations hardening", () => {
     expect(onboarding).toContain("Solo-Maintainer Exception");
     expect(maintainers).toMatch(/backup\s+maintainer/);
     expect(governance).toContain("second maintainer or platform/security review");
+    expect(governance).toContain("review thread is resolved or answered with evidence");
+    expect(onboarding).toMatch(/required\s+checks\s+and\s+unresolved\s+review\s+conversations/);
     expect(codeowners).toContain("Add the backup maintainer");
     expect(codeowners).not.toContain("@complyeaze/tools-maintainers");
   });

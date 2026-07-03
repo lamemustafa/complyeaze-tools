@@ -89,3 +89,8 @@ requests are made.
 
 The protected branch check name is `verify`. Do not rename the CI job without
 updating `docs/branch-protection.md` and GitHub branch protection.
+
+While this repo has only one eligible maintainer, branch protection should block
+on required checks and unresolved review conversations, not on an approving
+reviewer count. Treat Codex review comments as blocking when they create
+current-head unresolved review threads or requested-changes reviews.
