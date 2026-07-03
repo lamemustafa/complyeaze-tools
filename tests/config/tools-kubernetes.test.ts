@@ -130,6 +130,8 @@ describe("Kubernetes static deployment policy", () => {
     expect(role).toContain("kind: Role");
     expect(role).not.toContain("kind: ClusterRole");
     expect(role).toContain('resources: ["services"]');
+    expect(role).toContain('resources: ["pods"]');
+    expect(role).toContain('resources: ["pods/portforward"]');
     expect(role).toContain('resources: ["deployments"]');
     expect(role).toContain('resources: ["ingresses", "networkpolicies"]');
     expect(role).not.toContain("secrets");
