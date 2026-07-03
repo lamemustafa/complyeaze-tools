@@ -1,6 +1,7 @@
 ---
 import ToolWorkbench from "../islands/ToolWorkbench";
 import type { ToolMeta } from "@complyeaze-tools/source-register";
+import { publicSiteUrl } from "../lib/public-url";
 
 const { tool }: { tool: ToolMeta } = Astro.props;
 const sourceSummary = tool.officialSources
@@ -59,6 +60,6 @@ const sourceSummary = tool.officialSources
   name: tool.h1,
   applicationCategory: "BusinessApplication",
   operatingSystem: "Any",
-  url: `https://tools.complyeaze.com${tool.slug}`,
+  url: publicSiteUrl(tool.slug),
   offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },
 })} />

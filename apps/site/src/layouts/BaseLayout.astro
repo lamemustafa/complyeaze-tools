@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import "../styles/tool.css";
+import { publicSiteUrl } from "../lib/public-url";
 
 const {
   title = "ComplyEaze Tools",
@@ -11,6 +12,7 @@ const repositoryUrl = "https://github.com/lamemustafa/complyeaze-tools";
 const licenseUrl = `${repositoryUrl}/blob/main/LICENSE`;
 const releaseGatesUrl = `${repositoryUrl}/blob/main/docs/release-gates.md`;
 const provenanceUrl = `${repositoryUrl}/actions/workflows/publish-image.yml`;
+const canonicalUrl = publicSiteUrl(Astro.url.pathname);
 ---
 
 <!doctype html>
@@ -24,20 +26,20 @@ const provenanceUrl = `${repositoryUrl}/actions/workflows/publish-image.yml`;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={Astro.url.href} />
-    <link rel="canonical" href={Astro.url.href} />
+    <meta property="og:url" content={canonicalUrl} />
+    <link rel="canonical" href={canonicalUrl} />
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="/" aria-label="ComplyEaze Tools home">
+      <a class="brand" href={publicSiteUrl("/")} aria-label="ComplyEaze Tools home">
         <span class="brand-mark">CE</span>
         <span>ComplyEaze Tools</span>
       </a>
       <nav aria-label="Primary">
-        <a href="/source">Sources</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/security">Security</a>
-        <a href="/status">Status</a>
+        <a href={publicSiteUrl("/source")}>Sources</a>
+        <a href={publicSiteUrl("/privacy")}>Privacy</a>
+        <a href={publicSiteUrl("/security")}>Security</a>
+        <a href={publicSiteUrl("/status")}>Status</a>
         <a href={repositoryUrl}>GitHub</a>
       </nav>
     </header>
