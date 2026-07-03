@@ -136,6 +136,39 @@ export const TOOLS: ToolMeta[] = [
     bannedClaims: BANNED_PUBLIC_CLAIMS,
   },
   {
+    slug: "/gstr-2b-purchase-reconciliation-triage",
+    h1: "GSTR-2B Purchase Reconciliation Triage",
+    seoTitle: "GSTR-2B Purchase Reconciliation Triage",
+    metaDescription:
+      "Compare pasted purchase-register and GSTR-2B rows into exception buckets before professional review.",
+    title: "GSTR-2B Purchase Reconciliation Triage",
+    status: "mvp",
+    audiences: ["CAs", "GST teams", "accountants", "finance controllers"],
+    privacyMode: "browser-only",
+    accountRequired: false,
+    fileUploadRequired: false,
+    telemetry: "none",
+    supportedInputs: [
+      "pasted purchase-register rows",
+      "pasted GSTR-2B rows",
+      "manual tax-amount comparison table",
+    ],
+    unsupportedCases: [
+      "Does not determine ITC eligibility or filing positions.",
+      "Does not replace recurring reconciliation, IMS actions, or books updates.",
+    ],
+    outputArtifacts: [
+      "exception bucket summary",
+      "supplier follow-up draft basis",
+      "review checklist text",
+    ],
+    officialSources: [gstr2bManual],
+    axalUpgradePath:
+      "Use Axal for saved mappings, recurring reconciliation, IMS tracking, supplier tasks, and review workflow.",
+    trustCopy: STANDARD_TRUST_COPY,
+    bannedClaims: BANNED_PUBLIC_CLAIMS,
+  },
+  {
     slug: "/ais-form-26as-mismatch-checker",
     h1: "AIS and Form 26AS Mismatch Checker",
     seoTitle: "AIS and Form 26AS Mismatch Checker",

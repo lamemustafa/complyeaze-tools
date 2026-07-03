@@ -5,6 +5,7 @@ import { validateToolMeta } from "../../packages/source-register/src/validation"
 const expectedSlugs = [
   "/msme-45-day-payment-due-date-calculator",
   "/gstr-2b-missing-invoice-vendor-follow-up",
+  "/gstr-2b-purchase-reconciliation-triage",
   "/ais-form-26as-mismatch-checker",
   "/gst-portal-issue-evidence-memo",
   "/privacy/review-copy-builder",

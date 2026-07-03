@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { buildReviewFooter } from "@complyeaze-tools/artifacts";
-import { buildMsmePayableReview, parseSimpleCsv } from "@complyeaze-tools/core";
+import {
+  buildGstr2bReconciliationTriage,
+  buildMsmePayableReview,
+  parseSimpleCsv,
+} from "@complyeaze-tools/core";
 import { maskIndianIdentifiers } from "@complyeaze-tools/safety";
 import { toolInputClass } from "@complyeaze-tools/ui-react";
 import type { ToolMeta } from "@complyeaze-tools/source-register";
@@ -38,6 +42,16 @@ const configs: Record<string, WorkbenchConfig> = {
       "supplier,invoice,amount,status\nAcme Components,INV-102,125000,missing in 2B\nNorthline Supplies,INV-205,42000,value mismatch",
     requiredColumns: ["supplier", "invoice", "status"],
     reviewLabel: "GSTR-2B and purchase rows",
+  },
+  "/gstr-2b-purchase-reconciliation-triage": {
+    inputLabel: "Purchase and GSTR-2B rows",
+    outputLabel: "Reconciliation triage draft",
+    guidance:
+      "Paste one CSV with source, supplier, gstin, invoice, and taxAmount. Use source values purchase or 2b.",
+    sample:
+      "source,supplier,gstin,invoice,taxAmount\npurchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,18000\n2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,18000\npurchase,Northline Supplies,SYNTH-NORTH-GSTIN,INV-205,7560\n2b,Northline Supplies,SYNTH-NORTH-GSTIN,INV-205,7000\npurchase,Delta Traders,SYNTH-DELTA-GSTIN,INV-301,5400\n2b,Metro Inputs,SYNTH-METRO-GSTIN,INV-777,900",
+    requiredColumns: ["source", "supplier", "invoice", "taxAmount"],
+    reviewLabel: "GSTR-2B reconciliation triage rows",
   },
   "/ais-form-26as-mismatch-checker": {
     inputLabel: "Mismatch rows",
@@ -151,7 +165,7 @@ export default function ToolWorkbench({ tool }: Props) {
           className="primary-button"
           type="button"
           onClick={() =>
-              downloadText(`${tool.slug.split("/").filter(Boolean).pop()}.txt`, output)
+            downloadText(`${tool.slug.split("/").filter(Boolean).pop()}.txt`, output)
           }
           disabled={blockedOutput}
         >
@@ -206,6 +220,25 @@ function buildOutput(
     ].join("\n");
   }
 
+  if (slug === "/gstr-2b-purchase-reconciliation-triage") {
+    const summary = buildGstr2bReconciliationTriage(input);
+    return [
+      "GSTR-2B purchase reconciliation triage",
+      `Rows reviewed: ${summary.totalRows}`,
+      `Missing in 2B: ${summary.counts["missing-in-2b"]}`,
+      `Extra in 2B: ${summary.counts["extra-in-2b"]}`,
+      `Value mismatch: ${summary.counts["value-mismatch"]}`,
+      `Duplicate keys: ${summary.counts["duplicate-key"]}`,
+      `Matched within tolerance: ${summary.counts.matched}`,
+      "",
+      ...summary.issues.map(
+        (issue) =>
+          `${issue.status} | ${issue.supplier} | ${issue.invoice} | purchase ${formatAmount(issue.purchaseTaxAmount)} | 2B ${formatAmount(issue.gstr2bTaxAmount)} | diff ${formatAmount(issue.difference)} | ${issue.note}`,
+      ),
+      buildReviewFooter(config.reviewLabel),
+    ].join("\n");
+  }
+
   if (slug === "/ais-form-26as-mismatch-checker") {
     return [
       "Tax statement mismatch review",
@@ -226,6 +259,10 @@ function buildOutput(
   }
 
   return `${input}${buildReviewFooter("local input")}`;
+}
+
+function formatAmount(value: number | null) {
+  return value === null ? "-" : value.toFixed(2);
 }
 
 function validateRows(
