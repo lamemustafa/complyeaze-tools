@@ -12,6 +12,7 @@ This runbook turns the local standalone repo into the live
 - GHCR package: public `ghcr.io/lamemustafa/complyeaze-tools`.
 - Cluster: ingress-nginx installed, `letsencrypt-prod` ClusterIssuer ready.
 - DNS: `tools.complyeaze.com` points to the production ingress address.
+- External uptime monitor plan: see `docs/uptime-monitoring.md`.
 
 ## Local Checks
 
@@ -68,6 +69,9 @@ Generate `TOOLS_PROD_KUBECONFIG_B64` from the
 gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools --body "<base64-kubeconfig>"
 ```
 
+After first deployment, schedule the rotation issue workflow and follow
+`docs/deploy-credential-rotation.md` at least every 60 days.
+
 1. Copy the digest printed by `Publish Image`; it must match
    `sha256:[0-9a-f]{64}`.
 2. Run `Deploy Production` with that digest.
@@ -89,6 +93,10 @@ gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools --bo
    ```bash
    kubectl -n complyeaze-tools get secret complyeaze-tools-tls
    ```
+
+6. Configure external uptime monitors for `/`, `/-/health`, one tool page,
+   `sitemap.xml`, and `site.webmanifest` as described in
+   `docs/uptime-monitoring.md`.
 
 Do not promote a mutable tag or manually edit the live deployment image outside
 the digest-pinned workflow.

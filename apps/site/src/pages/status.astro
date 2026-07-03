@@ -19,6 +19,15 @@ import { getLaunchTools } from "../lib/tools";
     </div>
   </section>
   <section class="detail-grid">
+    <article>
+      <h2>Operational checks</h2>
+      <p>
+        Deploys use reviewed source SHAs, immutable image digests, service smoke
+        checks, live preflight checks, CodeQL, dependency review, image scanning,
+        and built-output network scanning. External monitor targets are defined
+        in the public runbook; do not treat this page as a real-time uptime feed.
+      </p>
+    </article>
     {getLaunchTools().map((tool) => (
       <article>
         <h2>{tool.h1}</h2>

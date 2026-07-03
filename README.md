@@ -45,6 +45,9 @@ trails.
 - Source register: `packages/source-register` and
   `https://tools.complyeaze.com/source/`
 - Release gates: `docs/release-gates.md`
+- Deploy credential rotation: `docs/deploy-credential-rotation.md`
+- External uptime monitoring: `docs/uptime-monitoring.md`
+- Cloudflare IaC scaffold: `infra/cloudflare`
 - Third-party license inventory: `docs/third-party-licenses.md`
 
 Search and AI crawlers may index public static pages, `robots.txt`,

@@ -26,8 +26,8 @@ controllers, founders, executives, and business owners.
 - Files are processed in your browser.
 - No account or file upload required.
 - No analytics or telemetry in V0.
-- Static site deployment with source, license, release-gate, SBOM, provenance,
-  privacy, security, and source-register pages.
+- Static site deployment with source, license, release-gate, image-scan,
+  digest-pinning, privacy, security, and source-register pages.
 - Cloudflare security checks may run on public HTML requests; this is disclosed
   on the privacy page and is separate from product analytics.
 

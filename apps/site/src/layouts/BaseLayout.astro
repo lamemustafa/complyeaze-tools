@@ -12,7 +12,7 @@ const {
 const repositoryUrl = "https://github.com/lamemustafa/complyeaze-tools";
 const licenseUrl = `${repositoryUrl}/blob/main/LICENSE`;
 const releaseGatesUrl = `${repositoryUrl}/blob/main/docs/release-gates.md`;
-const provenanceUrl = `${repositoryUrl}/actions/workflows/publish-image.yml`;
+const publishWorkflowUrl = `${repositoryUrl}/actions/workflows/publish-image.yml`;
 const canonicalUrl = publicSiteUrl(Astro.url.pathname);
 const siteName = "ComplyEaze Tools";
 const siteDescription =
@@ -97,7 +97,7 @@ const siteSchema = [
         <a href={repositoryUrl}>Source code</a>
         <a href={licenseUrl}>Apache-2.0 license</a>
         <a href={releaseGatesUrl}>Reproducible build gates</a>
-        <a href={provenanceUrl}>SBOM and provenance workflow</a>
+        <a href={publishWorkflowUrl}>Image scan and digest workflow</a>
       </nav>
       <p>
         Files are processed in your browser. No account or file upload required.
