@@ -20,7 +20,7 @@ these tools.
 
 | Tool | Workflow | Supported input | Output | Source posture |
 | --- | --- | --- | --- | --- |
-| MSME 45-Day Payment Due Date Calculator | MSME payables review | Pasted CSV-style payables rows | Due-date review draft, Udyam request text, management review note | MSME Samadhaan and DC-MSME sources reviewed |
+| MSME Payables Age Triage | MSME payables review | Pasted CSV-style payables rows | Payables age review draft, Udyam request text, management review note | MSME Samadhaan and DC-MSME sources reviewed |
 | GSTR-2B Purchase Reconciliation Triage | Reconciliation triage | Pasted purchase-register and GSTR-2B rows | Exception bucket summary, supplier follow-up basis, review checklist | GSTR-2B manual reviewed |
 | GSTR-2B Missing Invoice Follow-up Generator | Vendor follow-up | Pasted supplier issue rows | Supplier chase text, email draft, WhatsApp-ready draft text | GSTR-2B manual reviewed |
 | AIS and Form 26AS Mismatch Checker | Tax information review | Pasted AIS/Form 26AS comparison rows | Mismatch table, review checklist, deductor correction draft | Income Tax AIS/TDS sources reviewed |

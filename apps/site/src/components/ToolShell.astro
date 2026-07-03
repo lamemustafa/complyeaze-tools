@@ -10,26 +10,7 @@ const allTools = getLaunchTools();
 const relatedTools = tool.relatedSlugs
   .map((slug) => allTools.find((candidate) => candidate.slug === slug))
   .filter((candidate): candidate is ToolMeta => Boolean(candidate));
-const faqItems = [
-  {
-    question: `What does ${tool.h1} create?`,
-    answer: `It creates ${tool.outputArtifacts.join(", ")} from ${tool.supportedInputs.join(", ")}.`,
-  },
-  {
-    question: `Does ${tool.h1} decide the final compliance position?`,
-    answer: `No. ${tool.unsupportedCases.join(" ")}`,
-  },
-  {
-    question: "Which sources should I verify before relying on the draft?",
-    answer: `Review the source register entries for ${tool.officialSources
-      .map((source) => `${source.publisher}: ${source.title}`)
-      .join("; ")}.`,
-  },
-  {
-    question: "When should this move into Axal?",
-    answer: tool.axalUpgradePath,
-  },
-];
+const faqItems = tool.seoDepth.faqItems;
 const toolSchema = [
   {
     "@context": "https://schema.org",
@@ -70,7 +51,20 @@ const toolSchema = [
 </section>
 
 <section class="tool-workbench" aria-label={`${tool.h1} tool`}>
-  <ToolWorkbench client:load tool={{ slug: tool.slug }} />
+  <ToolWorkbench
+    client:load
+    tool={{
+      slug: tool.slug,
+      h1: tool.h1,
+      officialSources: tool.officialSources.map((source) => ({
+        publisher: source.publisher,
+        title: source.title,
+        url: source.url,
+        lastReviewedAt: source.lastReviewedAt,
+      })),
+      unsupportedCases: tool.unsupportedCases,
+    }}
+  />
 </section>
 
 <section class="detail-grid">
@@ -110,6 +104,10 @@ const toolSchema = [
     <h2>Axal path</h2>
     <p>{tool.axalUpgradePath}</p>
   </article>
+  <article>
+    <h2>Source explainer</h2>
+    <p>{tool.seoDepth.sourceExplainer}</p>
+  </article>
 </section>
 
 <section class="seo-depth" aria-labelledby="tool-review-workflow">
@@ -124,19 +122,15 @@ const toolSchema = [
   </div>
   <div class="workflow-grid">
     <article class="workflow-panel">
-      <h3>When to use this</h3>
-      <p>
-        Useful for {tool.audiences.join(", ")} when the immediate need is a
-        browser-local draft from {tool.supportedInputs.join(", ")}.
-      </p>
+      <h3>Input guide</h3>
+      <ul>
+        {tool.seoDepth.inputGuide.map((item) => <li>{item}</li>)}
+      </ul>
     </article>
     <article class="workflow-panel">
-      <h3>Review steps</h3>
+      <h3>Example workflow</h3>
       <ol>
-        <li>Paste only the minimum rows needed for the draft.</li>
-        <li>Compare the output against the listed official sources.</li>
-        <li>Check unsupported cases before sharing the draft.</li>
-        <li>Move recurring or client-owned work into Axal.</li>
+        {tool.seoDepth.exampleWorkflow.map((item) => <li>{item}</li>)}
       </ol>
     </article>
     <article class="workflow-panel">
@@ -148,6 +142,27 @@ const toolSchema = [
           </li>
         ))}
       </ul>
+    </article>
+  </div>
+</section>
+
+<section class="seo-depth" aria-labelledby="tool-review-checklist">
+  <div class="workflow-grid">
+    <article class="workflow-panel">
+      <h3 id="tool-review-checklist">Review checklist</h3>
+      <ul>
+        {tool.seoDepth.reviewChecklist.map((item) => <li>{item}</li>)}
+      </ul>
+    </article>
+    <article class="workflow-panel">
+      <h3>Common mistakes</h3>
+      <ul>
+        {tool.seoDepth.commonMistakes.map((item) => <li>{item}</li>)}
+      </ul>
+    </article>
+    <article class="workflow-panel">
+      <h3>When to move to Axal</h3>
+      <p>{tool.axalUpgradePath}</p>
     </article>
   </div>
 </section>

@@ -62,4 +62,75 @@ describe("buildGstr2bReconciliationTriage", () => {
     expect(summary.counts["value-mismatch"]).toBe(1);
     expect(summary.counts.matched).toBe(0);
   });
+
+  it("accepts pre-parsed rows and reports rows skipped by domain normalization", () => {
+    const summary = buildGstr2bReconciliationTriage([
+      {
+        source: "purchase",
+        supplier: "Acme Components",
+        gstin: "SYNTH-ACME-GSTIN",
+        invoice: "INV-102",
+        invoiceDate: "2026-05-01",
+        taxAmount: "18000",
+      },
+      {
+        source: "2b",
+        supplier: "Acme Components",
+        gstin: "SYNTH-ACME-GSTIN",
+        invoice: "INV-102",
+        invoiceDate: "2026-05-01",
+        taxAmount: "18000",
+      },
+      {
+        source: "",
+        supplier: "Skipped Supplier",
+        invoice: "INV-404",
+        taxAmount: "900",
+      },
+    ]);
+
+    expect(summary.totalRows).toBe(2);
+    expect(summary.skippedRowCount).toBe(1);
+    expect(summary.counts.matched).toBe(1);
+  });
+
+  it("can use invoice date and document type in a stricter review key", () => {
+    const basic = buildGstr2bReconciliationTriage(
+      [
+        "source,supplier,gstin,invoice,invoiceDate,documentType,taxAmount",
+        "purchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,18000",
+        "2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-02,Credit Note,18000",
+      ].join("\n"),
+    );
+    const strict = buildGstr2bReconciliationTriage(
+      [
+        "source,supplier,gstin,invoice,invoiceDate,documentType,taxAmount",
+        "purchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,18000",
+        "2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-02,Credit Note,18000",
+      ].join("\n"),
+      { matchFields: ["invoiceDate", "documentType"] },
+    );
+
+    expect(basic.counts.matched).toBe(1);
+    expect(strict.counts["missing-in-2b"]).toBe(1);
+    expect(strict.counts["extra-in-2b"]).toBe(1);
+  });
+
+  it("sums tax components when a total tax amount column is absent", () => {
+    const summary = buildGstr2bReconciliationTriage(
+      [
+        "source,supplier,gstin,invoice,igst,cgst,sgst",
+        "purchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,0,9000,9000",
+        "2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,0,9000,8997",
+      ].join("\n"),
+      { tolerance: 2 },
+    );
+
+    expect(summary.counts["value-mismatch"]).toBe(1);
+    expect(summary.issues[0]).toEqual(
+      expect.objectContaining({
+        difference: 3,
+      }),
+    );
+  });
 });

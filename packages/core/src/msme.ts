@@ -1,4 +1,4 @@
-import { parseSimpleCsv } from "./csv";
+import { parseSimpleCsv, type CsvRow } from "./csv";
 
 export type MsmePayableReview = {
   vendor: string;
@@ -9,12 +9,17 @@ export type MsmePayableReview = {
   possibleFlag: "review" | "missing-date" | "within-window";
 };
 
-export function buildMsmePayableReview(csv: string, asOf = new Date()): MsmePayableReview[] {
-  return parseSimpleCsv(csv).map((row) => {
-    const acceptanceDate = row.acceptanceDate || row.acceptance_date || row.invoiceDate || "";
+export function buildMsmePayableReview(
+  input: string | CsvRow[],
+  asOf = new Date(),
+): MsmePayableReview[] {
+  const rows = typeof input === "string" ? parseSimpleCsv(input) : input;
+  return rows.map((row) => {
+    const acceptanceDate =
+      row.acceptanceDate || row.deemedAcceptanceDate || row.invoiceDate || "";
     const ageDays = daysBetween(acceptanceDate, asOf);
     return {
-      vendor: row.vendor || row.supplier || "Unnamed vendor",
+      vendor: row.vendor || row.vendorName || row.supplier || "Unnamed vendor",
       amount: row.amount || "",
       invoiceDate: row.invoiceDate || row.invoice_date || "",
       acceptanceDate,

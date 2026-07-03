@@ -27,6 +27,11 @@ describe("tool source register", () => {
       expect(tool.unsupportedCases.length).toBeGreaterThan(0);
       expect(tool.relatedSlugs.length).toBeGreaterThanOrEqual(2);
       expect(tool.axalUpgradePath).toMatch(/\bAxal\b/);
+      expect(tool.seoDepth.exampleWorkflow.length).toBeGreaterThanOrEqual(3);
+      expect(tool.seoDepth.inputGuide.length).toBeGreaterThanOrEqual(2);
+      expect(tool.seoDepth.commonMistakes.length).toBeGreaterThanOrEqual(2);
+      expect(tool.seoDepth.reviewChecklist.length).toBeGreaterThanOrEqual(3);
+      expect(tool.seoDepth.faqItems.length).toBeGreaterThanOrEqual(2);
     }
   });
 

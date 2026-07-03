@@ -39,4 +39,22 @@ describe("buildMsmePayableReview", () => {
       }),
     );
   });
+
+  it("accepts Excel-style headers after paste normalization", () => {
+    const rows = buildMsmePayableReview(
+      "Vendor Name\tAmount\tInvoice Date\tAcceptance Date\nNorthline Supplies\t42000\t2026-06-20\t2026-06-21",
+      new Date("2026-07-02"),
+    );
+
+    expect(rows[0]).toEqual(
+      expect.objectContaining({
+        vendor: "Northline Supplies",
+        amount: "42000",
+        invoiceDate: "2026-06-20",
+        acceptanceDate: "2026-06-21",
+        ageDays: 11,
+        possibleFlag: "within-window",
+      }),
+    );
+  });
 });

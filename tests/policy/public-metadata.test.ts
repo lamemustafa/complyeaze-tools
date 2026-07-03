@@ -58,10 +58,16 @@ describe("public metadata", () => {
     expect(shell).toContain("Open Axal");
     expect(shell).toContain("https://complyeaze.com/axal");
     expect(shell).toContain("Need this as a recurring workflow?");
-    expect(shell).toContain("tool={{ slug: tool.slug }}");
+    expect(shell).toContain("officialSources: tool.officialSources.map");
+    expect(shell).toContain("lastReviewedAt: source.lastReviewedAt");
+    expect(shell).toContain("unsupportedCases: tool.unsupportedCases");
     expect(shell).not.toContain("tool={tool}");
     expect(shell).toContain("Related local tools");
     expect(shell).toContain("Common questions");
+    expect(shell).toContain("Input guide");
+    expect(shell).toContain("Common mistakes");
+    expect(shell).toContain("Review checklist");
+    expect(shell).toContain("tool.seoDepth.exampleWorkflow");
     expect(shell).toContain("FAQPage");
     expect(shell).toContain("refresh after {source.staleAfterDays} days");
   });

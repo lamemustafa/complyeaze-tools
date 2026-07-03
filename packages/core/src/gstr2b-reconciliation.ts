@@ -22,8 +22,16 @@ export type Gstr2bRecoIssue = {
 
 export type Gstr2bRecoSummary = {
   totalRows: number;
+  skippedRowCount: number;
   counts: Record<Gstr2bRecoStatus, number>;
   issues: Gstr2bRecoIssue[];
+};
+
+export type Gstr2bRecoMatchField = "invoiceDate" | "documentType";
+
+export type Gstr2bRecoOptions = {
+  tolerance?: number;
+  matchFields?: Gstr2bRecoMatchField[];
 };
 
 type NormalizedRow = {
@@ -31,6 +39,8 @@ type NormalizedRow = {
   supplier: string;
   gstin: string;
   invoice: string;
+  invoiceDate: string;
+  documentType: string;
   taxAmount: number | null;
   key: string;
 };
@@ -44,34 +54,56 @@ const statuses: Gstr2bRecoStatus[] = [
 ];
 
 export function buildGstr2bReconciliationTriage(
-  input: string,
-  tolerance = 2,
+  input: string | CsvRow[],
+  optionsOrTolerance: number | Gstr2bRecoOptions = 2,
 ): Gstr2bRecoSummary {
-  const rows = parseSimpleCsv(input)
-    .map(normalizeRow)
+  const options = normalizeOptions(optionsOrTolerance);
+  const inputRows = typeof input === "string" ? parseSimpleCsv(input) : input;
+  const rows = inputRows
+    .map((row) => normalizeRow(row, options.matchFields))
     .filter((row): row is NormalizedRow => row !== null);
   const grouped = groupByKey(rows);
   const issues = [...grouped.entries()]
-    .flatMap(([key, group]) => classifyGroup(key, group.purchase, group.gstr2b, tolerance))
+    .flatMap(([key, group]) =>
+      classifyGroup(key, group.purchase, group.gstr2b, options.tolerance),
+    )
     .sort((left, right) => statusRank(left.status) - statusRank(right.status));
 
   return {
     totalRows: rows.length,
+    skippedRowCount: inputRows.length - rows.length,
     counts: countIssues(issues),
     issues,
   };
 }
 
-function normalizeRow(row: CsvRow): NormalizedRow | null {
+function normalizeOptions(optionsOrTolerance: number | Gstr2bRecoOptions): Required<Gstr2bRecoOptions> {
+  if (typeof optionsOrTolerance === "number") {
+    return { tolerance: optionsOrTolerance, matchFields: [] };
+  }
+  return {
+    tolerance: optionsOrTolerance.tolerance ?? 2,
+    matchFields: optionsOrTolerance.matchFields ?? [],
+  };
+}
+
+function normalizeRow(
+  row: CsvRow,
+  matchFields: Gstr2bRecoMatchField[],
+): NormalizedRow | null {
   const source = normalizeSource(row.source);
   if (!source) return null;
 
   const supplier = row.supplier || row.vendor || "Unknown supplier";
   const gstin = normalizeText(row.gstin);
   const invoice = normalizeText(row.invoice || row.invoiceNumber || row.documentNumber);
-  const taxAmount = parseAmount(row.taxAmount || row.itcAmount || row.amount);
+  const invoiceDate = normalizeDate(row.invoiceDate || row.date || "");
+  const documentType = normalizeText(row.documentType || row.docType || row.type || "");
+  const taxAmount =
+    parseAmount(row.taxAmount || row.itcAmount || row.amount) ??
+    parseTaxComponents(row.igst, row.cgst, row.sgst);
   const fallbackSupplier = normalizeText(supplier);
-  const key = `${gstin || fallbackSupplier}:${invoice}`;
+  const key = buildKey(gstin || fallbackSupplier, invoice, invoiceDate, documentType, matchFields);
 
   if (!invoice || (!gstin && !fallbackSupplier)) return null;
 
@@ -80,9 +112,24 @@ function normalizeRow(row: CsvRow): NormalizedRow | null {
     supplier,
     gstin,
     invoice,
+    invoiceDate,
+    documentType,
     taxAmount,
     key,
   };
+}
+
+function buildKey(
+  party: string,
+  invoice: string,
+  invoiceDate: string,
+  documentType: string,
+  matchFields: Gstr2bRecoMatchField[],
+): string {
+  const parts = [party, invoice];
+  if (matchFields.includes("invoiceDate")) parts.push(invoiceDate);
+  if (matchFields.includes("documentType")) parts.push(documentType);
+  return parts.join(":");
 }
 
 function normalizeSource(value: string | undefined): Gstr2bRecoSource | null {
@@ -100,10 +147,23 @@ function normalizeText(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
+function normalizeDate(value: string) {
+  return value.trim().toLowerCase();
+}
+
 function parseAmount(value: string | undefined): number | null {
   if (!value?.trim()) return null;
   const parsed = Number(value.replace(/,/g, ""));
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseTaxComponents(
+  igst: string | undefined,
+  cgst: string | undefined,
+  sgst: string | undefined,
+): number | null {
+  const parsed = [igst, cgst, sgst].map(parseAmount).filter((value): value is number => value !== null);
+  return parsed.length ? parsed.reduce((sum, value) => sum + value, 0) : null;
 }
 
 function groupByKey(rows: NormalizedRow[]) {
