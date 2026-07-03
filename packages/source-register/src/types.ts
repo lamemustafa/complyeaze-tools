@@ -13,6 +13,20 @@ export type ToolSource = {
 
 export type ToolStatus = "landing" | "mvp" | "beta" | "stable";
 
+export type ToolFaqItem = {
+  question: string;
+  answer: string;
+};
+
+export type ToolSeoDepth = {
+  inputGuide: string[];
+  exampleWorkflow: string[];
+  commonMistakes: string[];
+  reviewChecklist: string[];
+  sourceExplainer: string;
+  faqItems: ToolFaqItem[];
+};
+
 export type ToolMeta = {
   slug: string;
   h1: string;
@@ -32,6 +46,7 @@ export type ToolMeta = {
   demandSignals?: ToolSource[];
   relatedSlugs: string[];
   axalUpgradePath: string;
+  seoDepth: ToolSeoDepth;
   trustCopy: string[];
   bannedClaims: string[];
 };

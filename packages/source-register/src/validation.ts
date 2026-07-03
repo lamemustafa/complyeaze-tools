@@ -40,6 +40,20 @@ export function validateToolMeta(
   if (!tool.supportedInputs.length) errors.push("supportedInputs are required");
   if (!tool.unsupportedCases.length) errors.push("unsupportedCases are required");
   if (!tool.outputArtifacts.length) errors.push("outputArtifacts are required");
+  if (tool.seoDepth.inputGuide.length < 2) errors.push("inputGuide is too thin");
+  if (tool.seoDepth.exampleWorkflow.length < 3) {
+    errors.push("exampleWorkflow is too thin");
+  }
+  if (tool.seoDepth.commonMistakes.length < 2) {
+    errors.push("commonMistakes are too thin");
+  }
+  if (tool.seoDepth.reviewChecklist.length < 3) {
+    errors.push("reviewChecklist is too thin");
+  }
+  if (!tool.seoDepth.sourceExplainer.trim()) {
+    errors.push("sourceExplainer is required");
+  }
+  if (tool.seoDepth.faqItems.length < 2) errors.push("faqItems are too thin");
   if (!tool.trustCopy.length) errors.push("trustCopy is required");
   if (!tool.bannedClaims.length) errors.push("bannedClaims are required");
   if (tool.relatedSlugs.length < 2) {
