@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import "../styles/sections.css";
 import "../styles/tool.css";
 import { publicSiteUrl } from "../lib/public-url";
 
@@ -13,6 +14,37 @@ const licenseUrl = `${repositoryUrl}/blob/main/LICENSE`;
 const releaseGatesUrl = `${repositoryUrl}/blob/main/docs/release-gates.md`;
 const provenanceUrl = `${repositoryUrl}/actions/workflows/publish-image.yml`;
 const canonicalUrl = publicSiteUrl(Astro.url.pathname);
+const siteName = "ComplyEaze Tools";
+const siteDescription =
+  "Private browser tools that turn messy Indian compliance records into review-ready action packs.";
+const socialImageUrl = publicSiteUrl("/social-card.svg");
+const faviconUrl = "/favicon.svg";
+const manifestUrl = "/site.webmanifest";
+const siteSchema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteName,
+    url: publicSiteUrl("/"),
+    description: siteDescription,
+    publisher: {
+      "@type": "Organization",
+      name: "ComplyEaze",
+      url: "https://complyeaze.com/",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    name: "ComplyEaze Tools",
+    codeRepository: repositoryUrl,
+    license: "https://www.apache.org/licenses/LICENSE-2.0",
+    programmingLanguage: ["TypeScript", "Astro", "React"],
+    runtimePlatform: "Web browser",
+    description: siteDescription,
+    url: publicSiteUrl("/"),
+  },
+];
 ---
 
 <!doctype html>
@@ -23,11 +55,22 @@ const canonicalUrl = publicSiteUrl(Astro.url.pathname);
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#0c6b58" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:image" content={socialImageUrl} />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageUrl} />
     <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" href={faviconUrl} type="image/svg+xml" />
+    <link rel="manifest" href={manifestUrl} />
+    <script type="application/ld+json" set:html={JSON.stringify(siteSchema)} />
   </head>
   <body>
     <header class="site-header">

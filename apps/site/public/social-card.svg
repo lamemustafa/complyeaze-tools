@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="ComplyEaze Tools social preview">
+  <rect width="1200" height="630" fill="#fbfcfb"/>
+  <rect x="64" y="64" width="1072" height="502" rx="24" fill="#ffffff" stroke="#d7dfdc" stroke-width="3"/>
+  <rect x="104" y="104" width="76" height="76" rx="16" fill="#15201d"/>
+  <text x="142" y="153" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#ffffff">CE</text>
+  <text x="208" y="137" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#0c6b58">tools.complyeaze.com</text>
+  <text x="104" y="268" font-family="Georgia, 'Times New Roman', serif" font-size="68" fill="#15201d">Browser-local compliance tools</text>
+  <text x="104" y="336" font-family="Arial, sans-serif" font-size="32" fill="#52615d">Reconciliation triage, evidence memos, review copy, and vendor follow-up drafts.</text>
+  <g font-family="Arial, sans-serif" font-size="24" fill="#15201d">
+    <rect x="104" y="414" width="266" height="52" rx="26" fill="#eef5f2" stroke="#d7dfdc"/>
+    <text x="237" y="448" text-anchor="middle">No account required</text>
+    <rect x="392" y="414" width="318" height="52" rx="26" fill="#eef5f2" stroke="#d7dfdc"/>
+    <text x="551" y="448" text-anchor="middle">No file upload required</text>
+    <rect x="732" y="414" width="324" height="52" rx="26" fill="#eef5f2" stroke="#d7dfdc"/>
+    <text x="894" y="448" text-anchor="middle">Drafts for professional review</text>
+  </g>
+</svg>

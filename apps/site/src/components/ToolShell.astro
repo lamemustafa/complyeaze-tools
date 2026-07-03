@@ -7,6 +7,7 @@ const { tool }: { tool: ToolMeta } = Astro.props;
 const sourceSummary = tool.officialSources
   .map((source) => `${source.publisher}: ${source.title}`)
   .join("; ");
+const axalUrl = "https://complyeaze.com/axal";
 ---
 
 <section class="tool-hero">
@@ -52,6 +53,18 @@ const sourceSummary = tool.officialSources
     <h2>Axal path</h2>
     <p>{tool.axalUpgradePath}</p>
   </article>
+</section>
+
+<section class="upgrade-band" aria-label="Axal upgrade path">
+  <div>
+    <h2>Need this as a recurring workflow?</h2>
+    <p>
+      Keep this page for a one-off local draft. Use Axal when the same work
+      needs saved mappings, client context, evidence trails, tasks, and review
+      history.
+    </p>
+  </div>
+  <a class="text-button" href={axalUrl}>Open Axal</a>
 </section>
 
 <script type="application/ld+json" set:html={JSON.stringify({

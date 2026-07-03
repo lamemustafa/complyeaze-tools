@@ -14,17 +14,36 @@ assets; tool files are not intentionally sent to ComplyEaze by these tools.
 - Browser-local parsing and artifact generation
 - Kubernetes static container only
 
-## Initial Tools
+## Tool Index
 
-- MSME 45-Day Payment Due Date Calculator
-- GSTR-2B Missing Invoice Follow-up Generator
-- AIS and Form 26AS Mismatch Checker
-- GST Portal Issue Evidence Memo Builder
-- Review Copy Builder
+| Tool | Workflow | Supported input | Output | Source posture |
+| --- | --- | --- | --- | --- |
+| MSME 45-Day Payment Due Date Calculator | MSME payables review | Pasted CSV-style payables rows | Due-date review draft, Udyam request text, management review note | MSME Samadhaan and DC-MSME sources reviewed |
+| GSTR-2B Purchase Reconciliation Triage | Reconciliation triage | Pasted purchase-register and GSTR-2B rows | Exception bucket summary, supplier follow-up basis, review checklist | GSTR-2B manual reviewed |
+| GSTR-2B Missing Invoice Follow-up Generator | Vendor follow-up | Pasted supplier issue rows | Supplier chase text, email draft, WhatsApp-ready draft text | GSTR-2B manual reviewed |
+| AIS and Form 26AS Mismatch Checker | Tax information review | Pasted AIS/Form 26AS comparison rows | Mismatch table, review checklist, deductor correction draft | Income Tax AIS/TDS sources reviewed |
+| GST Portal Issue Evidence Memo Builder | Portal issue evidence | Manual attempt timestamps, error labels, and notes | Attempt timeline, client note, retry checklist | GST self-service complaint portal reviewed |
+| Review Copy Builder | Privacy-conscious handoff | Plain text | Masked review draft and review footer | DPDP Act source reviewed |
 
 Each tool creates a local working artifact for review. It does not provide legal
 advice, tax advice, filing advice, final compliance conclusions, or portal
 automation.
+
+Use `https://tools.complyeaze.com` for one-off drafts. Use Axal at
+`https://complyeaze.com/axal` when the same work needs clients, saved mappings,
+documents, assignments, credential-safe workflows, review history, and audit
+trails.
+
+## Trust Surface
+
+- Source code: `https://github.com/lamemustafa/complyeaze-tools`
+- Security policy: `SECURITY.md` and `https://tools.complyeaze.com/security/`
+- Privacy posture: `docs/privacy-local-first.md` and
+  `https://tools.complyeaze.com/privacy/`
+- Source register: `packages/source-register` and
+  `https://tools.complyeaze.com/source/`
+- Release gates: `docs/release-gates.md`
+- Third-party license inventory: `docs/third-party-licenses.md`
 
 ## Development
 

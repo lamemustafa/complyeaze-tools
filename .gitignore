@@ -6,6 +6,8 @@ dist/
 !.env.example
 coverage/
 playwright-report/
+.playwright-cli/
+output/
 test-results/
 *.tsbuildinfo
 .DS_Store
