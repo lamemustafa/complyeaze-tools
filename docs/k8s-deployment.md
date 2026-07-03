@@ -12,7 +12,9 @@ separate from the root ComplyEaze Next.js app and from Pack.
   `automountServiceAccountToken: false`.
 - The production namespace is declared in the manifest set for admin bootstrap.
   GitHub Actions drops that namespace document and applies only namespace-scoped
-  workload resources.
+  workload resources. Keep the namespace labels in sync from an admin
+  workstation because the deploy ServiceAccount intentionally cannot patch
+  namespaces.
 - The GHCR package should be public. The workload intentionally has no
   image-pull secret dependency.
 - Egress is denied by default through `deploy/k8s/base/network-policy.yaml`.
@@ -23,10 +25,11 @@ separate from the root ComplyEaze Next.js app and from Pack.
 
 ## Image Flow
 
-The Dockerfile builds `apps/site/dist` and copies it into the static nginx
-image. `.github/workflows/publish-image.yml` pushes to GHCR and prints the
-published image digest. Production promotion must use that digest through
-`.github/workflows/deploy-production.yml`, not a mutable tag in the live cluster.
+The Dockerfile builds `apps/site/dist` from digest-pinned base images and copies
+it into the static nginx image. `.github/workflows/publish-image.yml` pushes to
+GHCR and prints the published image digest. Production promotion must use that
+digest through `.github/workflows/deploy-production.yml`, not a mutable tag in
+the live cluster.
 
 The base manifest contains an all-zero digest placeholder so accidental manual
 applies do not silently deploy a mutable tag. The deploy workflow replaces it
@@ -37,12 +40,23 @@ with the reviewed digest before applying manifests.
 Apply deploy access once from an admin workstation after the namespace exists:
 
 ```bash
+kubectl apply -f deploy/k8s/base/namespace.yaml
 kubectl apply -k deploy/k8s/deploy-access
 ```
 
 Then create `TOOLS_PROD_KUBECONFIG_B64` from the
 `complyeaze-tools-deployer-token` service-account token. Rotate it by deleting
 and recreating that token secret, then updating the GitHub Actions secret.
+
+To repair an existing namespace that predates the restricted labels:
+
+```bash
+kubectl label namespace complyeaze-tools \
+  pod-security.kubernetes.io/enforce=restricted \
+  pod-security.kubernetes.io/audit=restricted \
+  pod-security.kubernetes.io/warn=restricted \
+  --overwrite
+```
 
 ## Preflight
 
