@@ -9,7 +9,7 @@ describe("Docker static image policy", () => {
     const dockerfile = readFileSync(join(dockerRoot, "Dockerfile"), "utf8");
 
     expect(dockerfile).toContain("FROM node:22-alpine@sha256:");
-    expect(dockerfile).toContain("FROM nginxinc/nginx-unprivileged:1.27-alpine@sha256:");
+    expect(dockerfile).toContain("FROM nginxinc/nginx-unprivileged:mainline-alpine@sha256:");
     expect(dockerfile).toContain("ASTRO_TELEMETRY_DISABLED=1");
     expect(dockerfile).toContain("pnpm install --frozen-lockfile");
     expect(dockerfile).toContain("HEALTHCHECK");

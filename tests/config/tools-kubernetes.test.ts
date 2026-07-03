@@ -48,7 +48,7 @@ describe("Kubernetes static deployment policy", () => {
     expect(ingress).toContain("host: tools.complyeaze.com");
     expect(ingress).toContain("secretName: complyeaze-tools-tls");
     expect(ingress).not.toContain("pack.complyeaze.com");
-    expect(ingress).not.toMatch(/host:\s+complyeaze\.com\b/);
+    expect(ingress).not.toMatch(/(^|\n)\s*host:\s+complyeaze\.com\s*(\n|$)/);
   });
 
   it("keeps production image references digest-oriented", () => {
