@@ -154,17 +154,6 @@ function normalizeMismatchCategory(value: string): TaxStatementMismatchCategory 
   if (normalized.includes("duplicate")) return "duplicate-statement";
   if (
     [
-      "reportednotinrecords",
-      "reportednotinbooks",
-      "missinginbooks",
-      "omittedinbooks",
-    ].includes(normalized) ||
-    (normalized.includes("missing") && (normalized.includes("book") || normalized.includes("record")))
-  ) {
-    return "reported-not-in-records";
-  }
-  if (
-    [
       "recordsnotinstatement",
       "booksnotinstatement",
       "missinginstatement",
@@ -176,6 +165,17 @@ function normalizeMismatchCategory(value: string): TaxStatementMismatchCategory 
       (normalized.includes("statement") || normalized.includes("ais") || normalized.includes("26as")))
   ) {
     return "records-not-in-statement";
+  }
+  if (
+    [
+      "reportednotinrecords",
+      "reportednotinbooks",
+      "missinginbooks",
+      "omittedinbooks",
+    ].includes(normalized) ||
+    (normalized.includes("missing") && (normalized.includes("book") || normalized.includes("record")))
+  ) {
+    return "reported-not-in-records";
   }
   if (
     normalized === "identityorsectionreview" ||

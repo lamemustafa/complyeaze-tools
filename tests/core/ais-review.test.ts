@@ -114,11 +114,15 @@ describe("buildTaxStatementMismatchReview", () => {
         "source,category,recordsCategory,amount,recordsAmount,mismatchCategory",
         "AIS,Interest,Interest,5400,0,amount missing in books",
         "AIS,Interest,Interest,0,5000,missing from AIS",
+        "AIS,Interest,Interest,0,5000,records missing in AIS",
+        "Form 26AS,Contract,Contract,0,7000,books missing in statement",
       ].join("\n"),
     );
 
     expect(review.map((row) => row.mismatchCategory)).toEqual([
       "reported-not-in-records",
+      "records-not-in-statement",
+      "records-not-in-statement",
       "records-not-in-statement",
     ]);
   });
