@@ -15,7 +15,7 @@ export const configs: Record<string, WorkbenchConfig> = {
     guidance:
       "Paste rows with supplier, GSTIN, invoice, invoiceDate, taxPeriod, documentType, taxableValue, taxAmount, status, and optional escalationLevel. This creates follow-up text only, not ITC eligibility conclusions.",
     sample:
-      "supplier,gstin,invoice,invoiceDate,taxPeriod,documentType,taxableValue,taxAmount,status,escalationLevel\nAcme Components,27ABCDE1234F1Z5,INV-102,2026-05-01,May 2026,Tax Invoice,100000,18000,missing in 2B,first reminder\nNorthline Supplies,29ABCDE1234F1Z7,INV-205,2026-06-01,June 2026,Tax Invoice,40000,7200,value mismatch,second reminder",
+      "supplier,gstin,invoice,invoiceDate,taxPeriod,documentType,taxableValue,taxAmount,status,escalationLevel\nAcme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,May 2026,Tax Invoice,100000,18000,missing in 2B,first reminder\nNorthline Supplies,SYNTH-NORTH-GSTIN,INV-205,2026-06-01,June 2026,Tax Invoice,40000,7200,value mismatch,second reminder",
   },
   "/gstr-2b-purchase-reconciliation-triage": {
     inputLabel: "Purchase and GSTR-2B rows",
@@ -37,9 +37,9 @@ export const configs: Record<string, WorkbenchConfig> = {
     inputLabel: "Attempt timeline rows",
     outputLabel: "Evidence memo draft",
     guidance:
-      "Paste rows with attemptedAt, action, and error. This records user-observed attempts only.",
+      "Paste rows with attemptedAt, action, and error. Optional fields include timezone, retryCount, complaintReference, screenshotReference, screenshotSha256, browser, device, and networkContext. This records user-observed attempts only.",
     sample:
-      "attemptedAt,action,error\n2026-07-02 20:10,Login,OTP page timed out\n2026-07-02 20:24,Save GSTR-3B,Unable to load template",
+      "attemptedAt,timezone,action,error,retryCount,complaintReference,screenshotReference,screenshotSha256,browser,device,networkContext\n2026-07-02 20:10,Asia/Kolkata,Login,OTP page timed out,2,SR-123,retained-screenshot-1,sha256:synthetic-hash,Chrome 126,Windows laptop,office broadband\n2026-07-02 20:24,Asia/Kolkata,Save GSTR-3B,Unable to load template,1,,,,Brave 1.68,macOS desktop,home fiber",
   },
   "/privacy/review-copy-builder": {
     inputLabel: "Review text",

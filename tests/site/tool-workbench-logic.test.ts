@@ -36,6 +36,20 @@ const reviewCopyTool: WorkbenchTool = {
   ],
 };
 
+const gstPortalTool: WorkbenchTool = {
+  slug: "/gst-portal-issue-evidence-memo",
+  h1: "GST Portal Issue Evidence Memo Builder",
+  officialSources: [
+    {
+      publisher: "GST System",
+      title: "GST self-service complaint portal",
+      url: "https://selfservice.gstsystem.in/",
+      lastReviewedAt: "2026-07-02",
+    },
+  ],
+  unsupportedCases: ["Does not prove global portal downtime or guarantee extension."],
+};
+
 describe("tool workbench logic", () => {
   it("surfaces MSME review basis, candidate marker, and evidence checks in the draft", () => {
     const output = buildOutput(
@@ -96,6 +110,27 @@ describe("tool workbench logic", () => {
     expect(output).toContain("Source register: https://tools.complyeaze.com/source/");
     expect(output.toLowerCase()).not.toContain("forensic redaction");
     expect(output.toLowerCase()).not.toContain("permanent redaction");
+  });
+
+  it("keeps GST portal evidence output bounded to user-observed evidence references", () => {
+    const output = buildOutput(
+      gstPortalTool,
+      [
+        "attemptedAt,timezone,action,error,screenshotHash,browser,device",
+        "2026-07-02 20:10,Asia/Kolkata,Login,OTP page timed out,sha256:abc123,Chrome 126,Windows laptop",
+      ].join("\n"),
+      configs["/gst-portal-issue-evidence-memo"],
+      "",
+    );
+
+    expect(output).toContain("GST portal issue evidence memo");
+    expect(output).toContain("Screenshot/evidence reference: sha256:abc123");
+    expect(output).toContain("Browser/context: Chrome 126; Windows laptop");
+    expect(output).toContain("Evidence checks:");
+    expect(output).toContain("Next review actions:");
+    expect(output).toContain("Browser-local draft");
+    expect(output.toLowerCase()).not.toContain("portal outage proven");
+    expect(output.toLowerCase()).not.toContain("extension granted");
   });
 
   it("does not present a no-match Review Copy report as an all-clear", () => {

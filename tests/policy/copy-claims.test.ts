@@ -44,6 +44,12 @@ describe("public copy claims", () => {
       "admissible claim",
       "legal default",
       "recoverable amount",
+      "complaint-ready",
+      "waiver-ready",
+      "condonation-ready",
+      "hash verified",
+      "tamper-proof",
+      "outage proof",
     ]) {
       expect(publicText).not.toContain(claim);
     }

@@ -7,6 +7,7 @@ import {
   parseDelimitedTable,
 } from "@complyeaze-tools/core";
 import { maskIndianIdentifiersWithReport } from "@complyeaze-tools/safety";
+import { validateGstPortalMemoCells } from "./gst-portal-input-guard";
 import { getToolArtifactDefinition } from "./tool-output-config";
 import {
   buildFooter,
@@ -62,6 +63,10 @@ export function buildToolReviewArtifact({
   }
 
   const parsed = parseDelimitedTable(input);
+  if (tool.slug === "/gst-portal-issue-evidence-memo") {
+    const unsafeGstPortalInput = validateGstPortalMemoCells(parsed);
+    if (unsafeGstPortalInput) return unsafeGstPortalInput;
+  }
   const inputError = validateRowsForDefinition(input, parsed, definition);
   if (inputError) return inputError;
   const prepared = prepareRowsForDefinition(parsed, definition);

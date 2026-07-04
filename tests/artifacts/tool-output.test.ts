@@ -58,6 +58,23 @@ const aisTool: WorkbenchTool = {
   unsupportedCases: ["Does not compute ITR tax payable, refunds, or upload AIS feedback."],
 };
 
+const gstPortalTool: WorkbenchTool = {
+  slug: "/gst-portal-issue-evidence-memo",
+  h1: "GST Portal Issue Evidence Memo Builder",
+  officialSources: [
+    {
+      publisher: "GST System",
+      title: "GST self-service complaint portal",
+      url: "https://selfservice.gstsystem.in/",
+      lastReviewedAt: "2026-07-02",
+    },
+  ],
+  unsupportedCases: [
+    "Does not prove the GST portal was globally unavailable.",
+    "Does not guarantee extension, waiver, or condonation.",
+  ],
+};
+
 describe("tool output artifact contract", () => {
   it("includes row-count, source, boundary, and trust links for every parsed tool output", () => {
     for (const [slug, config] of Object.entries(configs)) {
@@ -237,6 +254,55 @@ describe("tool output artifact contract", () => {
     expect(output.toLowerCase()).not.toContain("verified udyam");
   });
 
+  it("surfaces GST portal evidence references as user-entered context only", () => {
+    const output = buildOutput(
+      gstPortalTool,
+      [
+        "attemptedAt,timezone,action,error,retryCount,complaintReference,screenshotHash,browser,device,networkContext",
+        "2026-07-02 20:10,Asia/Kolkata,File GSTR-3B,Submit button failed,3,SR-123,sha256:abc123,Brave 1.68,macOS desktop,office broadband",
+      ].join("\n"),
+      configs["/gst-portal-issue-evidence-memo"],
+      "",
+    );
+
+    expect(output).toContain("GST portal issue evidence memo");
+    expect(output).toContain("Screenshot/evidence reference: sha256:abc123");
+    expect(output).toContain("Browser/context: Brave 1.68; macOS desktop; office broadband");
+    expect(output).toContain("Evidence checks:");
+    expect(output).toContain("user-entered references only");
+    expect(output).toContain("Next review actions:");
+    expect(output).toContain("Rows parsed: 1; rows accepted for output: 1");
+    expect(output).toContain("Tool boundary:");
+    expect(output.toLowerCase()).not.toContain("portal outage proven");
+    expect(output.toLowerCase()).not.toContain("extension granted");
+    expect(output.toLowerCase()).not.toContain("complaint-ready");
+    expect(output.toLowerCase()).not.toContain("condonation approved");
+  });
+
+  it("blocks unsafe GST portal memo cells without echoing the offending value", () => {
+    const result = buildToolReviewArtifact({
+      tool: {
+        slug: gstPortalTool.slug,
+        title: gstPortalTool.h1,
+        officialSources: gstPortalTool.officialSources,
+        unsupportedCases: gstPortalTool.unsupportedCases,
+      },
+      input: [
+        "attemptedAt,action,error,screenshotBase64,gstin,otpNote",
+        "2026-07-02 20:10,Login,OTP page timed out,data:image/png;base64,SYNTHETIC-SECRET,27ABCDE1234F1Z5,OTP 123456",
+      ].join("\n"),
+    });
+
+    expect(result.status).toBe("blocked");
+    if (result.status !== "blocked") throw new Error("Expected blocked GST portal input");
+    expect(result.reason).toBe("unsafe-gst-portal-input");
+    expect(result.text).toContain("Do not paste screenshots, files, base64, local paths, GSTINs, OTPs, cookies, or credentials.");
+    expect(result.text).toContain("Use screenshot reference/hash text only.");
+    expect(result.text).not.toContain("SYNTHETIC-SECRET");
+    expect(result.text).not.toContain("27ABCDE1234F1Z5");
+    expect(result.text).not.toContain("123456");
+  });
+
   it("reports optional trailing missing cells without excluding otherwise valid rows", () => {
     const output = buildOutput(
       msmeTool,
@@ -350,7 +416,7 @@ describe("tool output artifact contract", () => {
 
     expect(output).toContain("Email draft");
     expect(output).toContain("WhatsApp-ready summary");
-    expect(output).toContain("GSTIN: 27ABCDE1234F1Z5");
+    expect(output).toContain("GSTIN: SYNTH-ACME-GSTIN");
     expect(output).toContain("Tax period: May 2026");
     expect(output).toContain("Document type: Tax Invoice");
     expect(output).toContain("Tax amount: 18000");
