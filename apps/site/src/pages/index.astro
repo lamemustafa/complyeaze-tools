@@ -5,6 +5,7 @@ import { publicSiteUrl } from "../lib/public-url";
 
 const tools = getLaunchTools();
 const axalUrl = "https://complyeaze.com/axal";
+const sanchikaUrl = publicSiteUrl("/sanchika");
 const clusters = [
   {
     title: "Reconciliation and vendor follow-up",
@@ -127,6 +128,17 @@ const clusters = [
         </article>
       ))}
     </div>
+  </section>
+
+  <section class="upgrade-band" aria-label="Sanchika design-system docs">
+    <div>
+      <h2>Need the shared UI package boundary?</h2>
+      <p>
+        Sanchika documents the tokens, primitives, workflow patterns, gallery,
+        adoption order, and verification checks behind shared compliance UI.
+      </p>
+    </div>
+    <a class="text-button" href={sanchikaUrl}>Open Sanchika docs</a>
   </section>
 
   <section class="upgrade-band" aria-label="Axal upgrade path">
