@@ -85,4 +85,42 @@ describe("maskIndianIdentifiers", () => {
       aadhaar: 1,
     });
   });
+
+  it("masks separator-tolerant identifiers without masking ordinary amounts or invoice numbers", () => {
+    const result = maskIndianIdentifiersWithReport(
+      "PAN ABCDE-1234-F, GSTIN 27 ABCDE 1234 F 1 Z 5, TAN ABCD 12345 E, Udyam UDYAM MH 12 1234567, acct # 1234 5678 9012, phone (98765) 43210, invoice INV-102, amount 18000",
+    );
+
+    expect(result.text).toContain("[PAN masked]");
+    expect(result.text).toContain("[GSTIN masked]");
+    expect(result.text).toContain("[TAN masked]");
+    expect(result.text).toContain("[Udyam registration masked]");
+    expect(result.text).toContain("acct # [bank-account-like number masked]");
+    expect(result.text).toContain("[phone-like number masked]");
+    expect(result.text).toContain("invoice INV-102");
+    expect(result.text).toContain("amount 18000");
+    expect(result.counts).toMatchObject({
+      pan: 1,
+      gstin: 1,
+      tan: 1,
+      udyam: 1,
+      bankAccount: 1,
+      phone: 1,
+    });
+  });
+
+  it("makes residual manual-review risk explicit even when no supported patterns match", () => {
+    const result = maskIndianIdentifiersWithReport(
+      "Client reference Alpha review note for May ledger.",
+    );
+
+    expect(result.warning).toContain("not an all-clear");
+    expect(result.notChecked).toEqual(
+      expect.arrayContaining([
+        "partial or non-standard identifiers",
+        "file names",
+        "client references",
+      ]),
+    );
+  });
 });

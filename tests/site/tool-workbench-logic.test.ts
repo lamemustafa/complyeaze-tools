@@ -80,7 +80,8 @@ describe("tool workbench logic", () => {
     expect(output).toContain("- pan: 1");
     expect(output).toContain("- email: 1");
     expect(output).toContain("- phone: 1");
-    expect(output).toContain("Checked, not found");
+    expect(output).toContain("Supported pattern checks with no match");
+    expect(output).not.toContain("Checked, not found");
     expect(output).toContain("- gstin");
     expect(output).toContain("Not checked automatically");
     expect(output).toContain("Manual review checklist");
@@ -89,5 +90,20 @@ describe("tool workbench logic", () => {
     expect(output).toContain("Source register: https://tools.complyeaze.com/source/");
     expect(output.toLowerCase()).not.toContain("forensic redaction");
     expect(output.toLowerCase()).not.toContain("permanent redaction");
+  });
+
+  it("does not present a no-match Review Copy report as an all-clear", () => {
+    const output = buildOutput(
+      reviewCopyTool,
+      "Client reference Alpha review note for May ledger.",
+      configs["/privacy/review-copy-builder"],
+      "",
+    );
+
+    expect(output).toContain("No supported patterns matched.");
+    expect(output).toContain("This is not an all-clear; manually inspect before sharing.");
+    expect(output).toContain("partial or non-standard identifiers");
+    expect(output).toContain("client references");
+    expect(output).not.toContain("Checked, not found");
   });
 });

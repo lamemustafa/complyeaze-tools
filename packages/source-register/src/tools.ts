@@ -460,6 +460,8 @@ export const TOOLS: ToolMeta[] = [
     unsupportedCases: [
       "Does not perform browser OCR in V0.",
       "Does not provide forensic or legally irreversible redaction.",
+      "Does not guarantee detection of partial, non-standard, or contextual identifiers.",
+      "Does not inspect file names, client references, screenshots, PDFs, or scanned text.",
     ],
     outputArtifacts: [
       "masked text draft",

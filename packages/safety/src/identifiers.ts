@@ -40,17 +40,17 @@ type Detector = {
 const detectors: Detector[] = [
   {
     key: "gstin",
-    pattern: /\b[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]\b/gi,
+    pattern: /\b[0-9]{2}[\s-]?[A-Z](?:[\s-]?[A-Z]){4}[\s-]?[0-9](?:[\s-]?[0-9]){3}[\s-]?[A-Z][\s-]?[1-9A-Z][\s-]?Z[\s-]?[0-9A-Z]\b/gi,
     replacement: "[GSTIN masked]",
   },
   {
     key: "pan",
-    pattern: /\b[A-Z]{5}[0-9]{4}[A-Z]\b/gi,
+    pattern: /\b[A-Z](?:[\s-]?[A-Z]){4}[\s-]?[0-9](?:[\s-]?[0-9]){3}[\s-]?[A-Z]\b/gi,
     replacement: "[PAN masked]",
   },
   {
     key: "tan",
-    pattern: /\b[A-Z]{4}[0-9]{5}[A-Z]\b/gi,
+    pattern: /\b[A-Z](?:[\s-]?[A-Z]){3}[\s-]?[0-9](?:[\s-]?[0-9]){4}[\s-]?[A-Z]\b/gi,
     replacement: "[TAN masked]",
   },
   {
@@ -60,7 +60,7 @@ const detectors: Detector[] = [
   },
   {
     key: "udyam",
-    pattern: /\bUDYAM-[A-Z]{2}-[0-9]{2}-[0-9]{7}\b/gi,
+    pattern: /\bUDYAM[\s-]?[A-Z]{2}[\s-]?[0-9]{2}[\s-]?[0-9]{7}\b/gi,
     replacement: "[Udyam registration masked]",
   },
   {
@@ -92,7 +92,7 @@ const detectors: Detector[] = [
   },
   {
     key: "bankAccount",
-    pattern: /\b((?:a\/c|account|bank account)\s*(?:no\.?|number)?\s*)[0-9][0-9 -]{8,20}[0-9]\b/gi,
+    pattern: /\b((?:a\/c|acct\.?|account|bank account)\s*(?:no\.?|number|#)?\s*[:#-]?\s*)[0-9][0-9 -]{8,20}[0-9]\b/gi,
     replacement: (_match, prefix: string) =>
       `${prefix.trimEnd()} [bank-account-like number masked]`,
   },
@@ -103,14 +103,17 @@ const detectors: Detector[] = [
   },
   {
     key: "phone",
-    pattern: /\b(?:\+91[\s-]?)?[6-9][0-9]{4}[\s-]?[0-9]{5}\b/g,
-    replacement: "[phone-like number masked]",
+    pattern: /(^|[^a-zA-Z0-9])((?:\+91[\s-]?)?(?:\(?[6-9][0-9]{4}\)?[\s-]?[0-9]{5}|[6-9][0-9]{4}[\s-]?[0-9]{5}))\b/g,
+    replacement: (_match, prefix: string) => `${prefix}[phone-like number masked]`,
   },
 ];
 
 const notCheckedAutomatically = [
   "names",
   "addresses",
+  "partial or non-standard identifiers",
+  "file names",
+  "client references",
   "PDFs",
   "screenshots",
   "scanned text",
@@ -153,7 +156,7 @@ export function maskIndianIdentifiersWithReport(input: string): IdentifierMaskRe
     notChecked: notCheckedAutomatically,
     manualReviewChecklist,
     warning:
-      "Not a redaction certificate: Review Copy Builder masks common text patterns only; this is not irreversible redaction.",
+      "Not a redaction certificate: Review Copy Builder masks common text patterns only; this is not irreversible redaction and not an all-clear.",
   };
 }
 
