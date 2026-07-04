@@ -94,22 +94,22 @@ function normalizeRow(
   const source = normalizeSource(row.source);
   if (!source) return null;
 
-  const supplier = row.supplier || row.vendor || "Unknown supplier";
-  const gstin = normalizeText(row.gstin);
-  const invoice = normalizeText(row.invoice || row.invoiceNumber || row.documentNumber);
+  const supplierName = row.supplier || row.vendor || "";
+  const gstin = normalizeText(row.gstin ?? "");
+  const invoice = normalizeText(row.invoice || row.invoiceNumber || row.documentNumber || "");
   const invoiceDate = normalizeDate(row.invoiceDate || row.date || "");
   const documentType = normalizeText(row.documentType || row.docType || row.type || "");
   const taxAmount =
     parseAmount(row.taxAmount || row.itcAmount || row.amount) ??
     parseTaxComponents(row.igst, row.cgst, row.sgst);
-  const fallbackSupplier = normalizeText(supplier);
+  const fallbackSupplier = normalizeText(supplierName);
   const key = buildKey(gstin || fallbackSupplier, invoice, invoiceDate, documentType, matchFields);
 
   if (!invoice || (!gstin && !fallbackSupplier)) return null;
 
   return {
     source,
-    supplier,
+    supplier: supplierName || "Unknown supplier",
     gstin,
     invoice,
     invoiceDate,

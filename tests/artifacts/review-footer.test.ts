@@ -20,6 +20,7 @@ describe("buildReviewFooter", () => {
       inputHeaders: ["source", "supplier", "invoice", "taxAmount"],
       rowCounts: {
         parsedRows: 6,
+        acceptedRows: 4,
         skippedBlankRows: 1,
         skippedInvalidRows: 2,
       },
@@ -52,7 +53,9 @@ describe("buildReviewFooter", () => {
     expect(footer).toContain("Expected columns: source, supplier, invoice, taxAmount");
     expect(footer).toContain("Detected delimiter: comma");
     expect(footer).toContain("Input headers: source, supplier, invoice, taxAmount");
-    expect(footer).toContain("Rows parsed: 6; blank rows skipped: 1; invalid rows needing review: 2.");
+    expect(footer).toContain(
+      "Rows parsed: 6; rows accepted for output: 4; blank rows skipped: 1; invalid rows needing review: 2.",
+    );
     expect(footer).toContain("Row 4: missing-cell - Missing value for invoice.");
     expect(footer).toContain("GST Tutorials: GSTR-2B User Manual (reviewed 2026-07-02)");
     expect(footer).toContain("https://tutorial.gst.gov.in/userguide/returns/Manual_gstr2b.htm");

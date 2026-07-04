@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import { toolInputClass } from "@complyeaze-tools/ui-react";
 import {
-  buildOutput,
+  buildToolReviewArtifact,
   configs,
-  isBlockingOutput,
+  getToolArtifactDefinition,
   type WorkbenchTool,
-} from "./tool-workbench-logic";
+} from "@complyeaze-tools/artifacts";
 
 type Props = {
   tool: WorkbenchTool;
@@ -13,6 +13,7 @@ type Props = {
 
 export default function ToolWorkbench({ tool }: Props) {
   const config = configs[tool.slug] ?? configs["/privacy/review-copy-builder"];
+  const artifactDefinition = getToolArtifactDefinition(tool.slug);
   const [input, setInput] = useState(config.sample);
   const [asOfDate, setAsOfDate] = useState(() =>
     tool.slug === "/msme-45-day-payment-due-date-calculator"
@@ -23,11 +24,23 @@ export default function ToolWorkbench({ tool }: Props) {
   const inputHelpId = "tool-input-help";
   const outputStatusId = "tool-output-status";
 
-  const output = useMemo(
-    () => buildOutput(tool, input, config, asOfDate, { strictGstrMatch }),
-    [tool, input, config, asOfDate, strictGstrMatch],
+  const artifactResult = useMemo(
+    () =>
+      buildToolReviewArtifact({
+        tool: {
+          slug: tool.slug,
+          title: tool.h1,
+          officialSources: tool.officialSources,
+          unsupportedCases: tool.unsupportedCases,
+        },
+        input,
+        asOfDate,
+        options: { strictGstrMatch },
+      }),
+    [tool, input, asOfDate, strictGstrMatch],
   );
-  const blockedOutput = isBlockingOutput(output);
+  const output = artifactResult.text;
+  const blockedOutput = artifactResult.status === "blocked";
   const outputStatus = blockedOutput
     ? output
     : "Draft output updated. Review it before downloading or sharing.";
@@ -38,8 +51,8 @@ export default function ToolWorkbench({ tool }: Props) {
         <div className="workbench-guide">
           <h2>Input format</h2>
           <p>{config.guidance}</p>
-          {config.requiredColumns ? (
-            <p>Expected columns: {config.requiredColumns.join(", ")}</p>
+          {artifactDefinition.requiredColumns ? (
+            <p>Expected columns: {artifactDefinition.requiredColumns.join(", ")}</p>
           ) : null}
         </div>
         {tool.slug === "/msme-45-day-payment-due-date-calculator" ? (

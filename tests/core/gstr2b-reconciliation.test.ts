@@ -133,4 +133,34 @@ describe("buildGstr2bReconciliationTriage", () => {
       }),
     );
   });
+
+  it("uses supplier fallback when optional GSTIN and strict-match fields are absent", () => {
+    const summary = buildGstr2bReconciliationTriage(
+      [
+        "source,supplier,invoice,taxAmount",
+        "purchase,Acme Components,INV-102,18000",
+        "2b,Acme Components,INV-102,18000",
+        "2b,Skipped Supplier,,900",
+      ].join("\n"),
+      { matchFields: ["invoiceDate", "documentType"] },
+    );
+
+    expect(summary.totalRows).toBe(2);
+    expect(summary.skippedRowCount).toBe(1);
+    expect(summary.counts.matched).toBe(1);
+  });
+
+  it("skips rows without a real GSTIN or supplier key", () => {
+    const summary = buildGstr2bReconciliationTriage(
+      [
+        "source,invoice,taxAmount",
+        "purchase,INV-102,18000",
+        "2b,INV-102,18000",
+      ].join("\n"),
+    );
+
+    expect(summary.totalRows).toBe(0);
+    expect(summary.skippedRowCount).toBe(2);
+    expect(summary.counts.matched).toBe(0);
+  });
 });
