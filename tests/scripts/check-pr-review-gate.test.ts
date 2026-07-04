@@ -98,6 +98,7 @@ describe("PR review gate script", () => {
       ]);
 
     expect(output).toContain("PR review gate passed");
+    expect(output).toContain("review-gate:allowed-missing-head-review");
   });
 
   it("blocks on missing bot review in strict mode without allow-missing-head-review", () => {

@@ -37,7 +37,9 @@ GitHub branch protection rule or repository ruleset with these requirements:
   formal current-head bot review object is present. Scheduled all-open sweeps may
   use the missing-review bypass so they still catch unresolved threads and
   requested-changes reviews without flipping every open PR red before Codex
-  responds. Keep the `pull_request_review` trigger limited to submit/edit/dismiss
+  responds, but they must skip writing a green status when the only passing
+  condition is an allowed missing current-head review. Keep the
+  `pull_request_review` trigger limited to submit/edit/dismiss
   events and keep it on trusted default-branch workflow code. Do not add
   `pull_request_review_comment` triggers unless the replacement design is proven
   to execute trusted default-branch workflow code.

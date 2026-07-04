@@ -15,6 +15,7 @@ describe("review findings gate", () => {
     };
     const workflow = read(".github/workflows/review-gate.yml");
     const syncScript = read("scripts/sync-review-gate-status.mjs");
+    const checkScript = read("scripts/check-pr-review-gate.mjs");
     const branchProtection = read("docs/branch-protection.md");
 
     expect(existsSync(join(root, "scripts", "check-pr-review-gate.mjs"))).toBe(true);
@@ -51,6 +52,8 @@ describe("review findings gate", () => {
     );
     expect(syncScript).toContain("readLatestReviewGateStatus");
     expect(syncScript).toContain("Review gate status already");
+    expect(syncScript).toContain("Skipping Review gate success");
+    expect(checkScript).toContain("review-gate:allowed-missing-head-review");
     expect(syncScript).toContain("pullRequests(states:OPEN,first:100");
     expect(syncScript).toContain("pageInfo{hasNextPage endCursor}");
     expect(syncScript).not.toContain('"pr",\n    "list"');
