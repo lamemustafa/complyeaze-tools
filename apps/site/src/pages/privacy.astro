@@ -32,6 +32,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         Static hosting, ingress, certificate, and security systems may process
         ordinary web request metadata such as IP address, user agent, request
         path, timestamp, and TLS details while serving pages and assets.
+        Operational access to these logs should be limited to deployment,
+        security, abuse-prevention, cache, and troubleshooting work. They are
+        not product analytics and are not intended to reconstruct pasted rows,
+        generated drafts, or downloaded artifact contents.
       </p>
     </article>
     <article>
@@ -41,17 +45,20 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         JavaScript Detections or challenge scripts served from
         /cdn-cgi/challenge-platform, to evaluate automated traffic. Those
         systems may set Cloudflare cookies such as cf_clearance and process
-        browser/security signals. They are not part of the tool workbench; the
-        tool code must not intentionally send pasted tool rows or generated
-        drafts to ComplyEaze or Cloudflare.
+        browser/security signals, challenge outcomes, Ray IDs, and request
+        metadata under Cloudflare's product controls and retention settings.
+        They are not part of the tool workbench; the tool code must not
+        intentionally send pasted tool rows or generated drafts to ComplyEaze or
+        Cloudflare.
       </p>
     </article>
     <article>
       <h2>What not to paste</h2>
       <p>
-        Do not paste real credentials, OTPs, CAPTCHA answers, Aadhaar numbers,
-        bank details, portal cookies, full notices, ledgers, or taxpayer
-        documents into public issues, screenshots, fixtures, or support threads.
+        Do not paste real credentials, OTPs, CAPTCHA answers, GSTINs, Aadhaar
+        numbers, bank details, portal cookies, portal screenshots, full notices,
+        ledgers, or taxpayer documents into public issues, screenshots,
+        fixtures, or support threads.
       </p>
     </article>
     <article>

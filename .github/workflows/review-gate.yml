@@ -5,17 +5,16 @@ on:
     inputs:
       pr:
         description: Pull request number to check
-        required: true
-  pull_request:
+        required: false
+  pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review, edited]
-  pull_request_review:
-    types: [submitted, edited, dismissed]
-  pull_request_review_comment:
-    types: [created, edited, deleted]
+  schedule:
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: read
   pull-requests: read
+  statuses: write
 
 concurrency:
   group: review-gate-${{ github.workflow }}-${{ github.event.pull_request.number || github.event.inputs.pr || github.ref }}
@@ -28,73 +27,38 @@ jobs:
     timeout-minutes: 8
 
     steps:
-      - name: Resolve PR metadata
-        id: resolve-pr
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Sync current-head review status
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           EVENT_NAME: ${{ github.event_name }}
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr }}
-          EVENT_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
-          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
 
-          if [ -z "${PR_NUMBER}" ]; then
-            echo "Could not determine pull request number." >&2
-            exit 1
-          fi
+          args=(
+            --repo "${GITHUB_REPOSITORY}"
+            --run-url "${RUN_URL}"
+            --strict-head-review
+            --required-review-author chatgpt-codex-connector
+          )
 
-          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
-            mapfile -t pr_metadata < <(
-              gh pr view "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" \
-                --json headRepository,headRefOid \
-                --jq '.headRepository.nameWithOwner, .headRefOid'
-            )
-            head_repo="${pr_metadata[0]:-}"
-            head_sha="${pr_metadata[1]:-}"
+          if [ "${EVENT_NAME}" = "schedule" ]; then
+            args+=(--all-open --wait-head-review-ms 0 --skip-pending-status)
           else
-            head_repo="${EVENT_HEAD_REPO}"
-            head_sha="${EVENT_HEAD_SHA}"
+            if [ -z "${PR_NUMBER}" ]; then
+              echo "Could not determine pull request number." >&2
+              exit 1
+            fi
+            args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000 --allow-missing-head-review)
           fi
 
-          if [ -z "${head_repo}" ] || [ -z "${head_sha}" ]; then
-            echo "Could not resolve complete pull request metadata for #${PR_NUMBER}." >&2
-            exit 1
-          fi
-
-          {
-            echo "pr=${PR_NUMBER}"
-            echo "head_repo=${head_repo}"
-            echo "head_sha=${head_sha}"
-          } >> "${GITHUB_OUTPUT}"
-
-      - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          fetch-depth: 0
-          repository: ${{ steps.resolve-pr.outputs.head_repo }}
-          ref: ${{ steps.resolve-pr.outputs.head_sha }}
-          persist-credentials: false
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
-        with:
-          version: 11.5.3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Check current-head review state
-        run: >-
-          pnpm review:gate -- --repo "${{ github.repository }}" --pr "${{ steps.resolve-pr.outputs.pr }}"
-          --strict-head-review --required-review-author chatgpt-codex-connector
-          --wait-head-review-ms 180000 --poll-interval-ms 10000 --allow-missing-head-review
-        env:
-          GH_TOKEN: ${{ github.token }}
+          node scripts/sync-review-gate-status.mjs "${args[@]}"

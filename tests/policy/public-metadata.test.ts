@@ -32,6 +32,7 @@ describe("public metadata", () => {
   it("uses page-specific trust page descriptions", () => {
     const pages = [
       "apps/site/src/pages/privacy.astro",
+      "apps/site/src/pages/terms.astro",
       "apps/site/src/pages/security.astro",
       "apps/site/src/pages/source.astro",
       "apps/site/src/pages/status.astro",
@@ -67,9 +68,22 @@ describe("public metadata", () => {
     expect(shell).toContain("Input guide");
     expect(shell).toContain("Common mistakes");
     expect(shell).toContain("Review checklist");
+    expect(shell).toContain("Downloaded draft includes");
+    expect(shell).toContain("Terms and disclaimer reference");
+    expect(shell).toContain("termsOfService");
+    expect(shell).toContain("BreadcrumbList");
+    expect(shell).toContain("WebPage");
+    expect(shell).toContain("citation: tool.officialSources.map");
     expect(shell).toContain("tool.seoDepth.exampleWorkflow");
     expect(shell).toContain("FAQPage");
     expect(shell).toContain("refresh after {source.staleAfterDays} days");
+  });
+
+  it("renders unsupported cases on the source register page", () => {
+    const sourcePage = read("apps/site/src/pages/source.astro");
+
+    expect(sourcePage).toContain("Unsupported cases");
+    expect(sourcePage).toContain("tool.unsupportedCases.map");
   });
 
   it("keeps llms.txt aligned with launch tools", () => {
@@ -79,6 +93,7 @@ describe("public metadata", () => {
       expect(llms).toContain(`https://tools.complyeaze.com${tool.slug}/`);
       expect(llms).toContain(tool.h1);
     }
+    expect(llms).toContain("Terms and disclaimer: https://tools.complyeaze.com/terms/");
   });
 
   it("keeps robots permissive for public static pages", () => {
@@ -97,5 +112,6 @@ describe("public metadata", () => {
 
     expect(urls.length).toBeGreaterThan(0);
     expect(lastmods.length).toBe(urls.length);
+    expect(sitemap).toContain("<loc>https://tools.complyeaze.com/terms/</loc>");
   });
 });

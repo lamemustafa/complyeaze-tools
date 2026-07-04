@@ -1,7 +1,6 @@
 # ComplyEaze Tools
 
-Private browser tools that turn messy Indian compliance records into
-review-ready action packs.
+Browser-local draft tools for first-pass Indian compliance review.
 
 Files are processed in your browser. No account or file upload is required.
 The site may receive normal web request metadata when serving pages and static
@@ -20,11 +19,11 @@ these tools.
 
 | Tool | Workflow | Supported input | Output | Source posture |
 | --- | --- | --- | --- | --- |
-| MSME Payables Age Triage | MSME payables review | Pasted CSV/TSV payables rows with optional agreement, payment, dispute, and Udyam evidence columns | Payables age review draft, Udyam request text, management review note | MSME Samadhaan and DC-MSME sources reviewed |
-| GSTR-2B Purchase Reconciliation Triage | Reconciliation triage | Pasted purchase-register and GSTR-2B rows | Exception bucket summary, supplier follow-up basis, review checklist | GSTR-2B manual reviewed |
-| GSTR-2B Missing Invoice Follow-up Generator | Vendor follow-up | Pasted supplier issue rows | Supplier chase text, email draft, WhatsApp-ready draft text | GSTR-2B manual reviewed |
-| AIS and Form 26AS Mismatch Checker | Tax information review | Pasted AIS/Form 26AS comparison rows | Mismatch table, review checklist, deductor correction draft | Income Tax AIS/TDS sources reviewed |
-| GST Portal Issue Evidence Memo Builder | Portal issue evidence | Manual attempt timestamps, error labels, and notes | Attempt timeline, client note, retry checklist | GST self-service complaint portal reviewed |
+| MSME Payables Age Triage | MSME payables review | Pasted CSV/TSV payables rows with optional agreement, objection, payment, open-balance, dispute, Udyam evidence, and Udyam registration date columns | Candidate review marker draft, missing-facts checklist, Udyam request text, management review note | MSME Samadhaan and DC-MSME sources reviewed |
+| GSTR-2B Purchase Reconciliation Triage | Reconciliation triage | Pasted purchase-register and GSTR-2B rows with optional invoice date, document type, amendment table, ITC availability, and IMS status columns | Exception bucket summary, ITC/IMS context flags, supplier follow-up basis, review checklist | GSTR-2B manual reviewed |
+| GSTR-2B Missing Invoice Follow-up Generator | Vendor follow-up | Pasted supplier issue rows with optional GSTIN, invoice date, period, document type, taxable value, tax amount, and escalation columns | Supplier-wise issue packet, email draft, WhatsApp-ready summary | GSTR-2B manual reviewed |
+| AIS and Form 26AS Mismatch Checker | Tax information review | Pasted AIS/Form 26AS comparison rows with optional deductor, TAN, section, income category, TDS/TCS, amount in books, mismatch category, and review action columns | Mismatch category table, review checklist, deductor-wise verification draft | Income Tax AIS/TDS sources reviewed |
+| GST Portal Issue Evidence Memo Builder | Portal issue evidence | Manual attempt timestamps, error labels, notes, complaint references, screenshot hash references, browser/device context, and retry context | Attempt timeline, client note, retry checklist, user-entered evidence reference checklist | GST self-service complaint portal reviewed |
 | Review Copy Builder | Privacy-conscious handoff | Plain text | Masked review draft and review footer | DPDP Act source reviewed |
 
 Each tool creates a local working artifact for review. It does not provide legal
@@ -42,6 +41,7 @@ trails.
 - Security policy: `SECURITY.md` and `https://tools.complyeaze.com/security/`
 - Privacy posture: `docs/privacy-local-first.md` and
   `https://tools.complyeaze.com/privacy/`
+- Terms and disclaimer: `https://tools.complyeaze.com/terms/`
 - Source register: `packages/source-register` and
   `https://tools.complyeaze.com/source/`
 - Release gates: `docs/release-gates.md`

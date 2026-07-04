@@ -7,7 +7,8 @@ export type Gstr2bRecoStatus =
   | "missing-in-2b"
   | "extra-in-2b"
   | "value-mismatch"
-  | "duplicate-key";
+  | "duplicate-key"
+  | "context-review";
 
 export type Gstr2bRecoIssue = {
   status: Gstr2bRecoStatus;
@@ -18,6 +19,7 @@ export type Gstr2bRecoIssue = {
   gstr2bTaxAmount: number | null;
   difference: number | null;
   note: string;
+  contextFlags: string[];
 };
 
 export type Gstr2bRecoSummary = {
@@ -27,11 +29,12 @@ export type Gstr2bRecoSummary = {
   issues: Gstr2bRecoIssue[];
 };
 
-export type Gstr2bRecoMatchField = "invoiceDate" | "documentType";
+export type Gstr2bRecoMatchField = "invoiceDate" | "documentType" | "amendmentType";
 
 export type Gstr2bRecoOptions = {
   tolerance?: number;
   matchFields?: Gstr2bRecoMatchField[];
+  reviewContext?: boolean;
 };
 
 type NormalizedRow = {
@@ -41,6 +44,10 @@ type NormalizedRow = {
   invoice: string;
   invoiceDate: string;
   documentType: string;
+  amendmentType: string;
+  itcAvailability: string;
+  imsStatus: string;
+  reverseCharge: string;
   taxAmount: number | null;
   key: string;
 };
@@ -50,6 +57,7 @@ const statuses: Gstr2bRecoStatus[] = [
   "extra-in-2b",
   "value-mismatch",
   "duplicate-key",
+  "context-review",
   "matched",
 ];
 
@@ -65,7 +73,7 @@ export function buildGstr2bReconciliationTriage(
   const grouped = groupByKey(rows);
   const issues = [...grouped.entries()]
     .flatMap(([key, group]) =>
-      classifyGroup(key, group.purchase, group.gstr2b, options.tolerance),
+      classifyGroup(key, group.purchase, group.gstr2b, options.tolerance, options.reviewContext),
     )
     .sort((left, right) => statusRank(left.status) - statusRank(right.status));
 
@@ -79,11 +87,12 @@ export function buildGstr2bReconciliationTriage(
 
 function normalizeOptions(optionsOrTolerance: number | Gstr2bRecoOptions): Required<Gstr2bRecoOptions> {
   if (typeof optionsOrTolerance === "number") {
-    return { tolerance: optionsOrTolerance, matchFields: [] };
+    return { tolerance: optionsOrTolerance, matchFields: [], reviewContext: false };
   }
   return {
     tolerance: optionsOrTolerance.tolerance ?? 2,
     matchFields: optionsOrTolerance.matchFields ?? [],
+    reviewContext: optionsOrTolerance.reviewContext ?? false,
   };
 }
 
@@ -94,26 +103,43 @@ function normalizeRow(
   const source = normalizeSource(row.source);
   if (!source) return null;
 
-  const supplier = row.supplier || row.vendor || "Unknown supplier";
-  const gstin = normalizeText(row.gstin);
-  const invoice = normalizeText(row.invoice || row.invoiceNumber || row.documentNumber);
+  const supplierName = row.supplier || row.vendor || "";
+  const gstin = normalizeText(row.gstin ?? "");
+  const invoice = normalizeText(row.invoice || row.invoiceNumber || row.documentNumber || "");
   const invoiceDate = normalizeDate(row.invoiceDate || row.date || "");
   const documentType = normalizeText(row.documentType || row.docType || row.type || "");
+  const amendmentType = normalizeAmendmentType(
+    row.amendmentType || row.amendment || row.table || row.returnTable || row.section || "",
+  );
+  const itcAvailability = normalizeText(row.itcAvailability || row.itcAvailable || row.itcStatus || "");
+  const imsStatus = normalizeText(row.imsStatus || row.ims || row.recipientAction || "");
+  const reverseCharge = normalizeText(row.reverseCharge || row.rcm || row.reverseChargeFlag || "");
   const taxAmount =
     parseAmount(row.taxAmount || row.itcAmount || row.amount) ??
     parseTaxComponents(row.igst, row.cgst, row.sgst);
-  const fallbackSupplier = normalizeText(supplier);
-  const key = buildKey(gstin || fallbackSupplier, invoice, invoiceDate, documentType, matchFields);
+  const fallbackSupplier = normalizeText(supplierName);
+  const key = buildKey(
+    gstin || fallbackSupplier,
+    invoice,
+    invoiceDate,
+    documentType,
+    amendmentType,
+    matchFields,
+  );
 
   if (!invoice || (!gstin && !fallbackSupplier)) return null;
 
   return {
     source,
-    supplier,
+    supplier: supplierName || "Unknown supplier",
     gstin,
     invoice,
     invoiceDate,
     documentType,
+    amendmentType,
+    itcAvailability,
+    imsStatus,
+    reverseCharge,
     taxAmount,
     key,
   };
@@ -124,11 +150,13 @@ function buildKey(
   invoice: string,
   invoiceDate: string,
   documentType: string,
+  amendmentType: string,
   matchFields: Gstr2bRecoMatchField[],
 ): string {
   const parts = [party, invoice];
   if (matchFields.includes("invoiceDate")) parts.push(invoiceDate);
   if (matchFields.includes("documentType")) parts.push(documentType);
+  if (matchFields.includes("amendmentType")) parts.push(amendmentType);
   return parts.join(":");
 }
 
@@ -149,6 +177,28 @@ function normalizeText(value: string) {
 
 function normalizeDate(value: string) {
   return value.trim().toLowerCase();
+}
+
+function normalizeAmendmentType(value: string) {
+  const normalized = normalizeText(value);
+  if (!normalized) return "";
+  if (
+    normalized.includes("amend") ||
+    [
+      "b2ba",
+      "b2bcdnra",
+      "cdnra",
+      "isda",
+      "ecoa",
+      "impgamendments",
+      "impgsezamendments",
+      "b2baitcreversal",
+      "b2bdnra",
+    ].includes(normalized)
+  ) {
+    return "amendment";
+  }
+  return "original";
 }
 
 function parseAmount(value: string | undefined): number | null {
@@ -186,6 +236,7 @@ function classifyGroup(
   purchase: NormalizedRow[],
   gstr2b: NormalizedRow[],
   tolerance: number,
+  reviewContext: boolean,
 ): Gstr2bRecoIssue[] {
   if (purchase.length > 1 || gstr2b.length > 1) {
     const row = purchase[0] ?? gstr2b[0];
@@ -207,7 +258,33 @@ function classifyGroup(
     return [issue("value-mismatch", row, key, purchaseRow, gstr2bRow, difference)];
   }
 
+  const contextFlags = reviewContext ? buildContextFlags(gstr2bRow) : [];
+  if (contextFlags.length) {
+    return [
+      issue("context-review", row, key, purchaseRow, gstr2bRow, difference, contextFlags),
+    ];
+  }
+
   return [issue("matched", row, key, purchaseRow, gstr2bRow, difference)];
+}
+
+function buildContextFlags(row: NormalizedRow): string[] {
+  const flags: string[] = [];
+  if (["no", "notavailable", "notavail", "ineligible", "unavailable"].includes(row.itcAvailability)) {
+    flags.push("ITC availability marked not available");
+  }
+  if (["rejected", "reject"].includes(row.imsStatus)) {
+    flags.push("IMS status marked rejected");
+  } else if (["pending", "deferred", "noaction"].includes(row.imsStatus)) {
+    flags.push("IMS status marked pending");
+  }
+  if (row.amendmentType === "amendment") {
+    flags.push("Amendment table or flag present");
+  }
+  if (["yes", "y", "true", "rcm", "reversecharge"].includes(row.reverseCharge)) {
+    flags.push("Reverse-charge flag present");
+  }
+  return flags;
 }
 
 function amountDifference(left: number | null, right: number | null) {
@@ -222,6 +299,7 @@ function issue(
   purchase: NormalizedRow | null,
   gstr2b: NormalizedRow | null,
   difference: number | null,
+  contextFlags: string[] = [],
 ): Gstr2bRecoIssue {
   return {
     status,
@@ -232,6 +310,7 @@ function issue(
     gstr2bTaxAmount: gstr2b?.taxAmount ?? null,
     difference,
     note: noteFor(status),
+    contextFlags,
   };
 }
 
@@ -245,6 +324,8 @@ function noteFor(status: Gstr2bRecoStatus) {
       return "Tax amount differs beyond the review tolerance or needs manual comparison.";
     case "duplicate-key":
       return "More than one row shares the same GSTIN/supplier and invoice key.";
+    case "context-review":
+      return "Pasted rows match numerically, but ITC availability or IMS context needs professional review.";
     case "matched":
       return "Pasted rows match within the review tolerance.";
   }

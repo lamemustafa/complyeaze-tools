@@ -1,6 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getLaunchTools } from "../lib/tools";
+import { publicSiteUrl } from "../lib/public-url";
+import { verificationEvidence } from "../lib/trust-evidence";
+
+const sourceDates = getLaunchTools().flatMap((tool) =>
+  tool.officialSources.map((source) => source.lastReviewedAt),
+);
+const latestSourceReviewDate = sourceDates.sort().at(-1) ?? "not recorded";
 ---
 
 <BaseLayout
@@ -28,11 +35,71 @@ import { getLaunchTools } from "../lib/tools";
         in the public runbook; do not treat this page as a real-time uptime feed.
       </p>
     </article>
+    <article>
+      <h2>Not a real-time uptime feed</h2>
+      <p>
+        This page is static. It documents required gates and launch boundaries,
+        not current availability, incident state, queue depth, or live cluster
+        health.
+      </p>
+    </article>
+    <article>
+      <h2>Source review snapshot</h2>
+      <p>Last source-reviewed date: {latestSourceReviewDate}.</p>
+      <p>
+        Each source row also carries its own stale-after window; review the
+        source register before relying on an output.
+      </p>
+      <p>
+        <a href={publicSiteUrl("/source")}>Open source register</a>
+      </p>
+    </article>
     {getLaunchTools().map((tool) => (
       <article>
-        <h2>{tool.h1}</h2>
+        <h2><a href={publicSiteUrl(tool.slug)}>{tool.h1}</a></h2>
         <p>Status: {tool.status}</p>
+        <p>
+          Source review: {tool.officialSources.map((source) => source.lastReviewedAt).sort().at(-1)}
+        </p>
+        <p>
+          <a href={publicSiteUrl(tool.slug)}>Open this tool</a>
+        </p>
       </article>
     ))}
+  </section>
+  <section class="evidence-section" aria-labelledby="verification-evidence">
+    <div class="section-heading">
+      <p class="domain-line">Review gates</p>
+      <h2 id="verification-evidence">Verification evidence</h2>
+      <p>
+        These are the public repository gates and deploy checks that support the
+        MVP status claim. They are evidence of review controls, not an
+        availability guarantee.
+      </p>
+    </div>
+    <div class="evidence-table-wrap">
+      <table class="evidence-table">
+        <thead>
+          <tr>
+            <th scope="col">Check</th>
+            <th scope="col">Evidence</th>
+            <th scope="col">Source</th>
+            <th scope="col">Cadence</th>
+            <th scope="col">Boundary</th>
+          </tr>
+        </thead>
+        <tbody>
+          {verificationEvidence.map((row) => (
+            <tr>
+              <th scope="row">{row.check}</th>
+              <td>{row.evidence}</td>
+              <td><code>{row.source}</code></td>
+              <td>{row.cadence}</td>
+              <td>{row.boundary}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   </section>
 </BaseLayout>

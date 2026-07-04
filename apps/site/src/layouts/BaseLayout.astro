@@ -6,7 +6,7 @@ import { publicSiteUrl } from "../lib/public-url";
 
 const {
   title = "ComplyEaze Tools",
-  description = "Private browser tools that turn messy Indian compliance records into review-ready action packs.",
+  description = "Browser-local draft tools for first-pass Indian compliance review.",
 } = Astro.props;
 
 const repositoryUrl = "https://github.com/lamemustafa/complyeaze-tools";
@@ -16,7 +16,7 @@ const publishWorkflowUrl = `${repositoryUrl}/actions/workflows/publish-image.yml
 const canonicalUrl = publicSiteUrl(Astro.url.pathname);
 const siteName = "ComplyEaze Tools";
 const siteDescription =
-  "Private browser tools that turn messy Indian compliance records into review-ready action packs.";
+  "Browser-local draft tools for first-pass Indian compliance review.";
 const socialImageUrl = publicSiteUrl("/social-card.png");
 const faviconUrl = "/favicon.svg";
 const manifestUrl = "/site.webmanifest";
@@ -84,6 +84,7 @@ const siteSchema = [
       <nav aria-label="Primary">
         <a href={publicSiteUrl("/source")}>Sources</a>
         <a href={publicSiteUrl("/privacy")}>Privacy</a>
+        <a href={publicSiteUrl("/terms")}>Terms</a>
         <a href={publicSiteUrl("/security")}>Security</a>
         <a href={publicSiteUrl("/status")}>Status</a>
         <a href={repositoryUrl}>GitHub</a>
@@ -96,6 +97,7 @@ const siteSchema = [
       <nav class="footer-links" aria-label="Open-source trust links">
         <a href={repositoryUrl}>Source code</a>
         <a href={licenseUrl}>Apache-2.0 license</a>
+        <a href={publicSiteUrl("/terms")}>Terms and disclaimer</a>
         <a href={releaseGatesUrl}>Reproducible build gates</a>
         <a href={publishWorkflowUrl}>Image scan and digest workflow</a>
       </nav>

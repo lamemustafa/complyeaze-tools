@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { securityBoundaryEvidence, verificationEvidence } from "../lib/trust-evidence";
 ---
 
 <BaseLayout
@@ -49,5 +50,70 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         that does not belong to you.
       </p>
     </article>
+  </section>
+  <section class="evidence-section" aria-labelledby="security-evidence">
+    <div class="section-heading">
+      <p class="domain-line">Security posture</p>
+      <h2 id="security-evidence">Security evidence</h2>
+      <p>
+        The public site is designed as a static browser-local surface. The table
+        below ties the claim to repo-controlled tests, manifests, and workflow
+        checks.
+      </p>
+    </div>
+    <div class="evidence-table-wrap">
+      <table class="evidence-table">
+        <thead>
+          <tr>
+            <th scope="col">Boundary</th>
+            <th scope="col">Evidence</th>
+            <th scope="col">Source</th>
+            <th scope="col">Cadence</th>
+            <th scope="col">Limit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {securityBoundaryEvidence.map((row) => (
+            <tr>
+              <th scope="row">{row.check}</th>
+              <td>{row.evidence}</td>
+              <td><code>{row.source}</code></td>
+              <td>{row.cadence}</td>
+              <td>{row.boundary}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="evidence-section" aria-labelledby="runtime-boundary-evidence">
+    <div class="section-heading">
+      <p class="domain-line">Release controls</p>
+      <h2 id="runtime-boundary-evidence">Runtime boundary evidence</h2>
+      <p>
+        Required checks are listed here so users can distinguish source-backed
+        controls from unsupported security claims.
+      </p>
+    </div>
+    <div class="evidence-table-wrap">
+      <table class="evidence-table evidence-table-compact">
+        <thead>
+          <tr>
+            <th scope="col">Check</th>
+            <th scope="col">What it covers</th>
+            <th scope="col">Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          {verificationEvidence.map((row) => (
+            <tr>
+              <th scope="row">{row.check}</th>
+              <td>{row.evidence}</td>
+              <td><code>{row.source}</code></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   </section>
 </BaseLayout>

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getLaunchTools } from "../lib/tools";
+import { publicSiteUrl } from "../lib/public-url";
 
 const tools = getLaunchTools();
 const freshnessIssueUrl =
@@ -24,7 +25,7 @@ const freshnessIssueUrl =
   <section class="detail-grid">
     {tools.map((tool) => (
       <article>
-        <h2>{tool.h1}</h2>
+        <h2><a href={publicSiteUrl(tool.slug)}>{tool.h1}</a></h2>
         <p>
           Refresh policy: each source is reviewed again within its listed
           stale-after window. Report stale or changed sources through the public
@@ -39,7 +40,15 @@ const freshnessIssueUrl =
             </li>
           ))}
         </ul>
+        <h3>Unsupported cases</h3>
+        <ul>
+          {tool.unsupportedCases.map((unsupportedCase) => (
+            <li>{unsupportedCase}</li>
+          ))}
+        </ul>
         <p>
+          <a href={publicSiteUrl(tool.slug)}>Open this tool</a>
+          {" "}or{" "}
           <a href={freshnessIssueUrl}>Report a stale source for this tool</a>
         </p>
       </article>
