@@ -79,6 +79,13 @@ describe("public metadata", () => {
     expect(shell).toContain("refresh after {source.staleAfterDays} days");
   });
 
+  it("renders unsupported cases on the source register page", () => {
+    const sourcePage = read("apps/site/src/pages/source.astro");
+
+    expect(sourcePage).toContain("Unsupported cases");
+    expect(sourcePage).toContain("tool.unsupportedCases.map");
+  });
+
   it("keeps llms.txt aligned with launch tools", () => {
     const llms = read("apps/site/public/llms.txt");
 
