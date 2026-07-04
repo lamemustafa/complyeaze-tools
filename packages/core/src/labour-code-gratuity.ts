@@ -5,6 +5,7 @@ const FIXED_TERM_ELIGIBILITY_YEARS = 1;
 const PERMANENT_ELIGIBILITY_YEARS = 5;
 
 export type LabourCodeEmploymentType = "permanent" | "fixed-term";
+export type LabourCodeEmploymentCategory = "ordinary" | "working-journalist";
 export type LabourCodeTerminationReason = "ordinary" | "death" | "disablement" | "unknown";
 
 export type LabourCodeGratuityRow = {
@@ -12,13 +13,14 @@ export type LabourCodeGratuityRow = {
   basic: number | null;
   da: number | null;
   retainingAllowance: number;
-  otherComponents: number;
+  otherComponents: number | null;
   wages: number | null;
   totalRemuneration: number | null;
   fiftyPercentTestExceeded: boolean | null;
   excessAddedBack: number | null;
   effectiveWageBase: number | null;
   employmentType: LabourCodeEmploymentType | null;
+  employmentCategory: LabourCodeEmploymentCategory;
   terminationReason: LabourCodeTerminationReason;
   yearsOfService: number | null;
   eligibleForGratuity: boolean | null;
@@ -41,8 +43,9 @@ function buildRow(row: CsvRow): LabourCodeGratuityRow {
   const basic = parseAmount(row.basic);
   const da = parseAmount(row.da);
   const retainingAllowance = parseAmount(row.retainingAllowance) ?? 0;
-  const otherComponents = parseAmount(row.otherComponents) ?? 0;
+  const otherComponents = parseAmount(row.otherComponents);
   const employmentType = normalizeEmploymentType(row.employmentType);
+  const employmentCategory = normalizeEmploymentCategory(row.employmentCategory || row.employeeCategory || row.category);
   const terminationReason = normalizeTerminationReason(
     row.terminationReason || row.separationReason || row.exitReason,
   );
@@ -52,6 +55,11 @@ function buildRow(row: CsvRow): LabourCodeGratuityRow {
   if (basic === null) flags.push("Missing basic pay.");
   if (da === null) flags.push("Missing dearness allowance.");
   if (yearsOfService === null) flags.push("Missing years of service.");
+  if (otherComponents === null) {
+    flags.push(
+      "Missing otherComponents; enter 0 explicitly if there are no excluded wage components before using the 50% wage test.",
+    );
+  }
   if (employmentType === null) {
     flags.push(
       "Missing or unsupported employmentType; enter permanent or fixed-term before using gratuity eligibility.",
@@ -60,13 +68,13 @@ function buildRow(row: CsvRow): LabourCodeGratuityRow {
 
   const oldWageBase = basic !== null && da !== null ? basic + da : null;
   const wages = basic !== null && da !== null ? basic + da + retainingAllowance : null;
-  const totalRemuneration = wages !== null ? wages + otherComponents : null;
+  const totalRemuneration = wages !== null && otherComponents !== null ? wages + otherComponents : null;
 
   let fiftyPercentTestExceeded: boolean | null = null;
   let excessAddedBack: number | null = null;
   let effectiveWageBase: number | null = wages;
 
-  if (totalRemuneration !== null) {
+  if (totalRemuneration !== null && otherComponents !== null) {
     const maxAllowedOtherComponents = 0.5 * totalRemuneration;
     fiftyPercentTestExceeded = otherComponents > maxAllowedOtherComponents;
     excessAddedBack = fiftyPercentTestExceeded
@@ -79,7 +87,12 @@ function buildRow(row: CsvRow): LabourCodeGratuityRow {
     eligibleForGratuity,
     eligibilityBasis,
     flags: eligibilityFlags,
-  } = evaluateGratuityEligibility(employmentType, yearsOfService, terminationReason);
+  } = evaluateGratuityEligibility(
+    employmentType,
+    employmentCategory,
+    yearsOfService,
+    terminationReason,
+  );
   flags.push(...eligibilityFlags);
 
   const oldGratuityResult = computeGratuity(oldWageBase, yearsOfService, eligibleForGratuity);
@@ -101,7 +114,7 @@ function buildRow(row: CsvRow): LabourCodeGratuityRow {
     );
   }
 
-  if (otherComponents > 0) {
+  if (otherComponents !== null && otherComponents > 0) {
     flags.push(
       "The 50% test denominator here is wages plus otherComponents only. It does not add a gratuity or retrenchment-compensation figure into total remuneration, since those are not standard recurring monthly payroll components - the Ministry's own FAQ worked example includes them where relevant to a specific event, which can give a different total remuneration figure for that purpose.",
     );
@@ -119,6 +132,7 @@ function buildRow(row: CsvRow): LabourCodeGratuityRow {
     excessAddedBack,
     effectiveWageBase,
     employmentType,
+    employmentCategory,
     terminationReason,
     yearsOfService,
     eligibleForGratuity,
@@ -132,6 +146,7 @@ function buildRow(row: CsvRow): LabourCodeGratuityRow {
 
 function evaluateGratuityEligibility(
   employmentType: LabourCodeEmploymentType | null,
+  employmentCategory: LabourCodeEmploymentCategory,
   yearsOfService: number | null,
   terminationReason: LabourCodeTerminationReason,
 ): { eligibleForGratuity: boolean | null; eligibilityBasis: string; flags: string[] } {
@@ -151,6 +166,25 @@ function evaluateGratuityEligibility(
     };
   }
 
+  if (terminationReason === "disablement") {
+    return {
+      eligibleForGratuity: null,
+      eligibilityBasis:
+        "Disablement rows need manual review because Section 53(4) may require pre-/post-disablement wage periods that this tool does not collect.",
+      flags: [
+        "Disablement entered: review manually or collect pre-/post-disablement wage split before computing gratuity.",
+      ],
+    };
+  }
+
+  if (terminationReason === "death") {
+    return {
+      eligibleForGratuity: true,
+      eligibilityBasis: `${employmentType === "fixed-term" ? "Fixed-term" : "Permanent"} employee death exception entered; do not deny solely on the ordinary service threshold (Code on Social Security 2020, Section 53).`,
+      flags: [],
+    };
+  }
+
   if (employmentType === "fixed-term") {
     const eligible = yearsOfService >= FIXED_TERM_ELIGIBILITY_YEARS;
     return {
@@ -158,6 +192,15 @@ function evaluateGratuityEligibility(
       eligibilityBasis: eligible
         ? "Fixed-term employee completing at least 1 year of the contract is exempt from the 5-year continuous-service rule (Code on Social Security 2020, Section 53(1)(d) and second proviso; the 1-year figure is Ministry of Labour FAQ guidance, not literal Act text)."
         : "Fixed-term employee has not completed the 1-year threshold referenced in Ministry of Labour FAQ guidance.",
+      flags: [],
+    };
+  }
+
+  if (employmentCategory === "working-journalist" && yearsOfService >= 3) {
+    return {
+      eligibleForGratuity: true,
+      eligibilityBasis:
+        "Working journalist category entered; Section 53 deems the continuous-service requirement to be 3 years for working journalists.",
       flags: [],
     };
   }
@@ -170,11 +213,14 @@ function evaluateGratuityEligibility(
     };
   }
 
-  if (terminationReason === "death" || terminationReason === "disablement") {
+  if (employmentCategory !== "working-journalist" && yearsOfService >= 3) {
     return {
-      eligibleForGratuity: true,
-      eligibilityBasis: `Permanent employee has under 5 years of service, but the Section 53 death/disablement exception was entered (${terminationReason}).`,
-      flags: [],
+      eligibleForGratuity: null,
+      eligibilityBasis:
+        "Permanent employee has 3-5 years of service; confirm whether the working-journalist 3-year rule applies before treating the row as ineligible.",
+      flags: [
+        "Permanent employee has 3-5 years of service; enter employmentCategory=working-journalist when applicable before denying gratuity.",
+      ],
     };
   }
 
@@ -219,6 +265,13 @@ function normalizeEmploymentType(value: string | undefined): LabourCodeEmploymen
   if (normalized === "fixed-term" || normalized === "fixedterm") return "fixed-term";
   if (normalized === "permanent") return "permanent";
   return null;
+}
+
+function normalizeEmploymentCategory(value: string | undefined): LabourCodeEmploymentCategory {
+  const normalized = value?.trim().toLowerCase().replace(/[^a-z]+/g, "") ?? "";
+  return normalized === "workingjournalist" || normalized === "journalist"
+    ? "working-journalist"
+    : "ordinary";
 }
 
 function normalizeTerminationReason(value: string | undefined): LabourCodeTerminationReason {

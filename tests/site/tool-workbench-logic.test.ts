@@ -104,8 +104,8 @@ it("emits Schedule 112A export fields, not only a human-readable summary", () =>
     const output = buildOutput(
       schedule112aTool,
       [
-        "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual,fmv31Jan2018PerUnit,expenditureOnTransfer",
-        "Sample Equity Ltd,INSYNTH00001,100,420,2026-05-10,25000,320,500",
+        "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual,fmv31Jan2018PerUnit,acquisitionDate,expenditureOnTransfer",
+        "Sample Equity Ltd,INSYNTH00001,100,420,2026-05-10,25000,320,2017-12-20,500",
       ].join("\n"),
       configs["/schedule-112a-capital-gains-csv-builder"],
       "",

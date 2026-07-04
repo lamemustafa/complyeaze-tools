@@ -5,8 +5,8 @@ describe("buildSchedule112ARows", () => {
   it("classifies a sale before 23 July 2024 as BE and applies grandfathering when FMV is given", () => {
     const rows = buildSchedule112ARows(
       [
-        "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual,fmv31Jan2018PerUnit",
-        "Sample Fund Units,INSYNTH00002,500,58,2024-06-01,20000,50",
+        "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual,fmv31Jan2018PerUnit,acquisitionDate",
+        "Sample Fund Units,INSYNTH00002,500,58,2024-06-01,20000,50,2017-12-20",
       ].join("\n"),
     );
 
@@ -64,6 +64,18 @@ describe("buildSchedule112ARows", () => {
     expect(rows[0].transferPeriod).toBe("unknown");
     expect(rows[0].flags).toContain(
       "Invalid sale date: use YYYY-MM-DD with a real calendar date before classifying the transfer period.",
+    );
+  });
+
+  it("does not apply grandfathering without acquisition-date evidence", () => {
+    const rows = buildSchedule112ARows(
+      "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual,fmv31Jan2018PerUnit\nPost 2018 Lot,INSYNTH00001,100,420,2026-05-10,25000,320",
+    );
+
+    expect(rows[0].grandfatheringApplied).toBe(false);
+    expect(rows[0].costOfAcquisitionFinal).toBe(25000);
+    expect(rows[0].flags).toContain(
+      "31-Jan-2018 FMV supplied without acquisition evidence on or before 2018-01-31; grandfathering was not applied and actual cost was used.",
     );
   });
 });

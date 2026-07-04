@@ -17,6 +17,8 @@ export type Schedule112ARow = {
   transferPeriod: Schedule112ATransferPeriod;
   costOfAcquisitionActual: number | null;
   fmv31Jan2018PerUnit: number | null;
+  acquisitionDate: string;
+  acquiredBefore31Jan2018: boolean | null;
   totalFmv31Jan2018: number | null;
   lowerOfFmvAndConsideration: number | null;
   costOfAcquisitionFinal: number | null;
@@ -46,8 +48,11 @@ function buildRow(row: CsvRow): Schedule112ARow {
   const transferPeriod = classifyTransferPeriod(saleDate);
   const costOfAcquisitionActual = parseAmount(row.costOfAcquisitionActual || row.costOfAcquisition);
   const fmv31Jan2018PerUnit = parseAmount(row.fmv31Jan2018PerUnit || row.fmv31Jan2018);
+  const acquisitionDate = (row.acquisitionDate || row.purchaseDate || "").trim();
+  const acquiredBefore31Jan2018 = resolveAcquiredBefore31Jan2018(row, acquisitionDate);
+  const canApplyGrandfathering = fmv31Jan2018PerUnit !== null && acquiredBefore31Jan2018 === true;
   const totalFmv31Jan2018 =
-    fmv31Jan2018PerUnit !== null && quantity !== null ? fmv31Jan2018PerUnit * quantity : null;
+    canApplyGrandfathering && quantity !== null ? fmv31Jan2018PerUnit * quantity : null;
   const lowerOfFmvAndConsideration =
     totalFmv31Jan2018 !== null && fullValueOfConsideration !== null
       ? Math.min(totalFmv31Jan2018, fullValueOfConsideration)
@@ -76,6 +81,11 @@ function buildRow(row: CsvRow): Schedule112ARow {
   }
   if (costOfAcquisitionActual === null) flags.push("Missing cost of acquisition.");
   if (fullValueOfConsideration === null) flags.push("Missing quantity/sale price or full value of consideration.");
+  if (fmv31Jan2018PerUnit !== null && acquiredBefore31Jan2018 !== true) {
+    flags.push(
+      "31-Jan-2018 FMV supplied without acquisition evidence on or before 2018-01-31; grandfathering was not applied and actual cost was used.",
+    );
+  }
   if (!grandfatheringApplied) {
     flags.push(
       "No 31-Jan-2018 FMV supplied: grandfathering under Section 55(2)(ac) was not applied, so cost of acquisition uses actual cost only.",
@@ -93,6 +103,8 @@ function buildRow(row: CsvRow): Schedule112ARow {
     transferPeriod,
     costOfAcquisitionActual,
     fmv31Jan2018PerUnit,
+    acquisitionDate,
+    acquiredBefore31Jan2018,
     totalFmv31Jan2018,
     lowerOfFmvAndConsideration,
     costOfAcquisitionFinal,
@@ -129,4 +141,20 @@ function parseAmount(value: string | undefined): number | null {
   if (!value?.trim()) return null;
   const parsed = Number(value.replace(/,/g, ""));
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function resolveAcquiredBefore31Jan2018(row: CsvRow, acquisitionDate: string): boolean | null {
+  const flag = normalizeBoolean(row.acquiredBefore31Jan2018 || row.acquiredBefore2018 || row.grandfatheringEligible);
+  if (flag !== null) return flag;
+  const parsed = parseIsoDate(acquisitionDate);
+  const cutoff = parseIsoDate("2018-01-31");
+  if (!parsed || !cutoff) return null;
+  return parsed.getTime() <= cutoff.getTime();
+}
+
+function normalizeBoolean(value: string | undefined): boolean | null {
+  const normalized = value?.trim().toLowerCase().replace(/[^a-z0-9]+/g, "") ?? "";
+  if (["yes", "y", "true", "1", "before", "eligible"].includes(normalized)) return true;
+  if (["no", "n", "false", "0", "after", "noteligible"].includes(normalized)) return false;
+  return null;
 }

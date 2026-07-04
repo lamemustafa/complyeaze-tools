@@ -27,6 +27,19 @@ export function buildDrc01bLiabilityMismatchReview(
     const gstr1Liability = parseAmount(row.gstr1Liability);
     const gstr3bLiability = parseAmount(row.gstr3bLiability);
 
+    if (!gstin || !period) {
+      return {
+        gstin,
+        period,
+        gstr1Liability,
+        gstr3bLiability,
+        difference: null,
+        percentDifference: null,
+        flag: "missing-data",
+        note: "gstin and period are required before comparing liability rows.",
+      };
+    }
+
     if (gstr1Liability === null || gstr3bLiability === null) {
       return {
         gstin,

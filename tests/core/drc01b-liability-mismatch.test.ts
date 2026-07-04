@@ -67,4 +67,18 @@ describe("buildDrc01bLiabilityMismatchReview", () => {
       }),
     );
   });
+
+  it("treats blank GSTIN or period as missing data", () => {
+    const rows = buildDrc01bLiabilityMismatchReview(
+      [
+        "gstin,period,gstr1Liability,gstr3bLiability",
+        ",2026-05,412000,398500",
+        "SYNTH-ACME-GSTIN,,1000,2000",
+      ].join("\n"),
+    );
+
+    expect(rows[0]).toEqual(expect.objectContaining({ flag: "missing-data", difference: null }));
+    expect(rows[0].note).toContain("gstin and period are required");
+    expect(rows[1]).toEqual(expect.objectContaining({ flag: "missing-data", difference: null }));
+  });
 });

@@ -31,7 +31,7 @@ describe("buildLabourCodeGratuityReview", () => {
 
   it("marks an ordinary permanent separation under 5 years as not eligible for gratuity", () => {
     const rows = buildLabourCodeGratuityReview(
-      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService,terminationReason\nSample Employee D,30000,0,0,5000,permanent,3,resignation",
+      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService,terminationReason\nSample Employee D,30000,0,0,5000,permanent,2,resignation",
     );
 
     expect(rows[0].eligibleForGratuity).toBe(false);
@@ -95,7 +95,7 @@ describe("buildLabourCodeGratuityReview", () => {
     const rows = buildLabourCodeGratuityReview(
       [
         "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService,terminationReason",
-        "Sample Employee H,30000,0,0,0,permanent,3,",
+        "Sample Employee H,30000,0,0,0,permanent,2,",
         "Sample Employee I,30000,0,0,0,permanent,3,death",
         "Sample Employee J,30000,0,0,0,permanent,3,disablement",
       ].join("\n"),
@@ -107,7 +107,55 @@ describe("buildLabourCodeGratuityReview", () => {
     );
     expect(rows[1].eligibleForGratuity).toBe(true);
     expect(rows[1].eligibilityBasis).toContain("death");
-    expect(rows[2].eligibleForGratuity).toBe(true);
-    expect(rows[2].eligibilityBasis).toContain("disablement");
+    expect(rows[2].eligibleForGratuity).toBeNull();
+    expect(rows[2].flags).toContain(
+      "Disablement entered: review manually or collect pre-/post-disablement wage split before computing gratuity.",
+    );
+  });
+
+  it("flags missing other components instead of treating them as zero", () => {
+    const rows = buildLabourCodeGratuityReview(
+      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService\nSample Employee K,25000,5000,0,,permanent,6",
+    );
+
+    expect(rows[0].otherComponents).toBeNull();
+    expect(rows[0].fiftyPercentTestExceeded).toBeNull();
+    expect(rows[0].effectiveWageBase).toBe(30000);
+    expect(rows[0].flags).toContain(
+      "Missing otherComponents; enter 0 explicitly if there are no excluded wage components before using the 50% wage test.",
+    );
+  });
+
+  it("checks death and disablement exceptions before fixed-term one-year denial", () => {
+    const rows = buildLabourCodeGratuityReview(
+      [
+        "employeeName,basic,da,otherComponents,employmentType,yearsOfService,terminationReason",
+        "Fixed Death,30000,0,0,fixed-term,0.8,death",
+        "Fixed Disablement,30000,0,0,fixed-term,0.8,disablement",
+      ].join("\n"),
+    );
+
+    expect(rows[0].eligibleForGratuity).toBe(true);
+    expect(rows[0].eligibilityBasis).toContain("death exception");
+    expect(rows[1].eligibleForGratuity).toBeNull();
+    expect(rows[1].flags).toContain(
+      "Disablement entered: review manually or collect pre-/post-disablement wage split before computing gratuity.",
+    );
+  });
+
+  it("routes possible working journalist rows through the 3-year review path", () => {
+    const ordinaryRows = buildLabourCodeGratuityReview(
+      "employeeName,basic,da,otherComponents,employmentType,yearsOfService,terminationReason\nOrdinary Employee,30000,0,0,permanent,3.5,ordinary",
+    );
+    const journalistRows = buildLabourCodeGratuityReview(
+      "employeeName,basic,da,otherComponents,employmentType,yearsOfService,terminationReason,employmentCategory\nJournalist Employee,30000,0,0,permanent,3.5,ordinary,working journalist",
+    );
+
+    expect(ordinaryRows[0].eligibleForGratuity).toBeNull();
+    expect(ordinaryRows[0].flags).toContain(
+      "Permanent employee has 3-5 years of service; enter employmentCategory=working-journalist when applicable before denying gratuity.",
+    );
+    expect(journalistRows[0].eligibleForGratuity).toBe(true);
+    expect(journalistRows[0].eligibilityBasis).toContain("3 years for working journalists");
   });
 });

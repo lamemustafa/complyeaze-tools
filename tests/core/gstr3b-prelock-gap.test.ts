@@ -55,4 +55,19 @@ describe("buildGstr3bPreLockGapCheck", () => {
     expect(rows[0].correctionPath).toContain("Only GSTR-3B outward liability tables 3.1 and 3.2 are supported");
     expect(rows[0].correctionPath).not.toContain("GSTR-1A");
   });
+
+  it("accepts GSTR-3B outward 3.1 sub-table labels", () => {
+    const rows = buildGstr3bPreLockGapCheck(
+      "lineRef,table,booksValue,autoPopulatedValue\nB2B outward,3.1(a),412000,405000",
+      { gstr3bAlreadyFiled: false },
+    );
+
+    expect(rows[0]).toEqual(
+      expect.objectContaining({
+        table: "3.1(a)",
+        status: "needs-amendment",
+        difference: 7000,
+      }),
+    );
+  });
 });

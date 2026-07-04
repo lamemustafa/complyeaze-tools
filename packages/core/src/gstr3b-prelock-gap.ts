@@ -26,7 +26,7 @@ export function buildGstr3bPreLockGapCheck(
 
   return rows.map((row) => {
     const lineRef = row.lineRef || row.invoice || row.note || "Unlabeled row";
-    const table = row.table?.trim() || "";
+    const table = normalizeSupportedOutwardTable(row.table?.trim() || "");
     const booksValue = parseAmount(row.booksValue || row.amount);
     const autoPopulatedValue = parseAmount(row.autoPopulatedValue);
 
@@ -84,9 +84,16 @@ export function buildGstr3bPreLockGapCheck(
   });
 }
 
+function normalizeSupportedOutwardTable(value: string): string {
+  const normalized = value.trim().toLowerCase().replace(/\s+/g, "");
+  if (normalized === "3.1" || normalized === "3.2") return normalized;
+  const table31Match = normalized.match(/^3\.1\(([abce])\)$/);
+  return table31Match ? `3.1(${table31Match[1]})` : value.trim();
+}
+
 function isSupportedOutwardTable(value: string): boolean {
   const normalized = value.trim().toLowerCase();
-  return normalized === "3.1" || normalized === "3.2";
+  return normalized === "3.1" || normalized === "3.2" || /^3\.1\([abce]\)$/.test(normalized);
 }
 
 function parseAmount(value: string | undefined): number | null {
