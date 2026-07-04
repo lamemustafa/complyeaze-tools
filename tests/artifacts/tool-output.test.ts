@@ -233,6 +233,40 @@ describe("tool output artifact contract", () => {
     expect(output).not.toContain("required-cell-empty");
   });
 
+  it("documents acquisition evidence for Schedule 112A grandfathering inputs", () => {
+    const config = configs["/schedule-112a-capital-gains-csv-builder"];
+    const definition = getToolArtifactDefinition("/schedule-112a-capital-gains-csv-builder");
+
+    expect(config.guidance).toContain("acquisitionDate");
+    expect(config.guidance).toContain("purchaseDate");
+    expect(config.guidance).toContain("acquiredBefore31Jan2018");
+    expect(config.sample).toContain("acquisitionDate");
+    expect(config.sample).toContain("2017-12-15");
+    expect(definition.requiredColumns).toContain(
+      "acquisitionDate, purchaseDate, or acquiredBefore31Jan2018 when fmv31Jan2018PerUnit is used",
+    );
+  });
+
+  it("lets GSTR-3B pre-lock rows with blank amount values reach missing-data review", () => {
+    const output = buildOutput(
+      {
+        slug: "/gstr3b-outward-liability-prelock-gap-checker",
+        h1: "GSTR-3B Outward Liability Pre-lock Gap Checker",
+        officialSources: gstr2bTool.officialSources,
+        unsupportedCases: ["Synthetic boundary for test."],
+      },
+      "lineRef,table,booksValue,autoPopulatedValue\nB2B outward,3.1,,405000",
+      configs["/gstr3b-outward-liability-prelock-gap-checker"],
+      "",
+    );
+
+    expect(output).toContain("Table 3.1 | B2B outward");
+    expect(output).toContain("| missing-data |");
+    expect(output).toContain("booksValue and autoPopulatedValue must both be numbers");
+    expect(output).toContain("Rows parsed: 1; rows accepted for output: 1");
+    expect(output).not.toContain("required-cell-empty");
+  });
+
   it("uses MSME candidate marker language instead of statutory due-date wording", () => {
     const output = buildOutput(
       msmeTool,

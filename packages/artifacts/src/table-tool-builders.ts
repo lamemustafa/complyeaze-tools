@@ -1,9 +1,15 @@
 import {
+  buildDrc01bLiabilityMismatchReview,
   buildGstPortalEvidenceMemo,
   buildGstr2bReconciliationTriage,
   buildGstr2bSupplierFollowUps,
+  buildGstr3bPreLockGapCheck,
+  buildLabourCodeGratuityReview,
+  buildMahareraForm3WithdrawalWorksheet,
   buildMsmePayableReview,
+  buildSchedule112ARows,
   buildTaxStatementMismatchReview,
+  buildTdsSectionTranslation,
 } from "@complyeaze-tools/core";
 import { requirePreparedTable, type ToolArtifactBuilderContext } from "./tool-builder-types";
 import { buildFooter } from "./tool-output-footer";
@@ -198,8 +204,196 @@ export function buildGstPortalArtifact({
   };
 }
 
+export function buildDrc01bArtifact({
+  tool,
+  definition,
+  parsed,
+  prepared,
+}: ToolArtifactBuilderContext): ToolArtifactResult {
+  const table = requirePreparedTable(parsed, prepared);
+  const review = buildDrc01bLiabilityMismatchReview(table.prepared.acceptedRows);
+
+  return {
+    status: "ready",
+    text: [
+      "GSTR-1 vs GSTR-3B liability gap review",
+      ...review.map(
+        (row) =>
+          `${row.gstin} | ${row.period} | GSTR-1 ${formatAmount(row.gstr1Liability)} | GSTR-3B ${formatAmount(row.gstr3bLiability)} | diff ${formatAmount(row.difference)} | ${row.flag} | ${row.note}`,
+      ),
+      buildFooter(tool, definition, table.parsed, table.prepared),
+    ].join("\n"),
+  };
+}
+
+export function buildGstr3bPreLockArtifact({
+  tool,
+  definition,
+  options,
+  parsed,
+  prepared,
+}: ToolArtifactBuilderContext): ToolArtifactResult {
+  const table = requirePreparedTable(parsed, prepared);
+  const gstr3bAlreadyFiled = options.gstr3bAlreadyFiled ?? false;
+  const review = buildGstr3bPreLockGapCheck(table.prepared.acceptedRows, {
+    gstr3bAlreadyFiled,
+  });
+
+  return {
+    status: "ready",
+    text: [
+      "GSTR-3B outward liability pre-lock gap review",
+      `GSTR-3B already filed for this period: ${gstr3bAlreadyFiled ? "yes" : "no"}`,
+      ...review.map(
+        (row) =>
+          `Table ${row.table} | ${row.lineRef} | books ${formatAmount(row.booksValue)} | auto-populated ${formatAmount(row.autoPopulatedValue)} | diff ${formatAmount(row.difference)} | ${row.status} | ${row.correctionPath}`,
+      ),
+      buildFooter(tool, definition, table.parsed, table.prepared, { gstr3bAlreadyFiled }),
+    ].join("\n"),
+  };
+}
+
+export function buildTdsTranslatorArtifact({
+  tool,
+  definition,
+  parsed,
+  prepared,
+}: ToolArtifactBuilderContext): ToolArtifactResult {
+  const table = requirePreparedTable(parsed, prepared);
+  const results = buildTdsSectionTranslation(table.prepared.acceptedRows);
+
+  return {
+    status: "ready",
+    text: [
+      "Income-tax Act 2025 TDS section translation",
+      ...results.map((result) =>
+        result.mapping
+          ? `${result.input} -> ${result.mapping.newCitation} | ${result.mapping.paymentType} | rate ${result.mapping.rate} | threshold ${result.mapping.threshold} | ${result.note}`
+          : `${result.input} -> ${result.status} | ${result.note}`,
+      ),
+      buildFooter(tool, definition, table.parsed, table.prepared),
+    ].join("\n"),
+  };
+}
+
+export function buildSchedule112AArtifact({
+  tool,
+  definition,
+  parsed,
+  prepared,
+}: ToolArtifactBuilderContext): ToolArtifactResult {
+  const table = requirePreparedTable(parsed, prepared);
+  const rows = buildSchedule112ARows(table.prepared.acceptedRows);
+
+  return {
+    status: "ready",
+    text: [
+      "Schedule 112A field draft",
+      ...rows.map(
+        (row) =>
+          `${row.scripName} | ISIN ${row.isin}${row.isinLooksValid ? "" : " (format looks invalid)"} | ${row.transferPeriod} | consideration ${formatAmount(row.fullValueOfConsideration)} | cost of acquisition ${formatAmount(row.costOfAcquisitionFinal)} | gain/loss ${formatAmount(row.gainOrLoss)}${row.flags.length ? ` | ${row.flags.join(" ")}` : ""}`,
+      ),
+      "",
+      "Schedule 112A field export",
+      formatSchedule112AExport(rows),
+      buildFooter(tool, definition, table.parsed, table.prepared),
+    ].join("\n"),
+  };
+}
+
+export function buildLabourCodeGratuityArtifact({
+  tool,
+  definition,
+  parsed,
+  prepared,
+}: ToolArtifactBuilderContext): ToolArtifactResult {
+  const table = requirePreparedTable(parsed, prepared);
+  const rows = buildLabourCodeGratuityReview(table.prepared.acceptedRows);
+
+  return {
+    status: "ready",
+    text: [
+      "Labour Code wage-test and gratuity comparison",
+      ...rows.map(
+        (row) =>
+          `${row.employeeName} | wages ${formatAmount(row.wages)} | 50% test exceeded: ${row.fiftyPercentTestExceeded ?? "unknown"} | effective wage base ${formatAmount(row.effectiveWageBase)} | eligible: ${row.eligibleForGratuity ?? "unknown"} | gratuity old ${formatAmount(row.gratuityOld)} -> new ${formatAmount(row.gratuityNew)} (delta ${formatAmount(row.gratuityDelta)}) | ${row.eligibilityBasis}${row.flags.length ? ` | ${row.flags.join(" ")}` : ""}`,
+      ),
+      buildFooter(tool, definition, table.parsed, table.prepared),
+    ].join("\n"),
+  };
+}
+
+export function buildMahareraForm3Artifact({
+  tool,
+  definition,
+  parsed,
+  prepared,
+}: ToolArtifactBuilderContext): ToolArtifactResult {
+  const table = requirePreparedTable(parsed, prepared);
+  const rows = buildMahareraForm3WithdrawalWorksheet(table.prepared.acceptedRows);
+
+  return {
+    status: "ready",
+    text: [
+      "MahaRERA Form 3 withdrawal ceiling worksheet",
+      ...rows.map(
+        (row) =>
+          `${row.projectName} | total estimated cost ${formatAmount(row.totalEstimatedCost)} | cost incurred ${formatAmount(row.costIncurred)} | proportion ${row.proportionOfCostIncurred !== null ? `${(row.proportionOfCostIncurred * 100).toFixed(2)}%` : "-"} | ceiling ${formatAmount(row.maxWithdrawableCeiling)} | withdrawn ${formatAmount(row.amountWithdrawnTillDate)} | net withdrawable ${formatAmount(row.netWithdrawableCappedByBalance)}${row.flags.length ? ` | ${row.flags.join(" ")}` : ""}`,
+      ),
+      buildFooter(tool, definition, table.parsed, table.prepared),
+    ].join("\n"),
+  };
+}
+
 function formatAmount(value: number | null) {
   return value === null ? "-" : value.toFixed(2);
+}
+
+function formatSchedule112AExport(rows: ReturnType<typeof buildSchedule112ARows>): string {
+  const headers = [
+    "scripName",
+    "isin",
+    "quantity",
+    "salePricePerUnit",
+    "fullValueOfConsideration",
+    "saleDate",
+    "transferPeriod",
+    "costOfAcquisitionActual",
+    "fmv31Jan2018PerUnit",
+    "lowerOfFmvAndConsideration",
+    "costOfAcquisitionFinal",
+    "expenditureOnTransfer",
+    "totalDeductions",
+    "gainOrLoss",
+  ];
+  const dataRows = rows.map((row) => [
+    row.scripName,
+    row.isin,
+    row.quantity,
+    row.salePricePerUnit,
+    row.fullValueOfConsideration,
+    row.saleDate,
+    row.transferPeriod,
+    row.costOfAcquisitionActual,
+    row.fmv31Jan2018PerUnit,
+    row.lowerOfFmvAndConsideration,
+    row.costOfAcquisitionFinal,
+    row.expenditureOnTransfer,
+    row.totalDeductions,
+    row.gainOrLoss,
+  ]);
+
+  return [headers, ...dataRows].map((fields) => fields.map(formatCsvField).join(",")).join("\n");
+}
+
+function formatCsvField(value: string | number | null): string {
+  if (value === null) return "";
+  const text = typeof value === "number" ? formatExportNumber(value) : value;
+  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function formatExportNumber(value: number): string {
+  return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(2)));
 }
 
 function normalizeGstrTolerance(value: number | undefined): number {

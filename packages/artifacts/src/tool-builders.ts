@@ -1,10 +1,16 @@
 import { buildReviewCopyArtifact } from "./review-copy-builder";
 import {
   buildAisArtifact,
+  buildDrc01bArtifact,
   buildGstPortalArtifact,
   buildGstr2bFollowUpArtifact,
   buildGstr2bReconciliationArtifact,
+  buildGstr3bPreLockArtifact,
+  buildLabourCodeGratuityArtifact,
+  buildMahareraForm3Artifact,
   buildMsmeArtifact,
+  buildSchedule112AArtifact,
+  buildTdsTranslatorArtifact,
 } from "./table-tool-builders";
 import { validateGstPortalMemoCells } from "./gst-portal-input-guard";
 import type { ToolArtifactBuilder } from "./tool-builder-types";
@@ -30,6 +36,30 @@ const tableBuilders: Record<string, ToolArtifactBuilder> = {
     inputMode: "table",
     preValidateParsed: validateGstPortalMemoCells,
     build: buildGstPortalArtifact,
+  },
+  "/gstr1-gstr3b-liability-mismatch-pre-checker": {
+    inputMode: "table",
+    build: buildDrc01bArtifact,
+  },
+  "/gstr3b-outward-liability-prelock-gap-checker": {
+    inputMode: "table",
+    build: buildGstr3bPreLockArtifact,
+  },
+  "/income-tax-act-2025-tds-section-translator": {
+    inputMode: "table",
+    build: buildTdsTranslatorArtifact,
+  },
+  "/schedule-112a-capital-gains-csv-builder": {
+    inputMode: "table",
+    build: buildSchedule112AArtifact,
+  },
+  "/labour-code-gratuity-wage-recalculator": {
+    inputMode: "table",
+    build: buildLabourCodeGratuityArtifact,
+  },
+  "/maharera-form-3-withdrawal-worksheet": {
+    inputMode: "table",
+    build: buildMahareraForm3Artifact,
   },
 };
 

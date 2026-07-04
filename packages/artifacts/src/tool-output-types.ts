@@ -33,6 +33,7 @@ export type ToolArtifactDefinition = {
 export type BuildOutputOptions = {
   strictGstrMatch?: boolean;
   gstrTolerance?: number;
+  gstr3bAlreadyFiled?: boolean;
   columnMapping?: Record<string, string>;
 };
 

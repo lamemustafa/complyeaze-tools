@@ -25,6 +25,7 @@ export default function ToolWorkbench({ tool }: Props) {
   );
   const [strictGstrMatch, setStrictGstrMatch] = useState(false);
   const [gstrTolerance, setGstrTolerance] = useState("2");
+  const [gstr3bAlreadyFiled, setGstr3bAlreadyFiled] = useState(false);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const inputHelpId = "tool-input-help";
   const outputStatusId = "tool-output-status";
@@ -58,10 +59,19 @@ export default function ToolWorkbench({ tool }: Props) {
         options: {
           strictGstrMatch,
           gstrTolerance: parseGstrTolerance(gstrTolerance),
+          gstr3bAlreadyFiled,
           columnMapping: effectiveColumnMapping,
         },
       }),
-    [tool, input, asOfDate, strictGstrMatch, gstrTolerance, effectiveColumnMapping],
+    [
+      tool,
+      input,
+      asOfDate,
+      strictGstrMatch,
+      gstrTolerance,
+      gstr3bAlreadyFiled,
+      effectiveColumnMapping,
+    ],
   );
   const output = artifactResult.text;
   const blockedOutput = artifactResult.status === "blocked";
@@ -116,6 +126,18 @@ export default function ToolWorkbench({ tool }: Props) {
               />
             </label>
           </div>
+        ) : null}
+        {tool.slug === "/gstr3b-outward-liability-prelock-gap-checker" ? (
+          <label className="option-control">
+            <span>Filing status</span>
+            <input
+              type="checkbox"
+              checked={gstr3bAlreadyFiled}
+              onChange={(event) => setGstr3bAlreadyFiled(event.currentTarget.checked)}
+              aria-describedby={outputStatusId}
+            />
+            <span>GSTR-3B for this period is already filed</span>
+          </label>
         ) : null}
         {mappingTargets.length ? (
           <div className="column-mapping-panel">

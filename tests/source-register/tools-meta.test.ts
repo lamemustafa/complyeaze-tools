@@ -9,6 +9,12 @@ const expectedSlugs = [
   "/ais-form-26as-mismatch-checker",
   "/gst-portal-issue-evidence-memo",
   "/privacy/review-copy-builder",
+  "/gstr1-gstr3b-liability-mismatch-pre-checker",
+  "/gstr3b-outward-liability-prelock-gap-checker",
+  "/income-tax-act-2025-tds-section-translator",
+  "/schedule-112a-capital-gains-csv-builder",
+  "/labour-code-gratuity-wage-recalculator",
+  "/maharera-form-3-withdrawal-worksheet",
 ];
 
 describe("tool source register", () => {
