@@ -25,6 +25,11 @@ const targets = allOpen ? listOpenPullRequests() : [readPullRequest(Number(expli
 let targetedFailure = false;
 
 for (const target of targets) {
+  if (target.state && target.state !== "OPEN") {
+    console.log(`Skipping PR #${target.number} because it is ${target.state}.`);
+    continue;
+  }
+
   if (!skipPendingStatus) {
     setReviewGateStatus(target, "pending", "Review gate is evaluating review state.");
   }
@@ -46,7 +51,15 @@ for (const target of targets) {
 if (!allOpen && targetedFailure) process.exit(1);
 
 function readPullRequest(number) {
-  return runJson(["pr", "view", String(number), "--repo", repo, "--json", "number,headRefOid"]);
+  return runJson([
+    "pr",
+    "view",
+    String(number),
+    "--repo",
+    repo,
+    "--json",
+    "number,headRefOid,state",
+  ]);
 }
 
 function listOpenPullRequests() {

@@ -125,7 +125,7 @@ describe("PR review gate script", () => {
     );
   });
 
-  it("ignores outdated unresolved threads and stale requested-changes reviews", () => {
+  it("keeps older requested-changes reviews blocking until approved or dismissed", () => {
     const fixturePath = writeFixture(
       "outdated-and-stale",
       reviewFixture({
@@ -146,7 +146,8 @@ describe("PR review gate script", () => {
       }),
     );
 
-    const output = runGate([
+    expect(() =>
+      runGate([
         scriptPath,
         "--repo",
         "lamemustafa/complyeaze-tools",
@@ -157,9 +158,8 @@ describe("PR review gate script", () => {
         "--strict-head-review",
         "--required-review-author",
         "chatgpt-codex-connector",
-      ]);
-
-    expect(output).toContain("PR review gate passed");
+      ]),
+    ).toThrow(/Requested-changes reviews/);
   });
 });
 
