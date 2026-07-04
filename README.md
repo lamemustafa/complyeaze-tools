@@ -21,7 +21,7 @@ these tools.
 | --- | --- | --- | --- | --- |
 | MSME Payables Age Triage | MSME payables review | Pasted CSV/TSV payables rows with optional agreement, payment, dispute, and Udyam evidence columns | Payables age review draft, Udyam request text, management review note | MSME Samadhaan and DC-MSME sources reviewed |
 | GSTR-2B Purchase Reconciliation Triage | Reconciliation triage | Pasted purchase-register and GSTR-2B rows | Exception bucket summary, supplier follow-up basis, review checklist | GSTR-2B manual reviewed |
-| GSTR-2B Missing Invoice Follow-up Generator | Vendor follow-up | Pasted supplier issue rows | Supplier chase text, email draft, WhatsApp-ready draft text | GSTR-2B manual reviewed |
+| GSTR-2B Missing Invoice Follow-up Generator | Vendor follow-up | Pasted supplier issue rows with optional GSTIN, invoice date, period, document type, taxable value, tax amount, and escalation columns | Supplier-wise issue packet, email draft, WhatsApp-ready summary | GSTR-2B manual reviewed |
 | AIS and Form 26AS Mismatch Checker | Tax information review | Pasted AIS/Form 26AS comparison rows | Mismatch table, review checklist, deductor correction draft | Income Tax AIS/TDS sources reviewed |
 | GST Portal Issue Evidence Memo Builder | Portal issue evidence | Manual attempt timestamps, error labels, and notes | Attempt timeline, client note, retry checklist | GST self-service complaint portal reviewed |
 | Review Copy Builder | Privacy-conscious handoff | Plain text | Masked review draft and review footer | DPDP Act source reviewed |
