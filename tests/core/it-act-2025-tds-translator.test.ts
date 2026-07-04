@@ -25,6 +25,18 @@ describe("buildTdsSectionTranslation", () => {
     expect(results[0].mapping?.paymentType).toContain("immovable property");
   });
 
+  it("does not collapse sub-clause suffixes into a different old section", () => {
+    const results = buildTdsSectionTranslation("oldSection\n194-I(a)");
+
+    expect(results[0]).toEqual(
+      expect.objectContaining({
+        status: "not-verified",
+        mapping: null,
+      }),
+    );
+    expect(results[0].note).toContain("Sub-clause-qualified section");
+  });
+
   it("marks unverified sections as not-verified instead of guessing", () => {
     const results = buildTdsSectionTranslation("oldSection\n194N");
 

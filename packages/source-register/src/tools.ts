@@ -952,13 +952,14 @@ export const TOOLS: ToolMeta[] = [
     fileUploadRequired: false,
     telemetry: "none",
     supportedInputs: [
-      "pasted employee rows with basic, DA, other remuneration components, employment type, and years of service",
+      "pasted employee rows with basic, DA, other remuneration components, employment type, years of service, and optional termination reason",
     ],
     unsupportedCases: [
       "Does not compute leave encashment or PF contribution amounts; it only shows the recalculated wage base those figures would use.",
       "Does not apply state-specific Labour Code rules, which were still rolling out unevenly as of the last-reviewed date.",
       "Does not model the exact fixed-term pro-rata gratuity formula; it applies the standard formula and flags fixed-term rows for manual confirmation.",
       "Does not confirm whether the Payment of Gratuity Act, as now subsumed into the Code on Social Security, applies to a given establishment.",
+      "Death and disablement exceptions are applied only when terminationReason is explicitly entered; otherwise under-5 permanent rows are sent to manual review.",
     ],
     outputArtifacts: ["plain-text wage-test and gratuity comparison table", "review checklist text"],
     officialSources: [codeOnWages, codeOnSocialSecurity, labourCodeFaqMarch2026],
@@ -970,8 +971,8 @@ export const TOOLS: ToolMeta[] = [
       "Track recurring payroll wage-structure reviews and gratuity provisioning history across employees in Axal.",
     seoDepth: {
       inputGuide: [
-        "Use one row per employee with basic, da, otherComponents (all other monthly pay components besides basic/DA/retaining allowance), employmentType, and yearsOfService.",
-        "Set employmentType to permanent or fixed-term; fixed-term employees use a 1-year eligibility threshold instead of 5 years.",
+        "Use one row per employee with basic, da, otherComponents (all other monthly pay components besides basic/DA/retaining allowance), employmentType, yearsOfService, and optional terminationReason.",
+        "Set employmentType to permanent or fixed-term; fixed-term employees use a 1-year eligibility threshold instead of 5 years. For permanent employees below 5 years, enter terminationReason only when death or disablement needs to be reviewed.",
       ],
       exampleWorkflow: [
         "Paste employee pay-component rows.",
@@ -984,7 +985,7 @@ export const TOOLS: ToolMeta[] = [
       ],
       reviewChecklist: [
         "Confirm which pay components were included in otherComponents for each employee.",
-        "Confirm gratuity eligibility (5 years for permanent employees, 1 year for fixed-term per Ministry FAQ guidance) before relying on a computed figure.",
+        "Confirm gratuity eligibility (5 years for permanent employees, death/disablement exceptions, and 1 year for fixed-term per Ministry FAQ guidance) before relying on a computed figure.",
         "Re-check state-specific Labour Code rules for your establishment before finalizing any provisioning figure.",
       ],
       sourceExplainer:

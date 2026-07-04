@@ -143,9 +143,9 @@ export const configs: Record<string, WorkbenchConfig> = {
     inputLabel: "Employee pay-component rows",
     outputLabel: "Wage-test and gratuity comparison draft",
     guidance:
-      "Paste rows with employeeName, basic, da, otherComponents, employmentType (permanent or fixed-term), and yearsOfService. Optional: retainingAllowance.",
+      "Paste rows with employeeName, basic, da, otherComponents, employmentType (permanent or fixed-term), and yearsOfService. Optional: retainingAllowance and terminationReason for under-5 permanent death/disablement review.",
     sample:
-      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService\nSample Employee A,20000,0,0,56000,permanent,7\nSample Employee B,35000,5000,0,25000,fixed-term,1.2",
+      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService,terminationReason\nSample Employee A,20000,0,0,56000,permanent,7,ordinary\nSample Employee B,35000,5000,0,25000,fixed-term,1.2,ordinary",
     requiredColumns: ["employeeName", "basic", "da", "otherComponents", "employmentType", "yearsOfService"],
     reviewLabel: "Labour Code wage/gratuity rows",
   },
@@ -303,6 +303,9 @@ export function buildOutput(
         (row) =>
           `${row.scripName} | ISIN ${row.isin}${row.isinLooksValid ? "" : " (format looks invalid)"} | ${row.transferPeriod} | consideration ${formatAmount(row.fullValueOfConsideration)} | cost of acquisition ${formatAmount(row.costOfAcquisitionFinal)} | gain/loss ${formatAmount(row.gainOrLoss)}${row.flags.length ? ` | ${row.flags.join(" ")}` : ""}`,
       ),
+      "",
+      "Schedule 112A field export",
+      formatSchedule112AExport(rows),
       buildFooter(tool, config, parsed),
     ].join("\n");
   }
@@ -384,6 +387,53 @@ function buildFooter(
     unsupportedCases: tool.unsupportedCases,
     extraCaveats,
   });
+}
+
+function formatSchedule112AExport(rows: ReturnType<typeof buildSchedule112ARows>): string {
+  const headers = [
+    "scripName",
+    "isin",
+    "quantity",
+    "salePricePerUnit",
+    "fullValueOfConsideration",
+    "saleDate",
+    "transferPeriod",
+    "costOfAcquisitionActual",
+    "fmv31Jan2018PerUnit",
+    "lowerOfFmvAndConsideration",
+    "costOfAcquisitionFinal",
+    "expenditureOnTransfer",
+    "totalDeductions",
+    "gainOrLoss",
+  ];
+  const dataRows = rows.map((row) => [
+    row.scripName,
+    row.isin,
+    row.quantity,
+    row.salePricePerUnit,
+    row.fullValueOfConsideration,
+    row.saleDate,
+    row.transferPeriod,
+    row.costOfAcquisitionActual,
+    row.fmv31Jan2018PerUnit,
+    row.lowerOfFmvAndConsideration,
+    row.costOfAcquisitionFinal,
+    row.expenditureOnTransfer,
+    row.totalDeductions,
+    row.gainOrLoss,
+  ]);
+
+  return [headers, ...dataRows].map((fields) => fields.map(formatCsvField).join(",")).join("\n");
+}
+
+function formatCsvField(value: string | number | null): string {
+  if (value === null) return "";
+  const text = typeof value === "number" ? formatExportNumber(value) : value;
+  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function formatExportNumber(value: number): string {
+  return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(2)));
 }
 
 function formatAmount(value: number | null) {

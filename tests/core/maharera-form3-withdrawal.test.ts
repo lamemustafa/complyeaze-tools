@@ -45,4 +45,18 @@ describe("buildMahareraForm3WithdrawalWorksheet", () => {
       "Amount already withdrawn exceeds the computed ceiling for this row - review before relying on this figure.",
     );
   });
+
+  it("flags a missing withdrawn amount instead of treating it as zero", () => {
+    const rows = buildMahareraForm3WithdrawalWorksheet(
+      "projectName,totalEstimatedLandCost,totalEstimatedConstructionCost,landCostIncurred,constructionCostIncurred,amountWithdrawnTillDate\nSample Project B,20000000,80000000,8000000,32000000,",
+    );
+
+    expect(rows[0].amountWithdrawnTillDate).toBeNull();
+    expect(rows[0].maxWithdrawableCeiling).toBeCloseTo(40_000_000);
+    expect(rows[0].netWithdrawable).toBeNull();
+    expect(rows[0].netWithdrawableCappedByBalance).toBeNull();
+    expect(rows[0].flags).toContain(
+      "Missing amountWithdrawnTillDate; net withdrawable cannot be computed without prior withdrawals.",
+    );
+  });
 });

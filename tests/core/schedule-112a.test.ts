@@ -55,4 +55,15 @@ describe("buildSchedule112ARows", () => {
 
     expect(rows[0].isinLooksValid).toBe(true);
   });
+
+  it("flags impossible sale dates instead of assigning a rate period", () => {
+    const rows = buildSchedule112ARows(
+      "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual\nSample Equity Ltd,INSYNTH00001,100,420,2024-02-31,25000",
+    );
+
+    expect(rows[0].transferPeriod).toBe("unknown");
+    expect(rows[0].flags).toContain(
+      "Invalid sale date: use YYYY-MM-DD with a real calendar date before classifying the transfer period.",
+    );
+  });
 });

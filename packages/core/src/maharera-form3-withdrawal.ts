@@ -11,7 +11,7 @@ export type MahareraForm3Row = {
   costIncurred: number | null;
   proportionOfCostIncurred: number | null;
   maxWithdrawableCeiling: number | null;
-  amountWithdrawnTillDate: number;
+  amountWithdrawnTillDate: number | null;
   netWithdrawable: number | null;
   designatedAccountBalance: number | null;
   netWithdrawableCappedByBalance: number | null;
@@ -32,7 +32,7 @@ function buildRow(row: CsvRow): MahareraForm3Row {
   const landCostIncurred = parseAmount(row.landCostIncurred);
   const constructionCostIncurred = parseAmount(row.constructionCostIncurred);
   const financingCostIncurred = parseAmount(row.financingCostIncurred) ?? 0;
-  const amountWithdrawnTillDate = parseAmount(row.amountWithdrawnTillDate) ?? 0;
+  const amountWithdrawnTillDate = parseAmount(row.amountWithdrawnTillDate);
   const designatedAccountBalance = parseAmount(row.designatedAccountBalance);
 
   const flags: string[] = [];
@@ -41,6 +41,11 @@ function buildRow(row: CsvRow): MahareraForm3Row {
   }
   if (landCostIncurred === null || constructionCostIncurred === null) {
     flags.push("Missing landCostIncurred or constructionCostIncurred.");
+  }
+  if (amountWithdrawnTillDate === null) {
+    flags.push(
+      "Missing amountWithdrawnTillDate; net withdrawable cannot be computed without prior withdrawals.",
+    );
   }
   if (financingCostIncurred > 0) {
     flags.push(
@@ -74,13 +79,15 @@ function buildRow(row: CsvRow): MahareraForm3Row {
       // separately since Form 3 Table B shows it as its own line (row 4).
       proportionOfCostIncurred = costIncurred / totalEstimatedCost;
       maxWithdrawableCeiling = costIncurred;
-      netWithdrawable = maxWithdrawableCeiling - amountWithdrawnTillDate;
-      netWithdrawableCappedByBalance =
-        designatedAccountBalance !== null
-          ? Math.min(netWithdrawable, designatedAccountBalance)
-          : netWithdrawable;
+      if (amountWithdrawnTillDate !== null) {
+        netWithdrawable = maxWithdrawableCeiling - amountWithdrawnTillDate;
+        netWithdrawableCappedByBalance =
+          designatedAccountBalance !== null
+            ? Math.min(netWithdrawable, designatedAccountBalance)
+            : netWithdrawable;
+      }
 
-      if (netWithdrawable < 0) {
+      if (netWithdrawable !== null && netWithdrawable < 0) {
         flags.push("Amount already withdrawn exceeds the computed ceiling for this row - review before relying on this figure.");
       }
     }

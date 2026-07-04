@@ -29,9 +29,9 @@ describe("buildLabourCodeGratuityReview", () => {
     expect(rows[0].effectiveWageBase).toBe(rows[0].wages);
   });
 
-  it("marks a permanent employee under 5 years as not eligible for gratuity", () => {
+  it("marks an ordinary permanent separation under 5 years as not eligible for gratuity", () => {
     const rows = buildLabourCodeGratuityReview(
-      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService\nSample Employee D,30000,0,0,5000,permanent,3",
+      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService,terminationReason\nSample Employee D,30000,0,0,5000,permanent,3,resignation",
     );
 
     expect(rows[0].eligibleForGratuity).toBe(false);
@@ -65,5 +65,49 @@ describe("buildLabourCodeGratuityReview", () => {
 
     expect(rows[0].gratuityOld).toBe(2_000_000);
     expect(rows[0].flags.some((flag) => flag.includes("currently-notified"))).toBe(true);
+  });
+
+  it("uses only basic and DA as the old gratuity base when retaining allowance is present", () => {
+    const rows = buildLabourCodeGratuityReview(
+      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService\nSample Employee F,25000,5000,5000,0,permanent,10",
+    );
+
+    expect(rows[0].wages).toBe(35000);
+    expect(rows[0].gratuityOld).toBeCloseTo((30000 / 26) * 15 * 10);
+    expect(rows[0].gratuityNew).toBeCloseTo((35000 / 26) * 15 * 10);
+    expect(rows[0].gratuityDelta).toBeGreaterThan(0);
+  });
+
+  it("flags missing employment types instead of assuming permanent", () => {
+    const rows = buildLabourCodeGratuityReview(
+      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService\nSample Employee G,25000,5000,0,0,,6",
+    );
+
+    expect(rows[0].employmentType).toBeNull();
+    expect(rows[0].eligibleForGratuity).toBeNull();
+    expect(rows[0].gratuityOld).toBeNull();
+    expect(rows[0].flags).toContain(
+      "Missing or unsupported employmentType; enter permanent or fixed-term before using gratuity eligibility.",
+    );
+  });
+
+  it("requires manual review for under-5 permanent rows unless a death or disablement exception is entered", () => {
+    const rows = buildLabourCodeGratuityReview(
+      [
+        "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService,terminationReason",
+        "Sample Employee H,30000,0,0,0,permanent,3,",
+        "Sample Employee I,30000,0,0,0,permanent,3,death",
+        "Sample Employee J,30000,0,0,0,permanent,3,disablement",
+      ].join("\n"),
+    );
+
+    expect(rows[0].eligibleForGratuity).toBeNull();
+    expect(rows[0].flags).toContain(
+      "Permanent employee has under 5 years of service; enter terminationReason to check death/disablement exceptions before treating the row as ineligible.",
+    );
+    expect(rows[1].eligibleForGratuity).toBe(true);
+    expect(rows[1].eligibilityBasis).toContain("death");
+    expect(rows[2].eligibleForGratuity).toBe(true);
+    expect(rows[2].eligibilityBasis).toContain("disablement");
   });
 });

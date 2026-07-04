@@ -67,7 +67,13 @@ function buildRow(row: CsvRow): Schedule112ARow {
 
   const flags: string[] = [];
   if (!isinLooksValid) flags.push("ISIN does not look like a 12-character alphanumeric ISIN.");
-  if (!saleDate) flags.push("Missing sale date: cannot classify as before/on-or-after 23 July 2024.");
+  if (!saleDate) {
+    flags.push("Missing sale date: cannot classify as before/on-or-after 23 July 2024.");
+  } else if (!isValidIsoDate(saleDate)) {
+    flags.push(
+      "Invalid sale date: use YYYY-MM-DD with a real calendar date before classifying the transfer period.",
+    );
+  }
   if (costOfAcquisitionActual === null) flags.push("Missing cost of acquisition.");
   if (fullValueOfConsideration === null) flags.push("Missing quantity/sale price or full value of consideration.");
   if (!grandfatheringApplied) {
@@ -100,14 +106,23 @@ function buildRow(row: CsvRow): Schedule112ARow {
 
 function classifyTransferPeriod(saleDate: string): Schedule112ATransferPeriod {
   const parsed = parseIsoDate(saleDate);
-  if (!parsed) return "unknown";
-  return saleDate >= RATE_CUTOVER_DATE ? "AE" : "BE";
+  const cutover = parseIsoDate(RATE_CUTOVER_DATE);
+  if (!parsed || !cutover) return "unknown";
+  return parsed.getTime() >= cutover.getTime() ? "AE" : "BE";
+}
+
+function isValidIsoDate(value: string): boolean {
+  return parseIsoDate(value) !== null;
 }
 
 function parseIsoDate(value: string): Date | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const date = new Date(`${value}T00:00:00Z`);
-  return Number.isNaN(date.getTime()) ? null : date;
+  if (Number.isNaN(date.getTime())) return null;
+  const yyyy = String(date.getUTCFullYear()).padStart(4, "0");
+  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(date.getUTCDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}` === value ? date : null;
 }
 
 function parseAmount(value: string | undefined): number | null {

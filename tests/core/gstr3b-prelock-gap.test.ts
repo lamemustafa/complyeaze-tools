@@ -43,4 +43,16 @@ describe("buildGstr3bPreLockGapCheck", () => {
 
     expect(rows[0].status).toBe("missing-data");
   });
+
+  it("marks non-outward-liability tables as unsupported instead of recommending GSTR-1A", () => {
+    const rows = buildGstr3bPreLockGapCheck(
+      "lineRef,table,booksValue,autoPopulatedValue\nITC row,4,76500,71200",
+      { gstr3bAlreadyFiled: false },
+    );
+
+    expect(rows[0].status).toBe("unsupported-table");
+    expect(rows[0].difference).toBeNull();
+    expect(rows[0].correctionPath).toContain("Only GSTR-3B outward liability tables 3.1 and 3.2 are supported");
+    expect(rows[0].correctionPath).not.toContain("GSTR-1A");
+  });
 });

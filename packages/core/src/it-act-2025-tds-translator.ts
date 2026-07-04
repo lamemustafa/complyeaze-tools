@@ -135,6 +135,15 @@ export function buildTdsSectionTranslation(
       };
     }
 
+    if (hasSubClauseSuffix(raw)) {
+      return {
+        input: raw,
+        status: "not-verified",
+        mapping: null,
+        note: "Sub-clause-qualified section inputs need manual review before translation; enter the parent section only when that is the intended mapping.",
+      };
+    }
+
     const normalized = normalizeSection(raw);
     const mapping =
       VERIFIED_TDS_MAPPINGS.find(
@@ -157,6 +166,10 @@ export function buildTdsSectionTranslation(
       note: "Matched against the gazetted Income-tax Act, 2025 text.",
     };
   });
+}
+
+function hasSubClauseSuffix(value: string): boolean {
+  return /\([a-z0-9]+\)\s*$/i.test(value.trim());
 }
 
 function normalizeSection(value: string): string {
