@@ -6,6 +6,7 @@ const scannedRoots = [
   join(process.cwd(), "tests", "fixtures"),
   join(process.cwd(), "apps", "site", "src"),
   join(process.cwd(), "packages", "source-register", "src"),
+  join(process.cwd(), "packages", "artifacts", "src", "tool-output-config.ts"),
 ];
 const sensitivePatterns = [
   /\b[A-Z]{5}[0-9]{4}[A-Z]\b/, // PAN-like
@@ -14,11 +15,14 @@ const sensitivePatterns = [
 ];
 
 function files(dir: string): string[] {
-  if (!statSync(dir, { throwIfNoEntry: false })?.isDirectory()) return [];
+  const stat = statSync(dir, { throwIfNoEntry: false });
+  if (!stat) return [];
+  if (stat.isFile()) return [dir];
+  if (!stat.isDirectory()) return [];
   return readdirSync(dir).flatMap((entry) => {
     const path = join(dir, entry);
-    const stat = statSync(path);
-    return stat.isDirectory() ? files(path) : [path];
+    const childStat = statSync(path);
+    return childStat.isDirectory() ? files(path) : [path];
   });
 }
 

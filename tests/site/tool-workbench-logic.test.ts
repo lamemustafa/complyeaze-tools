@@ -16,7 +16,7 @@ const msmeTool: WorkbenchTool = {
       lastReviewedAt: "2026-07-02",
     },
   ],
-  unsupportedCases: ["Does not decide final interest, disallowance, or legal default."],
+  unsupportedCases: ["Does not decide final interest, tax, or recovery positions."],
 };
 
 const reviewCopyTool: WorkbenchTool = {
@@ -36,8 +36,22 @@ const reviewCopyTool: WorkbenchTool = {
   ],
 };
 
+const gstPortalTool: WorkbenchTool = {
+  slug: "/gst-portal-issue-evidence-memo",
+  h1: "GST Portal Issue Evidence Memo Builder",
+  officialSources: [
+    {
+      publisher: "GST System",
+      title: "GST self-service complaint portal",
+      url: "https://selfservice.gstsystem.in/",
+      lastReviewedAt: "2026-07-02",
+    },
+  ],
+  unsupportedCases: ["Does not prove global portal downtime or guarantee extension."],
+};
+
 describe("tool workbench logic", () => {
-  it("surfaces MSME review basis, review dates, and evidence checks in the draft", () => {
+  it("surfaces MSME review basis, candidate marker, and evidence checks in the draft", () => {
     const output = buildOutput(
       msmeTool,
       [
@@ -50,8 +64,8 @@ describe("tool workbench logic", () => {
 
     expect(output).toContain("MSME payables first-pass triage draft");
     expect(output).toContain("first-pass");
-    expect(output).toContain("review date 2026-05-17");
-    expect(output).toContain("No written agreement: appointed-day review date after 15 days");
+    expect(output).toContain("candidate marker 2026-05-17");
+    expect(output).toContain("No written agreement: candidate marker uses the day after 15 days");
     expect(output).toContain("Collect or verify Udyam/MSE evidence");
     expect(output).toContain("Udyam evidence entered: missing");
     expect(output).toContain("Dates and statuses are based only on pasted rows.");
@@ -63,6 +77,12 @@ describe("tool workbench logic", () => {
     expect(output).toContain("Detected delimiter: comma");
     expect(output).toContain("Input headers: vendor, amount, acceptanceDate, writtenAgreement, agreedPaymentDays, udyamEvidence");
     expect(output.toLowerCase()).not.toContain("interest payable");
+    expect(output.toLowerCase()).not.toContain("statutory interest calculated");
+    expect(output.toLowerCase()).not.toContain("43b(h) compliant");
+    expect(output.toLowerCase()).not.toContain("eligible to file");
+    expect(output.toLowerCase()).not.toContain("msefc-ready");
+    expect(output.toLowerCase()).not.toContain("admissible claim");
+    expect(output.toLowerCase()).not.toContain("recoverable amount");
     expect(output.toLowerCase()).not.toContain("verified udyam");
   });
 
@@ -90,6 +110,27 @@ describe("tool workbench logic", () => {
     expect(output).toContain("Source register: https://tools.complyeaze.com/source/");
     expect(output.toLowerCase()).not.toContain("forensic redaction");
     expect(output.toLowerCase()).not.toContain("permanent redaction");
+  });
+
+  it("keeps GST portal evidence output bounded to user-observed evidence references", () => {
+    const output = buildOutput(
+      gstPortalTool,
+      [
+        "attemptedAt,timezone,action,error,screenshotHash,browser,device",
+        "2026-07-02 20:10,Asia/Kolkata,Login,OTP page timed out,sha256:abc123,Chrome 126,Windows laptop",
+      ].join("\n"),
+      configs["/gst-portal-issue-evidence-memo"],
+      "",
+    );
+
+    expect(output).toContain("GST portal issue evidence memo");
+    expect(output).toContain("Screenshot/evidence reference: sha256:abc123");
+    expect(output).toContain("Browser/context: Chrome 126; Windows laptop");
+    expect(output).toContain("Evidence checks:");
+    expect(output).toContain("Next review actions:");
+    expect(output).toContain("Browser-local draft");
+    expect(output.toLowerCase()).not.toContain("portal outage proven");
+    expect(output.toLowerCase()).not.toContain("extension granted");
   });
 
   it("does not present a no-match Review Copy report as an all-clear", () => {

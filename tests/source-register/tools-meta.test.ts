@@ -55,6 +55,9 @@ describe("tool source register", () => {
     const msmeTool = TOOLS.find(
       (tool) => tool.slug === "/msme-45-day-payment-due-date-calculator",
     );
+    const supportedInputs = msmeTool?.supportedInputs.join(" ") ?? "";
+    const outputArtifacts = msmeTool?.outputArtifacts.join(" ") ?? "";
+    const reviewChecklist = msmeTool?.seoDepth.reviewChecklist.join(" ") ?? "";
 
     expect(msmeTool?.officialSources.map((source) => source.url)).toContain(
       "https://samadhaan.msme.gov.in/MyMsme/MSEFC/FAQ.aspx",
@@ -68,6 +71,13 @@ describe("tool source register", () => {
     expect(msmeTool?.unsupportedCases.join(" ")).toContain(
       "Does not resolve disputed, partly paid, settled, or admissibility positions.",
     );
+    expect(supportedInputs).toContain("objection");
+    expect(supportedInputs).toContain("Udyam registration date");
+    expect(supportedInputs).toContain("open balance");
+    expect(outputArtifacts).toContain("candidate review marker");
+    expect(reviewChecklist).toContain("candidate marker");
+    expect(reviewChecklist).toContain("Udyam");
+    expect(reviewChecklist.toLowerCase()).not.toContain("statutory due date");
   });
 
   it("documents Review Copy mask report and checklist artifacts without redaction overclaims", () => {
@@ -144,5 +154,28 @@ describe("tool source register", () => {
     expect(reviewChecklist).toContain("incorrect category");
     expect(unsupported).toContain("Does not compute ITR tax payable or refunds.");
     expect(unsupported).toContain("Does not upload AIS feedback or submit portal corrections.");
+  });
+
+  it("documents GST portal evidence fields without outage or relief overclaims", () => {
+    const gstPortalTool = TOOLS.find(
+      (tool) => tool.slug === "/gst-portal-issue-evidence-memo",
+    );
+    const supportedInputs = gstPortalTool?.supportedInputs.join(" ") ?? "";
+    const outputArtifacts = gstPortalTool?.outputArtifacts.join(" ") ?? "";
+    const reviewChecklist = gstPortalTool?.seoDepth.reviewChecklist.join(" ") ?? "";
+    const unsupported = gstPortalTool?.unsupportedCases.join(" ") ?? "";
+
+    expect(supportedInputs).toContain("screenshot hash");
+    expect(supportedInputs).toContain("browser");
+    expect(supportedInputs).toContain("device");
+    expect(outputArtifacts).toContain("user-entered evidence reference checklist");
+    expect(reviewChecklist).toContain("hash");
+    expect(reviewChecklist).toContain("original screenshots");
+    expect(unsupported).toContain("Does not prove the GST portal was globally unavailable.");
+    expect(unsupported).toContain("Does not guarantee extension, waiver, or condonation.");
+    expect(unsupported).toContain("does not compute or verify hashes");
+    expect(unsupported).toContain("Does not accept screenshots, files, PDFs, base64");
+    expect(outputArtifacts.toLowerCase()).not.toContain("complaint-ready");
+    expect(reviewChecklist.toLowerCase()).not.toContain("outage proof");
   });
 });
