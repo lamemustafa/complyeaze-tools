@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
+import { parseDelimitedTable } from "@complyeaze-tools/core";
 import { toolInputClass } from "@complyeaze-tools/ui-react";
 import {
   buildToolReviewArtifact,
   configs,
+  filterWorkbenchColumnMapping,
+  getColumnMappingTargets,
   getToolArtifactDefinition,
   type WorkbenchTool,
-} from "@complyeaze-tools/artifacts";
+} from "./tool-workbench-logic";
 
 type Props = {
   tool: WorkbenchTool;
@@ -21,8 +24,21 @@ export default function ToolWorkbench({ tool }: Props) {
       : "",
   );
   const [strictGstrMatch, setStrictGstrMatch] = useState(false);
+  const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const inputHelpId = "tool-input-help";
   const outputStatusId = "tool-output-status";
+  const parsedInput = useMemo(() => parseDelimitedTable(input), [input]);
+  const mappingTargets = useMemo(
+    () =>
+      parsedInput.headers.length
+        ? getColumnMappingTargets(artifactDefinition, parsedInput.headers)
+        : [],
+    [artifactDefinition, parsedInput.headers],
+  );
+  const effectiveColumnMapping = useMemo(
+    () => filterWorkbenchColumnMapping(columnMapping, mappingTargets, parsedInput.headers),
+    [columnMapping, mappingTargets, parsedInput.headers],
+  );
 
   const artifactResult = useMemo(
     () =>
@@ -35,9 +51,9 @@ export default function ToolWorkbench({ tool }: Props) {
         },
         input,
         asOfDate,
-        options: { strictGstrMatch },
+        options: { strictGstrMatch, columnMapping: effectiveColumnMapping },
       }),
-    [tool, input, asOfDate, strictGstrMatch],
+    [tool, input, asOfDate, strictGstrMatch, effectiveColumnMapping],
   );
   const output = artifactResult.text;
   const blockedOutput = artifactResult.status === "blocked";
@@ -79,6 +95,39 @@ export default function ToolWorkbench({ tool }: Props) {
               Include invoice date, document type, amendment table, and ITC/IMS context when present
             </span>
           </label>
+        ) : null}
+        {mappingTargets.length ? (
+          <div className="column-mapping-panel">
+            <h2>Column mapping</h2>
+            <p>
+              Map detected spreadsheet headers to the expected fields. Mapping
+              happens in this browser before the draft is generated.
+            </p>
+            <p>Detected headers: {parsedInput.originalHeaders.join(", ")}</p>
+            <div className="column-mapping-grid">
+              {mappingTargets.map((target) => (
+                <label key={target.column} className="column-mapping-control">
+                  <span>{target.label}</span>
+                  <select
+                    value={columnMapping[target.column] ?? ""}
+                    onChange={(event) =>
+                      setColumnMapping((current) => ({
+                        ...current,
+                        [target.column]: event.currentTarget.value,
+                      }))
+                    }
+                  >
+                    <option value="">Not mapped</option>
+                    {parsedInput.headers.map((header, index) => (
+                      <option key={`${header}-${index}`} value={header}>
+                        {parsedInput.originalHeaders[index] ?? header}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
+          </div>
         ) : null}
         <label className="field-label" htmlFor="tool-input">
           {config.inputLabel}
