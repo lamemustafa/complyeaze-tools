@@ -68,14 +68,16 @@ export default function ToolWorkbench({ tool }: Props) {
         ) : null}
         {tool.slug === "/gstr-2b-purchase-reconciliation-triage" ? (
           <label className="option-control">
-            <span>Stricter match key</span>
+            <span>Professional context check</span>
             <input
               type="checkbox"
               checked={strictGstrMatch}
               onChange={(event) => setStrictGstrMatch(event.currentTarget.checked)}
               aria-describedby={outputStatusId}
             />
-            <span>Include invoice date and document type when present</span>
+            <span>
+              Include invoice date, document type, amendment table, and ITC/IMS context when present
+            </span>
           </label>
         ) : null}
         <label className="field-label" htmlFor="tool-input">
