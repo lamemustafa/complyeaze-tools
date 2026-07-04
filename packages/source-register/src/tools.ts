@@ -183,12 +183,21 @@ export const TOOLS: ToolMeta[] = [
     accountRequired: false,
     fileUploadRequired: false,
     telemetry: "none",
-    supportedInputs: ["pasted supplier issue rows", "manual purchase-register table"],
+    supportedInputs: [
+      "pasted supplier issue rows",
+      "manual purchase-register table",
+      "optional GSTIN, invoice date, tax period, document type, taxable value, tax amount, and escalation columns",
+    ],
     unsupportedCases: [
       "Does not determine ITC eligibility.",
       "Does not produce GSTR-3B-ready filing numbers.",
     ],
-    outputArtifacts: ["supplier chase text", "email draft", "WhatsApp-ready draft text"],
+    outputArtifacts: [
+      "supplier-wise issue packet",
+      "email draft",
+      "WhatsApp-ready summary",
+      "manual send checklist",
+    ],
     officialSources: [gstr2bManual],
     relatedSlugs: [
       "/gstr-2b-purchase-reconciliation-triage",
@@ -198,12 +207,12 @@ export const TOOLS: ToolMeta[] = [
       "Run recurring reconciliation, supplier tasks, IMS tracking, and review workflow in Axal.",
     seoDepth: {
       inputGuide: [
-        "Use one row per supplier issue with supplier, invoice, amount, and status.",
-        "Add GSTIN, invoiceDate, and taxAmount when available so the draft is easier for vendors to verify.",
+        "Use one row per supplier issue with supplier, invoice, and status.",
+        "Add GSTIN, invoiceDate, taxPeriod, documentType, taxableValue, taxAmount, and escalationLevel when available so the draft is easier for vendors to verify.",
       ],
       exampleWorkflow: [
         "Paste missing or mismatched invoices from a reconciliation sheet.",
-        "Review the supplier-wise grouped draft and remove rows that should not be chased.",
+        "Review the supplier-wise email and WhatsApp-ready draft and remove rows that should not be chased.",
         "Send the final text through your normal professional communication channel.",
       ],
       commonMistakes: [
@@ -211,7 +220,7 @@ export const TOOLS: ToolMeta[] = [
         "Using a generic message when the supplier needs exact invoice, date, and amount context.",
       ],
       reviewChecklist: [
-        "Confirm invoice number, date, GSTIN, and tax amount against books.",
+        "Confirm invoice number, date, GSTIN, tax period, document type, taxable value, and tax amount against books.",
         "Separate missing invoices from value mismatches before sending.",
         "Record supplier responses in Axal or another controlled workflow when follow-up becomes recurring.",
       ],

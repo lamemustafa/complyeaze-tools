@@ -37,6 +37,13 @@ const gstr2bTool: WorkbenchTool = {
   unsupportedCases: ["Does not determine ITC eligibility."],
 };
 
+const gstrFollowUpTool: WorkbenchTool = {
+  slug: "/gstr-2b-missing-invoice-vendor-follow-up",
+  h1: "GSTR-2B Missing Invoice Vendor Follow-up Generator",
+  officialSources: gstr2bTool.officialSources,
+  unsupportedCases: ["Does not determine ITC eligibility."],
+};
+
 describe("tool output artifact contract", () => {
   it("includes row-count, source, boundary, and trust links for every parsed tool output", () => {
     for (const [slug, config] of Object.entries(configs)) {
@@ -265,5 +272,21 @@ describe("tool output artifact contract", () => {
       "Rows parsed: 2; rows accepted for output: 2; blank rows skipped: 0; invalid rows needing review: 0.",
     );
     expect(output).not.toContain("extra-in-2b | Acme Components");
+  });
+
+  it("uses rich public sample fields for supplier follow-up drafts", () => {
+    const output = buildOutput(
+      gstrFollowUpTool,
+      configs["/gstr-2b-missing-invoice-vendor-follow-up"].sample,
+      configs["/gstr-2b-missing-invoice-vendor-follow-up"],
+      "",
+    );
+
+    expect(output).toContain("Email draft");
+    expect(output).toContain("WhatsApp-ready summary");
+    expect(output).toContain("GSTIN: 27ABCDE1234F1Z5");
+    expect(output).toContain("Tax period: May 2026");
+    expect(output).toContain("Document type: Tax Invoice");
+    expect(output).toContain("Tax amount: 18000");
   });
 });

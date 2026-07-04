@@ -13,9 +13,9 @@ export const configs: Record<string, WorkbenchConfig> = {
     inputLabel: "Supplier issue rows",
     outputLabel: "Supplier follow-up draft",
     guidance:
-      "Paste rows with supplier, invoice, amount, and status. This creates follow-up text only, not ITC eligibility conclusions.",
+      "Paste rows with supplier, GSTIN, invoice, invoiceDate, taxPeriod, documentType, taxableValue, taxAmount, status, and optional escalationLevel. This creates follow-up text only, not ITC eligibility conclusions.",
     sample:
-      "supplier,invoice,amount,status\nAcme Components,INV-102,125000,missing in 2B\nNorthline Supplies,INV-205,42000,value mismatch",
+      "supplier,gstin,invoice,invoiceDate,taxPeriod,documentType,taxableValue,taxAmount,status,escalationLevel\nAcme Components,27ABCDE1234F1Z5,INV-102,2026-05-01,May 2026,Tax Invoice,100000,18000,missing in 2B,first reminder\nNorthline Supplies,29ABCDE1234F1Z7,INV-205,2026-06-01,June 2026,Tax Invoice,40000,7200,value mismatch,second reminder",
   },
   "/gstr-2b-purchase-reconciliation-triage": {
     inputLabel: "Purchase and GSTR-2B rows",
