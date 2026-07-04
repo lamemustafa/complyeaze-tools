@@ -8,6 +8,12 @@ const officialHosts = [
   "tutorial.gst.gov.in",
   "www.dcmsme.gov.in",
   "www.incometax.gov.in",
+  "taxinformation.cbic.gov.in",
+  "www.mahagst.gov.in",
+  "static.incometax.gov.in",
+  "www.indiacode.nic.in",
+  "www.labour.gov.in",
+  "maharera.maharashtra.gov.in",
 ];
 
 export function validateToolMeta(

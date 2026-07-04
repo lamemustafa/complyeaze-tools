@@ -1,0 +1,189 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { publicSiteUrl } from "../lib/public-url";
+
+const repositoryUrl = "https://github.com/lamemustafa/sanchika";
+const packages = [
+  {
+    name: "@sanchika/tokens",
+    scope: "OKLCH theme variables, semantic roles, and motion variables.",
+  },
+  {
+    name: "@sanchika/primitives",
+    scope: "React-ready contracts for accessible base components.",
+  },
+  {
+    name: "@sanchika/patterns",
+    scope: "Compliance workflow patterns for evidence, review, and source posture.",
+  },
+  {
+    name: "@sanchika/gallery",
+    scope: "Inspectable examples for package consumers and reviewers.",
+  },
+];
+const verificationCommands = [
+  "pnpm validate",
+  "pnpm typecheck",
+  "pnpm build",
+  "pnpm typecheck:api",
+  "pnpm artifact:check",
+  "pnpm consumer:check",
+  "pnpm publish:tarball-check",
+  "pnpm verify",
+];
+const adoptionSteps = [
+  "ComplyEaze uses Sanchika first for internal compliance UI conventions.",
+  "Axal follows with workflow surfaces that need shared review posture.",
+  "Pack adopts only portable contracts that preserve its no-login extension boundary.",
+  "Tools adopts public documentation and utility surfaces after Pack.",
+];
+const trustBoundaries = [
+  {
+    title: "Docs before claims",
+    body: "Public docs describe what exists now, not future support.",
+  },
+  {
+    title: "No tenant data",
+    body: "Packages must not read credentials, clients, documents, or workspaces.",
+  },
+  {
+    title: "Managed history",
+    body: "Repository settings and branch protection stay reproducible.",
+  },
+  {
+    title: "Reviewable output",
+    body: "Built artifacts and tarballs must be reproducible by consumers.",
+  },
+];
+---
+
+<BaseLayout
+  title="Sanchika Docs | ComplyEaze Tools"
+  description="Standalone Sanchika documentation for the ComplyEaze design-system package family, adoption order, verification gates, and trust boundary."
+>
+  <section class="hero">
+    <div>
+      <p class="domain-line">tools.complyeaze.com/sanchika</p>
+      <h1>Sanchika design-system docs.</h1>
+      <p class="lede">
+        Sanchika is the package family for shared compliance UI tokens,
+        primitives, workflow patterns, and reviewable gallery examples across
+        ComplyEaze surfaces.
+      </p>
+      <div class="trust-strip" aria-label="Sanchika trust posture">
+        <span>Static documentation</span>
+        <span>No account required</span>
+        <span>No file upload required</span>
+        <span>Reviewable package contracts</span>
+      </div>
+    </div>
+    <aside class="source-card">
+      <h2>Boundary</h2>
+      <p>
+        Sanchika shapes interface contracts. Axal owns saved client data,
+        documents, tasks, audit trails, and recurring workflows.
+      </p>
+      <p>
+        Files are processed in your browser. No account or file upload required.
+      </p>
+    </aside>
+  </section>
+
+  <section class="workflow-section" aria-labelledby="packages-heading">
+    <div class="section-heading">
+      <p class="domain-line">Packages</p>
+      <h2 id="packages-heading">Package scope stays narrow.</h2>
+      <p>
+        Each package has one reason to change. Consumers should be able to adopt
+        tokens, primitives, patterns, or gallery examples independently.
+      </p>
+    </div>
+    <div class="workflow-grid">
+      {packages.map((pkg) => (
+        <article class="workflow-panel">
+          <h3>{pkg.name}</h3>
+          <p>{pkg.scope}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="workflow-section" aria-labelledby="adoption-heading">
+    <div class="section-heading">
+      <p class="domain-line">Adoption</p>
+      <h2 id="adoption-heading">Adopt from private product surfaces outward.</h2>
+      <p>
+        The order keeps public surfaces conservative and avoids turning Tools
+        into a persistence, collaboration, or workflow product.
+      </p>
+    </div>
+    <div class="evidence-table-wrap">
+      <table class="evidence-table evidence-table-compact">
+        <thead>
+          <tr>
+            <th scope="col">Step</th>
+            <th scope="col">Adoption rule</th>
+          </tr>
+        </thead>
+        <tbody>
+          {adoptionSteps.map((step, index) => (
+            <tr>
+              <th scope="row">{index + 1}</th>
+              <td>{step}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="workflow-section" aria-labelledby="verification-heading">
+    <div class="section-heading">
+      <p class="domain-line">Verification</p>
+      <h2 id="verification-heading">Package output must be reproducible.</h2>
+      <p>
+        Sanchika changes should pass package validation, API type checks,
+        consumer checks, tarball checks, and the combined verification gate.
+      </p>
+    </div>
+    <div class="workflow-grid">
+      {verificationCommands.map((command) => (
+        <article class="workflow-panel">
+          <h3><code>{command}</code></h3>
+          <p>Required before treating package output as ready for consumers.</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="workflow-section" aria-labelledby="trust-heading">
+    <div class="section-heading">
+      <p class="domain-line">Trust boundary</p>
+      <h2 id="trust-heading">Keep public claims tied to current artifacts.</h2>
+      <p>
+        The public route documents the package family and its boundaries. It does
+        not promise future components, official certification, or product
+        persistence.
+      </p>
+    </div>
+    <div class="workflow-grid">
+      {trustBoundaries.map((item) => (
+        <article class="workflow-panel">
+          <h3>{item.title}</h3>
+          <p>{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="upgrade-band" aria-label="Sanchika source repository">
+    <div>
+      <h2>Review the package source before adopting it.</h2>
+      <p>
+        The Sanchika repository is the source of truth for package contracts,
+        branch protection, generated artifacts, and publish checks.
+      </p>
+    </div>
+    <a class="text-button" href={repositoryUrl}>Open Sanchika source</a>
+  </section>
+</BaseLayout>

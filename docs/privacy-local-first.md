@@ -25,3 +25,10 @@ ComplyEaze Tools is local-first for tool input handling:
 Do not describe this as zero data collection, no data leaves the device, DPDP
 compliant, forensic redaction, or legally irreversible redaction. Those claims
 are intentionally outside the V0 evidence boundary.
+
+Do not paste real credentials, OTPs, CAPTCHA answers, GSTINs, Aadhaar numbers,
+bank details, portal cookies, portal screenshots, full notices, ledgers, or
+taxpayer documents into public issues, screenshots, fixtures, or support
+threads. GST portal evidence memo fields for screenshot references and hashes
+are manual text references only; the tool does not inspect, upload,
+authenticate, or verify screenshots.
