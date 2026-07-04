@@ -91,4 +91,14 @@ describe("tool source register", () => {
     expect(reviewCopyTool?.seoDepth.faqItems.map((item) => item.answer).join(" ").toLowerCase())
       .not.toContain("forensic redaction");
   });
+
+  it("documents Review Copy residual risks for partial identifiers and client context", () => {
+    const reviewCopyTool = TOOLS.find((tool) => tool.slug === "/privacy/review-copy-builder");
+    const unsupported = reviewCopyTool?.unsupportedCases.join(" ") ?? "";
+
+    expect(unsupported).toContain("partial, non-standard, or contextual identifiers");
+    expect(unsupported).toContain("file names");
+    expect(unsupported).toContain("client references");
+    expect(unsupported).toContain("screenshots, PDFs, or scanned text");
+  });
 });

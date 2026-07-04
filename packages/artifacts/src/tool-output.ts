@@ -192,7 +192,7 @@ function buildReviewCopyOutput(
     .map((entry) => `- ${entry.key}: ${entry.count}`);
   const notFoundLines = report.checked
     .filter((entry) => entry.status === "checked-not-found")
-    .map((entry) => `- ${entry.key}: checked, not found`);
+    .map((entry) => `- ${entry.key}: supported pattern did not match`);
 
   return [
     "Review copy draft",
@@ -201,9 +201,14 @@ function buildReviewCopyOutput(
     report.text,
     "",
     "Found and masked",
-    ...(foundLines.length ? foundLines : ["- No supported identifier-like patterns found."]),
+    ...(foundLines.length
+      ? foundLines
+      : [
+          "- No supported patterns matched.",
+          "- This is not an all-clear; manually inspect before sharing.",
+        ]),
     "",
-    "Checked, not found",
+    "Supported pattern checks with no match",
     ...notFoundLines,
     "",
     "Not checked automatically",
