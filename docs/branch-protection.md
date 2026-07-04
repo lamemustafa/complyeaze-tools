@@ -9,6 +9,10 @@ GitHub branch protection rule or repository ruleset with these requirements:
   `.github/workflows/review-gate.yml`; this blocks unresolved current-head
   review findings without requiring an approving reviewer. Branch protection
   should block on review findings, not on an approving reviewer count.
+- Require pull request reviews with `required_approving_review_count: 0`.
+  This does not create a self-review approval deadlock, but it lets GitHub
+  natively block pending or rejected reviews immediately. The Review gate then
+  handles unresolved current-head review threads and bot-review freshness.
 - After the first successful run, also require the `Analyze` and
   `Review dependency changes` check contexts so CodeQL and dependency review
   block unsafe pull requests.
@@ -16,8 +20,27 @@ GitHub branch protection rule or repository ruleset with these requirements:
 - Require conversation resolution before merge. Codex and other automated review
   comments count through unresolved review threads, not through an approving
   reviewer requirement.
+- If an unresolved review thread is resolved but GitHub does not rerun the
+  custom check automatically, rerun the `Review gate` check from the Checks UI
+  before merging.
+- The `Review gate` workflow intentionally runs on `pull_request_target`,
+  schedule, and manual dispatch. It updates the `Review gate` commit status for
+  PR heads from trusted default-branch code without running PR-controlled
+  workflow code. Native required pull request reviews with zero required
+  approvals are the immediate guard for pending or rejected reviews; the
+  scheduled Review gate sweep is only the trusted status-refresh backstop after
+  review threads are resolved, reviews are dismissed, or old statuses need to be
+  corrected. Targeted PR runs may pass after waiting for Codex even when no
+  formal bot review object is present; they still fail on unresolved threads and
+  requested-changes reviews. Scheduled all-open sweeps must not use that
+  missing-review bypass. Do not add
+  `pull_request_review` or `pull_request_review_comment` triggers unless the
+  replacement design is proven to execute trusted default-branch workflow code.
+  Manual dispatches should normally run from `main`; selecting another ref is a
+  maintainer-only recovery path for workflow-transition PRs.
 - Do not require an approving human review while the repo has only one eligible
-  maintainer. A required self-review creates a permanent merge deadlock.
+  maintainer. A required self-review creates a permanent merge deadlock. Keep the
+  required review count at zero unless a second eligible maintainer is active.
 - Block force pushes and branch deletion.
 - Prefer squash merge and delete branches after merge.
 - Keep admin bypass disabled except for documented break-glass recovery.
@@ -44,6 +67,7 @@ Suggested GitHub checks:
 Required status check: verify
 Required review findings check: Review gate
 Required security checks: Analyze, Review dependency changes
+Required pull request reviews: enabled with required approving reviews = 0
 Required conversation gate: all current-head review threads resolved
 Sensitive owner paths: .github/, deploy/, packages/source-register/,
 packages/safety/, infra/cloudflare/, privacy/security/source pages,
@@ -74,6 +98,9 @@ Ruleset target:
   Review dependency changes.
 - Require branches to be up to date before merging: enabled.
 - Require conversation resolution before merging: enabled.
-- Required approving reviews / Code Owner reviews: disabled until a backup
-  maintainer or valid tools-maintainers team exists.
+- Require pull request reviews before merging: enabled.
+- Required approving reviews: 0 until a backup maintainer or valid
+  tools-maintainers team exists.
+- Code Owner reviews: disabled until a backup maintainer or valid
+  tools-maintainers team exists.
 ```
