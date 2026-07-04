@@ -38,6 +38,7 @@ describe("review findings gate", () => {
     expect(workflow).not.toContain("github.event.pull_request.base.sha || github.sha");
     expect(workflow).toContain("node scripts/sync-review-gate-status.mjs");
     expect(workflow).toContain("name: Review gate status sync");
+    expect(workflow).toContain("Review gate scripts are not present on the trusted default branch yet");
     expect(workflow).toContain("--strict-head-review");
     expect(workflow).toContain("--required-review-author chatgpt-codex-connector");
     expect(workflow).toContain("--skip-pending-status");
