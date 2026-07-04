@@ -11,6 +11,7 @@ import {
   buildTaxStatementMismatchReview,
   buildTdsSectionTranslation,
 } from "@complyeaze-tools/core";
+import { escapeSpreadsheetCell } from "@complyeaze-tools/safety";
 import { requirePreparedTable, type ToolArtifactBuilderContext } from "./tool-builder-types";
 import { buildFooter } from "./tool-output-footer";
 import type { ToolArtifactResult } from "./tool-output-types";
@@ -128,6 +129,11 @@ export function buildGstr2bReconciliationArtifact({
             .filter((line): line is string => Boolean(line))
             .join("\n"),
       ),
+      "",
+      "Exception table - first-pass review only",
+      "This is a browser-local first-pass exception table for professional review. It does not determine ITC eligibility, filing positions, IMS actions, tax-disallowance positions, or books adjustments.",
+      "Exception table excludes rows matched within tolerance.",
+      formatGstr2bExceptionTable(summary.issues),
       buildFooter(tool, definition, table.parsed, table.prepared, {
         tolerance: formatTolerance(tolerance),
         matchMode: options.strictGstrMatch
@@ -349,6 +355,85 @@ function formatAmount(value: number | null) {
   return value === null ? "-" : value.toFixed(2);
 }
 
+function formatGstr2bExceptionTable(
+  issues: ReturnType<typeof buildGstr2bReconciliationTriage>["issues"],
+): string {
+  const headers = [
+    "status",
+    "bucket",
+    "supplier",
+    "invoice",
+    "invoiceDate",
+    "documentType",
+    "amendmentContext",
+    "purchaseTaxAmount",
+    "gstr2bTaxAmount",
+    "difference",
+    "contextFlags",
+    "reviewAction",
+  ];
+  const rows = issues
+    .filter((issue) => issue.status !== "matched")
+    .map((issue) => [
+      issue.status,
+      gstr2bExceptionBucket(issue.status),
+      issue.supplier,
+      issue.invoice,
+      issue.invoiceDate,
+      issue.documentType,
+      issue.amendmentType,
+      issue.purchaseTaxAmount,
+      issue.gstr2bTaxAmount,
+      issue.difference,
+      issue.contextFlags.join("; "),
+      gstr2bExceptionAction(issue.status),
+    ]);
+
+  if (!rows.length) {
+    return "No exception rows surfaced from the pasted rows that passed domain checks. Review matched rows and source records before relying on the draft.";
+  }
+
+  return [headers, ...rows].map((fields) => fields.map(formatCsvField).join(",")).join("\n");
+}
+
+function gstr2bExceptionBucket(
+  status: ReturnType<typeof buildGstr2bReconciliationTriage>["issues"][number]["status"],
+): string {
+  switch (status) {
+    case "missing-in-2b":
+      return "Missing in GSTR-2B";
+    case "extra-in-2b":
+      return "Extra in GSTR-2B";
+    case "value-mismatch":
+      return "Tax value mismatch";
+    case "duplicate-key":
+      return "Duplicate match key";
+    case "context-review":
+      return "ITC/IMS context review";
+    case "matched":
+      return "Matched within tolerance";
+  }
+}
+
+function gstr2bExceptionAction(
+  status: ReturnType<typeof buildGstr2bReconciliationTriage>["issues"][number]["status"],
+): string {
+  switch (status) {
+    case "missing-in-2b":
+      return "Check supplier filing, amendment table, period, and invoice-number mapping before taking any ITC position.";
+    case "extra-in-2b":
+      return "Trace whether this is unbooked, period-shifted, duplicate, or needs books/vendor follow-up.";
+    case "value-mismatch":
+      return "Compare tax components, debit/credit notes, amendments, and rounding tolerance before adjustment.";
+    case "duplicate-key":
+      return "Resolve duplicate purchase/GSTR-2B rows before using missing, extra, or mismatch buckets.";
+    case "context-review":
+      return "Review GSTR-2B ITC availability, IMS status, amendment, document type, and reverse-charge context manually.";
+    case "matched":
+      return "Review matched rows against source records before relying on the draft.";
+  }
+}
+
 function formatSchedule112AExport(rows: ReturnType<typeof buildSchedule112ARows>): string {
   const headers = [
     "scripName",
@@ -388,8 +473,8 @@ function formatSchedule112AExport(rows: ReturnType<typeof buildSchedule112ARows>
 
 function formatCsvField(value: string | number | null): string {
   if (value === null) return "";
-  const text = typeof value === "number" ? formatExportNumber(value) : value;
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  const text = typeof value === "number" ? formatExportNumber(value) : escapeSpreadsheetCell(value);
+  return /[",;\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
 function formatExportNumber(value: number): string {
