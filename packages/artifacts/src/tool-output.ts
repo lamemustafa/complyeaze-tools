@@ -76,7 +76,7 @@ export function buildToolReviewArtifact({
     }
     const review = buildMsmePayableReview(
       prepared.acceptedRows,
-      new Date(`${asOfDate}T00:00:00`),
+      new Date(`${asOfDate}T00:00:00Z`),
     );
     return {
       status: "ready",
@@ -252,11 +252,18 @@ function formatAmount(value: number | null) {
 
 function formatMsmeReviewRow(row: ReturnType<typeof buildMsmePayableReview>[number]): string[] {
   return [
-    `${row.vendor} | review-start age ${row.ageDays ?? "missing"} days | review date ${row.reviewDate ?? "missing"} | days past review date ${row.daysPastReviewDate ?? "missing"} | ${row.possibleFlag}`,
-    `Review basis: ${row.reviewBasis}`,
-    `Payment status: ${row.paymentStatus}; Udyam evidence entered: ${row.udyamEvidenceStatus}`,
-    row.evidenceChecks.length ? `Review checks: ${row.evidenceChecks.join(" ")}` : null,
+    `${row.vendor} | review-start age ${row.ageDays ?? "missing"} days | candidate marker ${row.candidateReviewMarkerDate ?? "missing"} | days past candidate marker ${row.daysPastCandidateMarker ?? "missing"} | ${row.possibleFlag}`,
+    `Review start basis: ${row.reviewStartSource}`,
+    `Threshold basis: ${row.reviewBasis}`,
+    `Payment status: ${row.paymentStatus}; open balance entered: ${formatOptionalAmount(row.openBalance)}; Udyam evidence entered: ${row.udyamEvidenceStatus}`,
+    row.udyamRegistrationDate ? `Udyam registration date entered: ${row.udyamRegistrationDate}` : null,
+    row.missingFactChecks.length ? `Missing facts: ${row.missingFactChecks.join(" ")}` : null,
+    row.nextReviewActions.length ? `Next review actions: ${row.nextReviewActions.join(" ")}` : null,
   ].filter((line): line is string => Boolean(line));
+}
+
+function formatOptionalAmount(value: number | null): string {
+  return value === null ? "not-entered" : value.toFixed(2);
 }
 
 const msmeReviewCaveats = [

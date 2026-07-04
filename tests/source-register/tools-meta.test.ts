@@ -55,6 +55,9 @@ describe("tool source register", () => {
     const msmeTool = TOOLS.find(
       (tool) => tool.slug === "/msme-45-day-payment-due-date-calculator",
     );
+    const supportedInputs = msmeTool?.supportedInputs.join(" ") ?? "";
+    const outputArtifacts = msmeTool?.outputArtifacts.join(" ") ?? "";
+    const reviewChecklist = msmeTool?.seoDepth.reviewChecklist.join(" ") ?? "";
 
     expect(msmeTool?.officialSources.map((source) => source.url)).toContain(
       "https://samadhaan.msme.gov.in/MyMsme/MSEFC/FAQ.aspx",
@@ -68,6 +71,13 @@ describe("tool source register", () => {
     expect(msmeTool?.unsupportedCases.join(" ")).toContain(
       "Does not resolve disputed, partly paid, settled, or admissibility positions.",
     );
+    expect(supportedInputs).toContain("objection");
+    expect(supportedInputs).toContain("Udyam registration date");
+    expect(supportedInputs).toContain("open balance");
+    expect(outputArtifacts).toContain("candidate review marker");
+    expect(reviewChecklist).toContain("candidate marker");
+    expect(reviewChecklist).toContain("Udyam");
+    expect(reviewChecklist.toLowerCase()).not.toContain("statutory due date");
   });
 
   it("documents Review Copy mask report and checklist artifacts without redaction overclaims", () => {

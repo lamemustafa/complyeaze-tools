@@ -99,9 +99,9 @@ export const TOOLS: ToolMeta[] = [
   {
     slug: "/msme-45-day-payment-due-date-calculator",
     h1: "MSME Payables Age Triage",
-    seoTitle: "MSME 45-Day Payables Age Triage | Udyam Evidence",
+    seoTitle: "MSME Payables Candidate Marker Triage | Udyam Evidence",
     metaDescription:
-      "Check possible MSME 15/45-day payment flags and prepare Udyam evidence requests before professional review.",
+      "Prepare MSME payables candidate-marker review notes with agreement, objection, payment, and Udyam evidence prompts.",
     title: "MSME Payables Age Triage",
     status: "mvp",
     audiences: ["MSMEs", "CFOs", "founders", "CAs", "CSs", "CMAs"],
@@ -112,7 +112,7 @@ export const TOOLS: ToolMeta[] = [
     supportedInputs: [
       "pasted CSV/TSV rows",
       "manual payables table",
-      "optional agreement, payment, dispute, and Udyam evidence columns",
+      "optional agreement, payment, objection, dispute, Udyam evidence, Udyam registration date, and open balance context columns",
     ],
     unsupportedCases: [
       "Does not verify Udyam registration or supplier MSE status on government portals.",
@@ -121,8 +121,9 @@ export const TOOLS: ToolMeta[] = [
       "Does not prepare an MSEFC or ODR filing package.",
     ],
     outputArtifacts: [
-      "plain-text payables age review draft",
+      "plain-text payables candidate review marker draft",
       "Udyam confirmation request text",
+      "missing-facts checklist",
       "management review note",
     ],
     officialSources: [msmeSamadhaan, msmeSamadhaanFaq, dcmsmeFaq],
@@ -134,8 +135,8 @@ export const TOOLS: ToolMeta[] = [
       "Track recurring MSME payables, evidence, reminders, and review tasks in Axal.",
     seoDepth: {
       inputGuide: [
-        "Use one row per payable with vendor, amount, and acceptanceDate or deemedAcceptanceDate.",
-        "Optional columns include writtenAgreement, agreedPaymentDays, paymentDate, paidAmount, disputeStatus, and udyamEvidence.",
+        "Use one row per payable with vendor, amount, and acceptanceDate or deemedAcceptanceDate. Invoice date is accepted only as a screening fallback when acceptance evidence is missing.",
+        "Optional columns include writtenAgreement, agreedPaymentDays, paymentDate, paidAmount, open balance context, objectionRaisedDate, objectionResolvedDate, disputeStatus, udyamEvidence, and Udyam registration date.",
         "Use YYYY-MM-DD dates where possible; blank or invalid dates are kept for manual review.",
       ],
       exampleWorkflow: [
@@ -145,12 +146,12 @@ export const TOOLS: ToolMeta[] = [
       ],
       commonMistakes: [
         "Treating invoice date as acceptance date when acceptance or deemed acceptance needs separate review.",
-        "Using the output as an interest/default decision without checking supplier status and agreement terms.",
+        "Using the output as an interest, default, tax, or filing decision without checking supplier status, prior Udyam evidence, agreement terms, and dispute/payment context.",
       ],
       reviewChecklist: [
-        "Confirm whether the supplier is an MSME and whether Udyam evidence is available.",
-        "Check whether written payment terms exist and whether the acceptance date is supportable.",
-        "Review disputed, paid, or partly paid invoices separately before sending a management note.",
+        "Confirm whether the supplier is an MSME and whether Udyam evidence, including Udyam registration date context, is available.",
+        "Check whether written payment terms exist and whether the acceptance/deemed acceptance date behind the candidate marker is supportable.",
+        "Review objection, disputed, paid, partly paid, and open balance context separately before sending a management note.",
       ],
       sourceExplainer:
         "MSME source links are used to frame delayed-payment review boundaries, Udyam evidence prompts, and dispute caveats, not to decide final interest, tax, or recovery outcomes.",

@@ -26,4 +26,8 @@ export {
   type TaxStatementMismatchReview,
 } from "./ais";
 export { buildGstPortalEvidenceMemo } from "./gst-portal-evidence";
-export { buildMsmePayableReview, type MsmePayableReview } from "./msme";
+export {
+  buildMsmePayableReview,
+  type MsmePayableReview,
+  type MsmeReviewStartSource,
+} from "./msme";

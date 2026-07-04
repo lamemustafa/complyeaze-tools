@@ -16,7 +16,7 @@ const msmeTool: WorkbenchTool = {
       lastReviewedAt: "2026-07-02",
     },
   ],
-  unsupportedCases: ["Does not decide final interest, disallowance, or legal default."],
+  unsupportedCases: ["Does not decide final interest, tax, or recovery positions."],
 };
 
 const reviewCopyTool: WorkbenchTool = {
@@ -37,7 +37,7 @@ const reviewCopyTool: WorkbenchTool = {
 };
 
 describe("tool workbench logic", () => {
-  it("surfaces MSME review basis, review dates, and evidence checks in the draft", () => {
+  it("surfaces MSME review basis, candidate marker, and evidence checks in the draft", () => {
     const output = buildOutput(
       msmeTool,
       [
@@ -50,8 +50,8 @@ describe("tool workbench logic", () => {
 
     expect(output).toContain("MSME payables first-pass triage draft");
     expect(output).toContain("first-pass");
-    expect(output).toContain("review date 2026-05-17");
-    expect(output).toContain("No written agreement: appointed-day review date after 15 days");
+    expect(output).toContain("candidate marker 2026-05-17");
+    expect(output).toContain("No written agreement: candidate marker uses the day after 15 days");
     expect(output).toContain("Collect or verify Udyam/MSE evidence");
     expect(output).toContain("Udyam evidence entered: missing");
     expect(output).toContain("Dates and statuses are based only on pasted rows.");
@@ -63,6 +63,12 @@ describe("tool workbench logic", () => {
     expect(output).toContain("Detected delimiter: comma");
     expect(output).toContain("Input headers: vendor, amount, acceptanceDate, writtenAgreement, agreedPaymentDays, udyamEvidence");
     expect(output.toLowerCase()).not.toContain("interest payable");
+    expect(output.toLowerCase()).not.toContain("statutory interest calculated");
+    expect(output.toLowerCase()).not.toContain("43b(h) compliant");
+    expect(output.toLowerCase()).not.toContain("eligible to file");
+    expect(output.toLowerCase()).not.toContain("msefc-ready");
+    expect(output.toLowerCase()).not.toContain("admissible claim");
+    expect(output.toLowerCase()).not.toContain("recoverable amount");
     expect(output.toLowerCase()).not.toContain("verified udyam");
   });
 
