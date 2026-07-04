@@ -120,4 +120,27 @@ describe("tool source register", () => {
     expect(reviewChecklist).toContain("amendment");
     expect(unsupported).toContain("Does not determine ITC eligibility or filing positions.");
   });
+
+  it("documents AIS/Form 26AS structured mismatch fields without filing overclaims", () => {
+    const aisTool = TOOLS.find((tool) => tool.slug === "/ais-form-26as-mismatch-checker");
+    const supportedInputs = aisTool?.supportedInputs.join(" ") ?? "";
+    const outputArtifacts = aisTool?.outputArtifacts.join(" ") ?? "";
+    const reviewChecklist = aisTool?.seoDepth.reviewChecklist.join(" ") ?? "";
+    const unsupported = aisTool?.unsupportedCases.join(" ") ?? "";
+
+    expect(supportedInputs).toContain("deductor");
+    expect(supportedInputs).toContain("TAN");
+    expect(supportedInputs).toContain("section");
+    expect(supportedInputs).toContain("income category");
+    expect(supportedInputs).toContain("TDS/TCS");
+    expect(supportedInputs).toContain("amount in books");
+    expect(supportedInputs).toContain("mismatch category");
+    expect(supportedInputs).toContain("review action");
+    expect(outputArtifacts).toContain("deductor-wise verification draft");
+    expect(reviewChecklist).toContain("duplicate");
+    expect(reviewChecklist).toContain("omitted");
+    expect(reviewChecklist).toContain("incorrect category");
+    expect(unsupported).toContain("Does not compute ITR tax payable or refunds.");
+    expect(unsupported).toContain("Does not upload AIS feedback or submit portal corrections.");
+  });
 });
