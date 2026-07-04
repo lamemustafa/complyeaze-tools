@@ -71,7 +71,7 @@ Generate `TOOLS_PROD_KUBECONFIG_B64` from the
 `complyeaze-tools-deployer-token` service-account token, then set it with:
 
 ```bash
-printf '%s' "$TOOLS_PROD_KUBECONFIG_B64" | gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools --body-file -
+printf '%s' "$TOOLS_PROD_KUBECONFIG_B64" | gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools
 ```
 
 After first deployment, schedule the rotation issue workflow and follow

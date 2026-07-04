@@ -107,4 +107,19 @@ describe("buildTaxStatementMismatchReview", () => {
       "reported-not-in-records",
     ]);
   });
+
+  it("preserves descriptive missing-in-books and missing-in-AIS labels", () => {
+    const review = buildTaxStatementMismatchReview(
+      [
+        "source,category,recordsCategory,amount,recordsAmount,mismatchCategory",
+        "AIS,Interest,Interest,5400,0,amount missing in books",
+        "AIS,Interest,Interest,0,5000,missing from AIS",
+      ].join("\n"),
+    );
+
+    expect(review.map((row) => row.mismatchCategory)).toEqual([
+      "reported-not-in-records",
+      "records-not-in-statement",
+    ]);
+  });
 });

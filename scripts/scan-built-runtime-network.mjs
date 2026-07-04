@@ -22,7 +22,7 @@ export const forbiddenBuiltRuntimePatterns = [
   { label: "EventSource", pattern: /\bEventSource\b/ },
   { label: "serviceWorker.register", pattern: /\bserviceWorker\.register\b/ },
   { label: "remote dynamic import", pattern: /\bimport\s*\(\s*["'](?:https?:)?\/\// },
-  { label: "remote static import", pattern: /\bimport\s+(?:(?:[^"';]+?)\s+from\s+)?["'](?:https?:)?\/\// },
+  { label: "remote static import", pattern: /\b(?:import|export)\s+(?:(?:[^"';]+?)\s+from\s+)?["'](?:https?:)?\/\// },
 ];
 
 export function listBuiltRuntimeFiles(distDir = join(process.cwd(), "apps", "site", "dist")) {

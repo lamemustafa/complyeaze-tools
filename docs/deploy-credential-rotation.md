@@ -31,7 +31,7 @@ environment variable or password manager prompt, then stream it to GitHub
 without putting the secret value in the command line:
 
 ```bash
-printf '%s' "$TOOLS_PROD_KUBECONFIG_B64" | gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools --body-file -
+printf '%s' "$TOOLS_PROD_KUBECONFIG_B64" | gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools
 ```
 
 ## Validation

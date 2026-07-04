@@ -158,7 +158,8 @@ function normalizeMismatchCategory(value: string): TaxStatementMismatchCategory 
       "reportednotinbooks",
       "missinginbooks",
       "omittedinbooks",
-    ].includes(normalized)
+    ].includes(normalized) ||
+    (normalized.includes("missing") && (normalized.includes("book") || normalized.includes("record")))
   ) {
     return "reported-not-in-records";
   }
@@ -170,7 +171,9 @@ function normalizeMismatchCategory(value: string): TaxStatementMismatchCategory 
       "missinginais",
       "missinginform26as",
       "omittedinstatement",
-    ].includes(normalized)
+    ].includes(normalized) ||
+    (normalized.includes("missing") &&
+      (normalized.includes("statement") || normalized.includes("ais") || normalized.includes("26as")))
   ) {
     return "records-not-in-statement";
   }

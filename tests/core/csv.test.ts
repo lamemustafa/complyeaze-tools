@@ -122,6 +122,16 @@ describe("parseDelimitedTable", () => {
       },
     ]);
   });
+
+  it("honors whitespace before quoted CSV cells", () => {
+    const parsed = parseDelimitedTable('supplier,note\nAcme, "needs, review"');
+
+    expect(parsed.rows[0]).toEqual({
+      supplier: "Acme",
+      note: "needs, review",
+    });
+    expect(parsed.issues).toEqual([]);
+  });
 });
 
 describe("normalizeHeaderKey", () => {

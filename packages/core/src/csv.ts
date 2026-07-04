@@ -197,7 +197,8 @@ function parseRecords(
         lastCharWasRecordBreak = false;
         continue;
       }
-      if (current.length === 0) {
+      if (current.length === 0 || /^\s+$/.test(current)) {
+        current = "";
         quoted = true;
         lastCharWasRecordBreak = false;
         continue;

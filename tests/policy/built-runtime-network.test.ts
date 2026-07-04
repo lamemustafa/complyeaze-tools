@@ -116,4 +116,22 @@ describe("built runtime network scanner", () => {
       rmSync(distDir, { recursive: true, force: true });
     }
   });
+
+  it("blocks remote esm re-exports", async () => {
+    const { scanBuiltRuntimeNetwork } = await loadScanner();
+    const distDir = mkdtempSync(join(tmpdir(), "tools-built-runtime-reexport-"));
+
+    try {
+      writeFileSync(
+        join(distDir, "chunk.js"),
+        "export * from 'https://cdn.example/x.js'; export { foo } from '//cdn.example/y.js';",
+      );
+
+      expect(scanBuiltRuntimeNetwork({ distDir })).toEqual([
+        expect.stringContaining("remote static import"),
+      ]);
+    } finally {
+      rmSync(distDir, { recursive: true, force: true });
+    }
+  });
 });
