@@ -37,6 +37,7 @@ describe("public metadata", () => {
       "apps/site/src/pages/source.astro",
       "apps/site/src/pages/status.astro",
       "apps/site/src/pages/changelog.astro",
+      "apps/site/src/pages/sanchika.astro",
     ];
 
     for (const pagePath of pages) {
@@ -49,6 +50,8 @@ describe("public metadata", () => {
 
     expect(homepage).toContain("Reconciliation and vendor follow-up");
     expect(homepage).toContain("Evidence and review copy");
+    expect(homepage).toContain("Open Sanchika docs");
+    expect(homepage).toContain("Need the shared UI package boundary?");
     expect(homepage).toContain("Need saved mappings, evidence trails, and recurring workflows?");
     expect(homepage).toContain("https://complyeaze.com/axal");
   });
@@ -94,6 +97,9 @@ describe("public metadata", () => {
       expect(llms).toContain(tool.h1);
     }
     expect(llms).toContain("Terms and disclaimer: https://tools.complyeaze.com/terms/");
+    expect(llms).toContain(
+      "Sanchika design-system docs: https://tools.complyeaze.com/sanchika/",
+    );
   });
 
   it("keeps robots permissive for public static pages", () => {
@@ -112,6 +118,7 @@ describe("public metadata", () => {
 
     expect(urls.length).toBeGreaterThan(0);
     expect(lastmods.length).toBe(urls.length);
+    expect(sitemap).toContain("<loc>https://tools.complyeaze.com/sanchika/</loc>");
     expect(sitemap).toContain("<loc>https://tools.complyeaze.com/terms/</loc>");
   });
 });

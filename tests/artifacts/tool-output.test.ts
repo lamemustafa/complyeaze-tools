@@ -186,25 +186,44 @@ describe("tool output artifact contract", () => {
   });
 
   it("excludes rows with blank required cells from MSME output and reports diagnostics", () => {
-    const output = buildOutput(
-      msmeTool,
-      [
+    const result = buildToolReviewArtifact({
+      tool: {
+        slug: msmeTool.slug,
+        title: msmeTool.h1,
+        officialSources: msmeTool.officialSources,
+        unsupportedCases: msmeTool.unsupportedCases,
+      },
+      input: [
         "vendor,amount,acceptanceDate,writtenAgreement,agreedPaymentDays,udyamEvidence",
         "Acme Components,125000,2026-05-01,no,,missing",
         ",42000,2026-05-01,yes,30,available",
       ].join("\n"),
-      configs["/msme-45-day-payment-due-date-calculator"],
-      "2026-07-02",
-    );
+      asOfDate: "2026-07-02",
+    });
 
-    expect(output).toContain("Acme Components | review-start age");
-    expect(output).not.toContain("Unnamed vendor | review-start age");
-    expect(output).toContain(
+    expect(result.status).toBe("ready");
+    expect(result.text).toContain("Acme Components | review-start age");
+    expect(result.text).not.toContain("Unnamed vendor | review-start age");
+    expect(result.text).toContain(
       "Rows parsed: 2; rows accepted for output: 1; blank rows skipped: 0; invalid rows needing review: 1.",
     );
-    expect(output).toContain(
+    expect(result.text).toContain(
       "Row 3: required-cell-empty - Missing required value for vendor.",
     );
+    expect(result.rowCounts).toEqual({
+      parsedRows: 2,
+      acceptedRows: 1,
+      skippedBlankRows: 0,
+      skippedInvalidRows: 1,
+    });
+    expect(result.parseIssues).toEqual([
+      {
+        rowNumber: 3,
+        code: "required-cell-empty",
+        column: "vendor",
+        message: "Missing required value for vendor.",
+      },
+    ]);
   });
 
   it("preserves MSME rows with blank review dates for missing-date manual review", () => {
@@ -356,21 +375,40 @@ describe("tool output artifact contract", () => {
   });
 
   it("reports optional trailing missing cells without excluding otherwise valid rows", () => {
-    const output = buildOutput(
-      msmeTool,
-      [
+    const result = buildToolReviewArtifact({
+      tool: {
+        slug: msmeTool.slug,
+        title: msmeTool.h1,
+        officialSources: msmeTool.officialSources,
+        unsupportedCases: msmeTool.unsupportedCases,
+      },
+      input: [
         "vendor,amount,acceptanceDate,paymentDate",
         "Acme Components,125000,2026-05-01",
       ].join("\n"),
-      configs["/msme-45-day-payment-due-date-calculator"],
-      "2026-07-02",
-    );
+      asOfDate: "2026-07-02",
+    });
 
-    expect(output).toContain("Acme Components | review-start age");
-    expect(output).toContain(
+    expect(result.status).toBe("ready");
+    expect(result.text).toContain("Acme Components | review-start age");
+    expect(result.text).toContain(
       "Rows parsed: 1; rows accepted for output: 1; blank rows skipped: 0; invalid rows needing review: 0.",
     );
-    expect(output).toContain("Row 2: missing-cell - Missing value for paymentDate.");
+    expect(result.text).toContain("Row 2: missing-cell - Missing value for paymentDate.");
+    expect(result.rowCounts).toEqual({
+      parsedRows: 1,
+      acceptedRows: 1,
+      skippedBlankRows: 0,
+      skippedInvalidRows: 0,
+    });
+    expect(result.parseIssues).toEqual([
+      {
+        rowNumber: 2,
+        code: "missing-cell",
+        column: "paymentDate",
+        message: "Missing value for paymentDate.",
+      },
+    ]);
   });
 
   it("skips parser-shape issues before GSTR reconciliation domain output", () => {
