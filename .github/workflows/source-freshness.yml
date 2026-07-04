@@ -43,7 +43,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh label create source-freshness --color 0c6b58 --description "Official source review required" --force
-          issue_number="$(gh issue list --state open --label source-freshness --json number --jq '.[0].number')"
+          issue_number="$(gh issue list --state open --label source-freshness --json number --jq '.[0].number // ""')"
           if [ -n "$issue_number" ]; then
             gh issue edit "$issue_number" --title "Source freshness review required" --body-file source-freshness-report.md
           else

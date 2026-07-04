@@ -162,6 +162,12 @@ subtree.
   violate by accident while "improving" a tool — any change to
   `packages/core`, `packages/parsers`, or the workbench islands should be
   checked against this before it's considered done.
+- **Closed-PR review cleanup.** Use the `AGENTS.md` process: classify unresolved
+  merged-PR review threads against current `main`, link valid findings to an
+  issue, reply and resolve the historical thread, then fix from an isolated
+  branch. `Review gate` must run from trusted base code; if comments are only
+  resolved without a push, re-run the workflow manually because GitHub Actions
+  does not provide a review-thread resolution trigger.
 
 ### This repo moves fast — verify, don't recall
 

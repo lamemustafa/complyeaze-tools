@@ -95,3 +95,11 @@ While this repo has only one eligible maintainer, branch protection should block
 on required checks and unresolved review conversations, not on an approving
 reviewer count. Treat Codex review comments as blocking when they create
 current-head unresolved review threads or requested-changes reviews.
+
+For closed or merged PR review cleanup, audit unresolved threads against current
+`main`, classify stale versus still-valid findings, create or link a GitHub issue
+for valid findings, reply with the disposition, and resolve the historical
+conversation. Fix valid findings from an isolated worktree/branch and run the
+review/rectify loop before merging. After resolving conversations without a new
+push, manually re-run `Review gate`; GitHub Actions does not expose a review
+thread resolution trigger for this workflow.

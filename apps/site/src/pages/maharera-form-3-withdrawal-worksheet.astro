@@ -1,0 +1,11 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ToolShell from "../components/ToolShell.astro";
+import { getToolBySlug } from "../lib/tools";
+
+const tool = getToolBySlug("/maharera-form-3-withdrawal-worksheet");
+---
+
+<BaseLayout title={tool.seoTitle} description={tool.metaDescription}>
+  <ToolShell tool={tool} />
+</BaseLayout>

@@ -44,7 +44,10 @@ const knownHeaderKeys: Record<string, string> = {
   category: "category",
   documentnumber: "documentNumber",
   error: "error",
+  fmv31jan2018: "fmv31Jan2018",
+  fmv31jan2018perunit: "fmv31Jan2018PerUnit",
   gstin: "gstin",
+  gstr1liability: "gstr1Liability",
   invoice: "invoice",
   invoicedate: "invoiceDate",
   invoicenumber: "invoiceNumber",
@@ -55,6 +58,7 @@ const knownHeaderKeys: Record<string, string> = {
   status: "status",
   supplier: "supplier",
   taxamount: "taxAmount",
+  tdstcs: "tdsTcsAmount",
   vendor: "vendor",
   vendorname: "vendorName",
 };
@@ -191,7 +195,18 @@ function parseRecords(
         lastCharWasRecordBreak = false;
         continue;
       }
-      quoted = !quoted;
+      if (quoted) {
+        quoted = false;
+        lastCharWasRecordBreak = false;
+        continue;
+      }
+      if (current.length === 0 || /^\s+$/.test(current)) {
+        current = "";
+        quoted = true;
+        lastCharWasRecordBreak = false;
+        continue;
+      }
+      current += char;
       lastCharWasRecordBreak = false;
       continue;
     }
