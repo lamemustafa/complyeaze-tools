@@ -24,6 +24,7 @@ describe("built runtime network scanner", () => {
       "EventSource",
       "serviceWorker.register",
       "remote dynamic import",
+      "remote static import",
     ]);
   });
 
@@ -79,13 +80,18 @@ describe("built runtime network scanner", () => {
           "<link rel=stylesheet href=https://css-unquoted.example.test/app.css>",
           "<link rel=\"stylesheet\" href=\"https://cdn.example.test/app.css\">",
           "<link rel=\"modulepreload\" href=\"https://cdn.example.test/chunk.js\">",
+          "<script src=\"//scheme-relative.example.test/app.js\"></script>",
           "<img srcset=\"/local.png 1x, https://img.example.test/remote.png 2x\" alt=\"\">",
           "<a href=\"https://github.com/lamemustafa/complyeaze-tools\">Allowed source link</a>",
         ].join("\n"),
       );
       writeFileSync(
         join(distDir, "style.css"),
-        "@import url('https://css.example.test/base.css'); .x { background: url(https://img.example.test/bg.png); }",
+        "@import url('https://css.example.test/base.css'); .x { background: url(//img.example.test/bg.png); }",
+      );
+      writeFileSync(
+        join(distDir, "static-import.js"),
+        "import helper from 'https://cdn.example.test/helper.js'; import '//cdn.example.test/side-effect.js';",
       );
 
       expect(scanBuiltRuntimeNetwork({ distDir })).toEqual(
@@ -96,9 +102,11 @@ describe("built runtime network scanner", () => {
           expect.stringContaining("css-unquoted.example.test"),
           expect.stringContaining("remote link stylesheet"),
           expect.stringContaining("remote link modulepreload"),
+          expect.stringContaining("scheme-relative.example.test"),
           expect.stringContaining("remote srcset"),
           expect.stringContaining("remote css import"),
           expect.stringContaining("remote css url"),
+          expect.stringContaining("remote static import"),
         ]),
       );
       expect(scanBuiltRuntimeNetwork({ distDir })).not.toEqual([

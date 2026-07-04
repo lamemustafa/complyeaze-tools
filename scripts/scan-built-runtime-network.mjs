@@ -21,7 +21,8 @@ export const forbiddenBuiltRuntimePatterns = [
   { label: "WebSocket", pattern: /\bWebSocket\b/ },
   { label: "EventSource", pattern: /\bEventSource\b/ },
   { label: "serviceWorker.register", pattern: /\bserviceWorker\.register\b/ },
-  { label: "remote dynamic import", pattern: /\bimport\s*\(\s*["']https?:\/\// },
+  { label: "remote dynamic import", pattern: /\bimport\s*\(\s*["'](?:https?:)?\/\// },
+  { label: "remote static import", pattern: /\bimport\s+(?:(?:[^"';]+?)\s+from\s+)?["'](?:https?:)?\/\// },
 ];
 
 export function listBuiltRuntimeFiles(distDir = join(process.cwd(), "apps", "site", "dist")) {
@@ -95,11 +96,11 @@ function scanHtmlResources(source, file) {
 function scanCssResources(source, file) {
   const offenders = [];
 
-  for (const match of source.matchAll(/@import\s+(?:url\(\s*)?(["']?)(https?:\/\/[^'")\s]+)\1/gi)) {
+  for (const match of source.matchAll(/@import\s+(?:url\(\s*)?(["']?)((?:https?:)?\/\/[^'")\s]+)\1/gi)) {
     if (isForbiddenRemoteUrl(match[2])) offenders.push(formatOffender(file, "remote css import", match[2]));
   }
 
-  for (const match of source.matchAll(/url\(\s*(["']?)(https?:\/\/[^'")]+)\1\s*\)/gi)) {
+  for (const match of source.matchAll(/url\(\s*(["']?)((?:https?:)?\/\/[^'")]+)\1\s*\)/gi)) {
     if (isForbiddenRemoteUrl(match[2])) offenders.push(formatOffender(file, "remote css url", match[2]));
   }
 
@@ -122,10 +123,11 @@ function readSrcsetUrls(value) {
 }
 
 function isForbiddenRemoteUrl(value) {
-  if (!/^https?:\/\//i.test(value)) return false;
+  const normalized = value.startsWith("//") ? `https:${value}` : value;
+  if (!/^https?:\/\//i.test(normalized)) return false;
 
   try {
-    return new URL(value).origin !== publicOrigin;
+    return new URL(normalized).origin !== publicOrigin;
   } catch {
     return true;
   }

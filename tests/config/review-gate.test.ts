@@ -26,10 +26,14 @@ describe("review findings gate", () => {
     expect(workflow).toContain("workflow_dispatch:");
     expect(workflow).toContain("pull-requests: read");
     expect(workflow).toContain("GH_TOKEN: ${{ github.token }}");
-    expect(workflow).toContain("ref: ${{ steps.resolve-pr.outputs.head_sha }}");
+    expect(workflow).toContain("baseRepository,baseRefOid");
+    expect(workflow).toContain("Checkout trusted base code");
+    expect(workflow).toContain("repository: ${{ steps.resolve-pr.outputs.base_repo }}");
+    expect(workflow).toContain("ref: ${{ steps.resolve-pr.outputs.base_sha }}");
     expect(workflow).toContain("--strict-head-review");
     expect(workflow).toContain("--required-review-author chatgpt-codex-connector");
     expect(workflow).toContain("--allow-missing-head-review");
+    expect(workflow).not.toContain("ref: ${{ steps.resolve-pr.outputs.head_sha }}");
     expect(workflow).not.toContain("issue_comment:");
     expect(workflow).not.toContain("required approving review");
 

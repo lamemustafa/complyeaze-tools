@@ -26,9 +26,10 @@ kubectl get clusterissuer letsencrypt-prod
 dig +short tools.complyeaze.com
 ```
 
-`pnpm preflight:live` is read-only. It checks GitHub auth/repo access, Docker,
-published image pullability, DNS, cert-manager, the production Kustomize render,
-deploy-secret presence, and namespace existence.
+`pnpm preflight:live` does not mutate GitHub, the repository, or the cluster. It
+checks GitHub auth/repo access, Docker, published image pullability, candidate
+image smoke behavior in a short-lived local container, DNS, cert-manager, the
+production Kustomize render, deploy-secret presence, and namespace existence.
 
 The production render must include:
 
@@ -56,9 +57,13 @@ Open a PR to `main`, wait for CI, merge, then run the `Publish Image` workflow.
 
 ## Production Promotion
 
-Apply deploy access once before the first GitHub Actions deployment:
+Apply the namespace manifest and deploy access once before the first GitHub
+Actions deployment. The namespace step is where Pod Security labels are applied;
+the namespace-scoped deploy workflow intentionally drops the namespace document
+later because the deployer cannot mutate namespaces.
 
 ```bash
+kubectl apply -f deploy/k8s/base/namespace.yaml
 kubectl apply -k deploy/k8s/deploy-access
 ```
 
@@ -66,7 +71,7 @@ Generate `TOOLS_PROD_KUBECONFIG_B64` from the
 `complyeaze-tools-deployer-token` service-account token, then set it with:
 
 ```bash
-gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools --body "<base64-kubeconfig>"
+printf '%s' "$TOOLS_PROD_KUBECONFIG_B64" | gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools --body-file -
 ```
 
 After first deployment, schedule the rotation issue workflow and follow

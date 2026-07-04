@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const scriptPath = join(process.cwd(), "scripts", "live-preflight.mjs");
+const candidateSmokePath = join(process.cwd(), "scripts", "candidate-image-smoke.mjs");
 
 describe("live preflight command", () => {
   it("is exposed as a package script", () => {
@@ -10,6 +11,7 @@ describe("live preflight command", () => {
 
     expect(packageJson.scripts["preflight:live"]).toBe("node scripts/live-preflight.mjs");
     expect(existsSync(scriptPath)).toBe(true);
+    expect(existsSync(candidateSmokePath)).toBe(true);
   });
 
   it("checks required live-cutover surfaces without mutation", async () => {
@@ -21,6 +23,7 @@ describe("live preflight command", () => {
         command: string[];
         mutates: boolean;
         expectedOutput?: string;
+        expectedOutputIgnoreCase?: boolean;
         forbiddenOutput?: string[];
       }>;
     };
@@ -34,6 +37,7 @@ describe("live preflight command", () => {
       "github-repo",
       "github-deploy-secret",
       "published-image",
+      "candidate-image-smoke",
       "dns-record",
       "clusterissuer",
       "kustomize-production",
@@ -65,6 +69,11 @@ describe("live preflight command", () => {
     ).toContain(
       "ghcr.io/lamemustafa/complyeaze-tools@sha256:2a100524ebf35cf3fa5e6c2e5ccd40e144f0e3c9eda04432be652a748ebc1a2e",
     );
+    expect(
+      LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "candidate-image-smoke")?.command.join(" "),
+    ).toContain(
+      "scripts/candidate-image-smoke.mjs --image ghcr.io/lamemustafa/complyeaze-tools@sha256:2a100524ebf35cf3fa5e6c2e5ccd40e144f0e3c9eda04432be652a748ebc1a2e",
+    );
     for (const id of [
       "live-no-slash-redirect",
       "live-homepage-public-links",
@@ -74,6 +83,7 @@ describe("live preflight command", () => {
       const check = LIVE_PREFLIGHT_CHECKS.find((candidate) => candidate.id === id);
 
       expect(check?.command[0]).toBe("curl");
+      expect(check?.command).toContain("--max-time");
       expect(check?.forbiddenOutput).toEqual([":8080"]);
     }
     expect(
@@ -84,6 +94,10 @@ describe("live preflight command", () => {
       LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "live-manifest-content-type")
         ?.expectedOutput,
     ).toBe("content-type: application/manifest+json");
+    expect(
+      LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "live-manifest-content-type")
+        ?.expectedOutputIgnoreCase,
+    ).toBe(true);
     expect(
       LIVE_PREFLIGHT_CHECKS.find((check) => check.id === "live-hashed-assets-immutable")
         ?.expectedOutput,
@@ -123,6 +137,34 @@ describe("live preflight command", () => {
 
     expect(result.ok).toBe(false);
     expect(result.output).toContain(":8080");
+  });
+
+  it("can match expected command output case-insensitively", async () => {
+    const { runCheck } = (await import(scriptPath)) as {
+      runCheck: (check: {
+        id: string;
+        label: string;
+        command: string[];
+        mutates: boolean;
+        expectedOutput?: string;
+        expectedOutputIgnoreCase?: boolean;
+      }) => { ok: boolean; output: string };
+    };
+
+    const result = runCheck({
+      id: "header-case",
+      label: "Header case",
+      command: [
+        process.execPath,
+        "-e",
+        "process.stdout.write('Content-Type: application/manifest+json')",
+      ],
+      mutates: false,
+      expectedOutput: "content-type: application/manifest+json",
+      expectedOutputIgnoreCase: true,
+    });
+
+    expect(result.ok).toBe(true);
   });
 
   it("truncates long command output in rendered summaries", async () => {

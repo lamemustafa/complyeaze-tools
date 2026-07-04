@@ -26,10 +26,12 @@ kubectl -n complyeaze-tools get secret complyeaze-tools-deployer-token
 
 Build a kubeconfig that points to the production cluster, uses only the new
 `complyeaze-tools-deployer-token`, and cannot mutate resources outside the
-`complyeaze-tools` namespace. Then set the GitHub Actions secret:
+`complyeaze-tools` namespace. Store the base64 value in a protected local
+environment variable or password manager prompt, then stream it to GitHub
+without putting the secret value in the command line:
 
 ```bash
-gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools --body "<base64-kubeconfig>"
+printf '%s' "$TOOLS_PROD_KUBECONFIG_B64" | gh secret set TOOLS_PROD_KUBECONFIG_B64 --repo lamemustafa/complyeaze-tools --body-file -
 ```
 
 ## Validation

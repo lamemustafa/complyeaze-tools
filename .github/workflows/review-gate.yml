@@ -37,6 +37,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr }}
           EVENT_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_BASE_REPO: ${{ github.event.pull_request.base.repo.full_name }}
+          EVENT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
 
@@ -48,17 +50,21 @@ jobs:
           if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
             mapfile -t pr_metadata < <(
               gh pr view "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" \
-                --json headRepository,headRefOid \
-                --jq '.headRepository.nameWithOwner, .headRefOid'
+                --json headRepository,headRefOid,baseRepository,baseRefOid \
+                --jq '.headRepository.nameWithOwner, .headRefOid, .baseRepository.nameWithOwner, .baseRefOid'
             )
             head_repo="${pr_metadata[0]:-}"
             head_sha="${pr_metadata[1]:-}"
+            base_repo="${pr_metadata[2]:-}"
+            base_sha="${pr_metadata[3]:-}"
           else
             head_repo="${EVENT_HEAD_REPO}"
             head_sha="${EVENT_HEAD_SHA}"
+            base_repo="${EVENT_BASE_REPO}"
+            base_sha="${EVENT_BASE_SHA}"
           fi
 
-          if [ -z "${head_repo}" ] || [ -z "${head_sha}" ]; then
+          if [ -z "${head_repo}" ] || [ -z "${head_sha}" ] || [ -z "${base_repo}" ] || [ -z "${base_sha}" ]; then
             echo "Could not resolve complete pull request metadata for #${PR_NUMBER}." >&2
             exit 1
           fi
@@ -67,14 +73,16 @@ jobs:
             echo "pr=${PR_NUMBER}"
             echo "head_repo=${head_repo}"
             echo "head_sha=${head_sha}"
+            echo "base_repo=${base_repo}"
+            echo "base_sha=${base_sha}"
           } >> "${GITHUB_OUTPUT}"
 
-      - name: Checkout
+      - name: Checkout trusted base code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
-          repository: ${{ steps.resolve-pr.outputs.head_repo }}
-          ref: ${{ steps.resolve-pr.outputs.head_sha }}
+          repository: ${{ steps.resolve-pr.outputs.base_repo }}
+          ref: ${{ steps.resolve-pr.outputs.base_sha }}
           persist-credentials: false
 
       - name: Set up pnpm
