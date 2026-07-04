@@ -1,5 +1,5 @@
 import type { CsvRow } from "@complyeaze-tools/core";
-import type { ArtifactParseIssue, ArtifactSource } from "./text";
+import type { ArtifactParseIssue, ArtifactRowCounts, ArtifactSource } from "./text";
 
 export type ArtifactToolContext = {
   slug: string;
@@ -26,11 +26,15 @@ export type ToolArtifactDefinition = {
   requiredColumns?: string[];
   requiredColumnGroups?: string[][];
   requiredValueColumnGroups?: string[][];
+  optionalMappableColumns?: string[];
   sourceLabel: string;
 };
 
 export type BuildOutputOptions = {
   strictGstrMatch?: boolean;
+  gstrTolerance?: number;
+  gstr3bAlreadyFiled?: boolean;
+  columnMapping?: Record<string, string>;
 };
 
 export type BuildToolReviewArtifactInput = {
@@ -40,9 +44,14 @@ export type BuildToolReviewArtifactInput = {
   options?: BuildOutputOptions;
 };
 
+export type ToolArtifactDiagnostics = {
+  rowCounts?: ArtifactRowCounts;
+  parseIssues?: ArtifactParseIssue[];
+};
+
 export type ToolArtifactResult =
-  | { status: "ready"; text: string }
-  | { status: "blocked"; text: string; reason: string };
+  | ({ status: "ready"; text: string } & ToolArtifactDiagnostics)
+  | ({ status: "blocked"; text: string; reason: string } & ToolArtifactDiagnostics);
 
 export type PreparedRows = {
   acceptedRows: CsvRow[];

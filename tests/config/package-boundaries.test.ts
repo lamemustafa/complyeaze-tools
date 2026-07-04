@@ -38,6 +38,26 @@ describe("workspace package boundaries", () => {
       }
     }
   });
+
+  it("keeps tool-specific artifact builders out of the generic output host", () => {
+    const hostPath = join(root, "packages/artifacts/src/tool-output.ts");
+    const source = readFileSync(hostPath, "utf8");
+    const disallowedBuilderNames = [
+      "buildGstPortalEvidenceMemo",
+      "buildGstr2bReconciliationTriage",
+      "buildGstr2bSupplierFollowUps",
+      "buildMsmePayableReview",
+      "buildTaxStatementMismatchReview",
+      "maskIndianIdentifiersWithReport",
+    ];
+
+    for (const name of disallowedBuilderNames) {
+      expect(
+        source.includes(name),
+        `${relative(root, hostPath)} should delegate ${name} through the artifact builder registry`,
+      ).toBe(false);
+    }
+  });
 });
 
 function listTypeScriptFiles(dir: string): string[] {

@@ -1,11 +1,15 @@
 import { useMemo, useState } from "react";
+import { parseDelimitedTable } from "@complyeaze-tools/core";
 import { toolInputClass } from "@complyeaze-tools/ui-react";
 import {
   buildToolReviewArtifact,
+  buildWorkbenchDiagnostics,
   configs,
+  filterWorkbenchColumnMapping,
+  getColumnMappingTargets,
   getToolArtifactDefinition,
   type WorkbenchTool,
-} from "@complyeaze-tools/artifacts";
+} from "./tool-workbench-logic";
 
 type Props = {
   tool: WorkbenchTool;
@@ -21,8 +25,26 @@ export default function ToolWorkbench({ tool }: Props) {
       : "",
   );
   const [strictGstrMatch, setStrictGstrMatch] = useState(false);
+  const [gstrTolerance, setGstrTolerance] = useState("2");
+  const [gstr3bAlreadyFiled, setGstr3bAlreadyFiled] = useState(false);
+  const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const inputHelpId = "tool-input-help";
   const outputStatusId = "tool-output-status";
+  const parsedInput = useMemo(() => parseDelimitedTable(input), [input]);
+  const mappingTargets = useMemo(
+    () =>
+      parsedInput.headers.length
+        ? getColumnMappingTargets(artifactDefinition, parsedInput.headers, {
+            includeOptional:
+              tool.slug === "/gstr-2b-purchase-reconciliation-triage" && strictGstrMatch,
+          })
+        : [],
+    [artifactDefinition, parsedInput.headers, strictGstrMatch, tool.slug],
+  );
+  const effectiveColumnMapping = useMemo(
+    () => filterWorkbenchColumnMapping(columnMapping, mappingTargets, parsedInput.headers),
+    [columnMapping, mappingTargets, parsedInput.headers],
+  );
 
   const artifactResult = useMemo(
     () =>
@@ -35,12 +57,26 @@ export default function ToolWorkbench({ tool }: Props) {
         },
         input,
         asOfDate,
-        options: { strictGstrMatch },
+        options: {
+          strictGstrMatch,
+          gstrTolerance: parseGstrTolerance(gstrTolerance),
+          gstr3bAlreadyFiled,
+          columnMapping: effectiveColumnMapping,
+        },
       }),
-    [tool, input, asOfDate, strictGstrMatch],
+    [
+      tool,
+      input,
+      asOfDate,
+      strictGstrMatch,
+      gstrTolerance,
+      gstr3bAlreadyFiled,
+      effectiveColumnMapping,
+    ],
   );
   const output = artifactResult.text;
   const blockedOutput = artifactResult.status === "blocked";
+  const diagnostics = buildWorkbenchDiagnostics(artifactResult);
   const outputStatus = blockedOutput
     ? output
     : "Draft output updated. Review it before downloading or sharing.";
@@ -67,16 +103,76 @@ export default function ToolWorkbench({ tool }: Props) {
           </label>
         ) : null}
         {tool.slug === "/gstr-2b-purchase-reconciliation-triage" ? (
+          <div className="gstr-options">
+            <label className="option-control">
+              <span>Professional context check</span>
+              <input
+                type="checkbox"
+                checked={strictGstrMatch}
+                onChange={(event) => setStrictGstrMatch(event.currentTarget.checked)}
+                aria-describedby={outputStatusId}
+              />
+              <span>
+                Include invoice date, document type, amendment table, and ITC/IMS context when present
+              </span>
+            </label>
+            <label className="as-of-control">
+              <span>Tax tolerance</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={gstrTolerance}
+                onChange={(event) => setGstrTolerance(event.currentTarget.value)}
+                aria-describedby={outputStatusId}
+              />
+            </label>
+          </div>
+        ) : null}
+        {tool.slug === "/gstr3b-outward-liability-prelock-gap-checker" ? (
           <label className="option-control">
-            <span>Stricter match key</span>
+            <span>Filing status</span>
             <input
               type="checkbox"
-              checked={strictGstrMatch}
-              onChange={(event) => setStrictGstrMatch(event.currentTarget.checked)}
+              checked={gstr3bAlreadyFiled}
+              onChange={(event) => setGstr3bAlreadyFiled(event.currentTarget.checked)}
               aria-describedby={outputStatusId}
             />
-            <span>Include invoice date and document type when present</span>
+            <span>GSTR-3B for this period is already filed</span>
           </label>
+        ) : null}
+        {mappingTargets.length ? (
+          <div className="column-mapping-panel">
+            <h2>Column mapping</h2>
+            <p>
+              Map detected spreadsheet headers to the expected fields. Mapping
+              happens in this browser before the draft is generated.
+            </p>
+            <p>Detected headers: {parsedInput.originalHeaders.join(", ")}</p>
+            <div className="column-mapping-grid">
+              {mappingTargets.map((target) => (
+                <label key={target.column} className="column-mapping-control">
+                  <span>{target.label}</span>
+                  <select
+                    value={columnMapping[target.column] ?? ""}
+                    onChange={(event) =>
+                      setColumnMapping((current) => ({
+                        ...current,
+                        [target.column]: event.currentTarget.value,
+                      }))
+                    }
+                  >
+                    <option value="">Not mapped</option>
+                    {parsedInput.headers.map((header, index) => (
+                      <option key={`${header}-${index}`} value={header}>
+                        {parsedInput.originalHeaders[index] ?? header}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
+          </div>
         ) : null}
         <label className="field-label" htmlFor="tool-input">
           {config.inputLabel}
@@ -97,6 +193,23 @@ export default function ToolWorkbench({ tool }: Props) {
         <label className="field-label" htmlFor="tool-output">
           {config.outputLabel}
         </label>
+        {diagnostics ? (
+          <section className="workbench-diagnostics" aria-label="Input diagnostics">
+            <h2>{diagnostics.title}</h2>
+            <ul className="diagnostic-summary">
+              {diagnostics.summary.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+            {diagnostics.issues.length ? (
+              <ul className="diagnostic-issues">
+                {diagnostics.issues.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
+        ) : null}
         <textarea
           id="tool-output"
           className={toolInputClass}
@@ -135,4 +248,9 @@ function downloadText(filename: string, text: string) {
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+function parseGstrTolerance(value: string): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 2;
 }

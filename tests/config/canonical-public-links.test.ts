@@ -17,6 +17,7 @@ describe("canonical public links", () => {
     expect(publicSiteUrl("/gst-portal-issue-evidence-memo")).toBe(
       "https://tools.complyeaze.com/gst-portal-issue-evidence-memo/",
     );
+    expect(publicSiteUrl("/sanchika")).toBe("https://tools.complyeaze.com/sanchika/");
   });
 
   it("does not add trailing slashes to static asset URLs", () => {

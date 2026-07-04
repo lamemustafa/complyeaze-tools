@@ -91,6 +91,8 @@ describe("Kubernetes static deployment policy", () => {
     expect(workflow).toContain("source_sha");
     expect(workflow).toContain("Verify reviewed publish run");
     expect(workflow).toContain("--workflow publish-image.yml");
+    expect(workflow).toContain("${{ env.IMAGE_NAME }}:${{ inputs.source_sha }}");
+    expect(workflow).toContain("Image digest does not belong to reviewed source SHA");
     expect(workflow).toContain("docker buildx imagetools inspect");
     expect(workflow).toContain("complyeaze-tools@sha256");
     expect(workflow).not.toContain("perl -0pi");
@@ -132,6 +134,7 @@ describe("Kubernetes static deployment policy", () => {
     expect(role).toContain('resources: ["services"]');
     expect(role).toContain('resources: ["pods"]');
     expect(role).toContain('resources: ["pods/portforward"]');
+    expect(role).toContain('verbs: ["get", "create"]');
     expect(role).toContain('resources: ["deployments"]');
     expect(role).toContain('resources: ["ingresses", "networkpolicies"]');
     expect(role).not.toContain("secrets");
