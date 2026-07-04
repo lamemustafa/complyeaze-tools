@@ -4,6 +4,7 @@ import { getToolArtifactBuilder } from "./tool-builders";
 import { getToolArtifactDefinition } from "./tool-output-config";
 import {
   buildFooter,
+  buildRowCounts,
   prepareRowsForDefinition,
   toArtifactToolContext,
   validateRowsForDefinition,
@@ -61,21 +62,29 @@ export function buildToolReviewArtifact({
   const prepared = prepareRowsForDefinition(parsed, definition);
 
   if (builder) {
-    return builder.build({
-      tool,
-      definition,
-      input,
-      asOfDate,
-      options: buildOptions,
+    return withTableDiagnostics(
+      builder.build({
+        tool,
+        definition,
+        input,
+        asOfDate,
+        options: buildOptions,
+        parsed,
+        prepared,
+      }),
       parsed,
       prepared,
-    });
+    );
   }
 
-  return {
-    status: "ready",
-    text: `${input}${buildFooter(tool, definition, parsed, prepared)}`,
-  };
+  return withTableDiagnostics(
+    {
+      status: "ready",
+      text: `${input}${buildFooter(tool, definition, parsed, prepared)}`,
+    },
+    parsed,
+    prepared,
+  );
 }
 
 export function buildOutput(
@@ -103,4 +112,16 @@ function getMappableTargetColumns(definition: ToolArtifactDefinition): string[] 
     [];
 
   return [...groups.flat(), ...(definition.optionalMappableColumns ?? [])];
+}
+
+function withTableDiagnostics(
+  result: ToolArtifactResult,
+  parsed: ReturnType<typeof parseDelimitedTable>,
+  prepared: NonNullable<Parameters<typeof buildRowCounts>[1]>,
+): ToolArtifactResult {
+  return {
+    ...result,
+    rowCounts: buildRowCounts(parsed, prepared),
+    parseIssues: prepared.diagnostics,
+  };
 }

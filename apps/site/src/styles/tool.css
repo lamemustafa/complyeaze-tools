@@ -107,6 +107,33 @@
   outline-offset: 3px;
 }
 
+.workbench-diagnostics {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 14px;
+}
+
+.workbench-diagnostics h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.diagnostic-summary,
+.diagnostic-issues {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.diagnostic-issues {
+  color: var(--warning);
+}
+
 .as-of-control {
   display: grid;
   gap: 8px;
