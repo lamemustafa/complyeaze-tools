@@ -153,4 +153,27 @@ describe("tool source register", () => {
     expect(unsupported).toContain("Does not compute ITR tax payable or refunds.");
     expect(unsupported).toContain("Does not upload AIS feedback or submit portal corrections.");
   });
+
+  it("documents GST portal evidence fields without outage or relief overclaims", () => {
+    const gstPortalTool = TOOLS.find(
+      (tool) => tool.slug === "/gst-portal-issue-evidence-memo",
+    );
+    const supportedInputs = gstPortalTool?.supportedInputs.join(" ") ?? "";
+    const outputArtifacts = gstPortalTool?.outputArtifacts.join(" ") ?? "";
+    const reviewChecklist = gstPortalTool?.seoDepth.reviewChecklist.join(" ") ?? "";
+    const unsupported = gstPortalTool?.unsupportedCases.join(" ") ?? "";
+
+    expect(supportedInputs).toContain("screenshot hash");
+    expect(supportedInputs).toContain("browser");
+    expect(supportedInputs).toContain("device");
+    expect(outputArtifacts).toContain("user-entered evidence reference checklist");
+    expect(reviewChecklist).toContain("hash");
+    expect(reviewChecklist).toContain("original screenshots");
+    expect(unsupported).toContain("Does not prove the GST portal was globally unavailable.");
+    expect(unsupported).toContain("Does not guarantee extension, waiver, or condonation.");
+    expect(unsupported).toContain("does not compute or verify hashes");
+    expect(unsupported).toContain("Does not accept screenshots, files, PDFs, base64");
+    expect(outputArtifacts.toLowerCase()).not.toContain("complaint-ready");
+    expect(reviewChecklist.toLowerCase()).not.toContain("outage proof");
+  });
 });

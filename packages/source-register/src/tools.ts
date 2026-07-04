@@ -395,7 +395,7 @@ export const TOOLS: ToolMeta[] = [
     h1: "GST Portal Issue Evidence Memo Builder",
     seoTitle: "GST Portal Issue Evidence Memo Builder",
     metaDescription:
-      "Create a user-observed GST filing-attempt memo from manual timestamps, error labels, and retry notes.",
+      "Create a user-observed GST filing-attempt memo with timestamps, error labels, retry notes, and evidence references.",
     title: "GST Portal Issue Evidence Memo Builder",
     status: "mvp",
     audiences: ["CAs", "GST consultants", "businesses"],
@@ -403,12 +403,23 @@ export const TOOLS: ToolMeta[] = [
     accountRequired: false,
     fileUploadRequired: false,
     telemetry: "none",
-    supportedInputs: ["manual attempt timestamps", "error labels", "manual notes"],
+    supportedInputs: [
+      "manual attempt timestamps",
+      "error labels",
+      "manual notes",
+      "optional screenshot hash, screenshot reference, complaint reference, browser, device, timezone, retry count, and network context",
+    ],
     unsupportedCases: [
       "Does not prove the GST portal was globally unavailable.",
       "Does not guarantee extension, waiver, or condonation.",
+      "Does not accept screenshots, files, PDFs, base64, local paths, GSTINs, OTPs, cookies, or credentials, and does not compute or verify hashes.",
     ],
-    outputArtifacts: ["attempt timeline text", "client note", "retry checklist"],
+    outputArtifacts: [
+      "attempt timeline text",
+      "client note",
+      "retry checklist",
+      "user-entered evidence reference checklist",
+    ],
     officialSources: [gstSelfService],
     relatedSlugs: [
       "/privacy/review-copy-builder",
@@ -419,7 +430,7 @@ export const TOOLS: ToolMeta[] = [
     seoDepth: {
       inputGuide: [
         "Use one row per attempt with attemptedAt, action, and error.",
-        "Add timezone, retryCount, and complaintReference when available.",
+        "Add timezone, retryCount, complaintReference, screenshot reference, screenshot hash, browser, device, and networkContext when available.",
       ],
       exampleWorkflow: [
         "Record each portal attempt close to the time it happened.",
@@ -429,10 +440,12 @@ export const TOOLS: ToolMeta[] = [
       commonMistakes: [
         "Writing a broad outage claim when only a user-observed attempt was recorded.",
         "Leaving out timezone, browser context, or complaint reference from the working note.",
+        "Treating a pasted screenshot hash as verified evidence when this tool only records user-entered references.",
       ],
       reviewChecklist: [
         "Confirm timestamps and timezone before sharing the memo.",
         "Separate user errors, browser issues, and portal errors where possible.",
+        "Confirm any screenshot hash against the retained original file.",
         "Keep original screenshots or ticket references outside the pasted draft.",
       ],
       sourceExplainer:
@@ -447,6 +460,11 @@ export const TOOLS: ToolMeta[] = [
           question: "Can I attach screenshots here?",
           answer:
             "No. V0 accepts text rows only. Keep screenshots in your evidence folder or Axal.",
+        },
+        {
+          question: "Does a screenshot hash verify the screenshot?",
+          answer:
+            "No. Screenshot names and hashes are user-entered references only. This tool does not inspect, upload, authenticate, or verify screenshots.",
         },
       ],
     },
