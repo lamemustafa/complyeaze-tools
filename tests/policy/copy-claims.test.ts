@@ -38,7 +38,10 @@ describe("public copy claims", () => {
       "msefc-ready",
       "statutory interest calculated",
       "udyam verified",
+      "verified udyam",
       "43b(h) compliant",
+      "eligible to file",
+      "admissible claim",
       "legal default",
       "recoverable amount",
     ]) {

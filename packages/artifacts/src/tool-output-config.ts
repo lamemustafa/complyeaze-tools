@@ -5,9 +5,9 @@ export const configs: Record<string, WorkbenchConfig> = {
     inputLabel: "Payables review rows",
     outputLabel: "MSME first-pass review draft",
     guidance:
-      "Paste rows with vendor, amount, invoiceDate, acceptanceDate or deemedAcceptanceDate. Optional review fields: writtenAgreement, agreedPaymentDays, paymentDate, paidAmount, disputeStatus, udyamEvidence. This creates a browser-local triage draft only.",
+      "Paste rows with vendor, amount, invoiceDate, acceptanceDate or deemedAcceptanceDate. Optional review fields: writtenAgreement, agreedPaymentDays, paymentDate, paidAmount, objection dates, disputeStatus, udyamEvidence, and udyamRegistrationDate. This creates a browser-local triage draft only.",
     sample:
-      "vendor,amount,invoiceDate,acceptanceDate,writtenAgreement,agreedPaymentDays,udyamEvidence,disputeStatus,paymentDate,paidAmount\nAcme Components,125000,2026-05-01,2026-05-03,no,,available,,,\nNorthline Supplies,42000,2026-06-20,2026-06-21,yes,30,missing,,,\nDelta Traders,54000,2026-05-02,2026-05-02,yes,60,available,disputed,,5000",
+      "vendor,amount,invoiceDate,acceptanceDate,writtenAgreement,agreedPaymentDays,udyamEvidence,udyamRegistrationDate,disputeStatus,objectionRaisedDate,objectionResolvedDate,paymentDate,paidAmount\nAcme Components,125000,2026-05-01,2026-05-03,no,,available,2025-11-10,,,,,\nNorthline Supplies,42000,2026-06-20,2026-06-21,yes,30,missing,,,,,,\nDelta Traders,54000,2026-05-02,2026-05-02,yes,60,available,2026-04-01,disputed,2026-05-10,2026-05-20,,5000",
   },
   "/gstr-2b-missing-invoice-vendor-follow-up": {
     inputLabel: "Supplier issue rows",
@@ -53,7 +53,11 @@ export const configs: Record<string, WorkbenchConfig> = {
 
 const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
   "/msme-45-day-payment-due-date-calculator": {
-    requiredColumns: ["vendor", "amount", "acceptanceDate, deemedAcceptanceDate, or invoiceDate"],
+    requiredColumns: [
+      "vendor",
+      "amount",
+      "acceptanceDate, deemedAcceptanceDate, or invoiceDate for screening",
+    ],
     requiredColumnGroups: [
       ["vendor"],
       ["amount"],

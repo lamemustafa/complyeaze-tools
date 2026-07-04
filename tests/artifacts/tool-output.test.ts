@@ -20,7 +20,7 @@ const msmeTool: WorkbenchTool = {
       lastReviewedAt: "2026-07-02",
     },
   ],
-  unsupportedCases: ["Does not decide final interest, disallowance, or legal default."],
+  unsupportedCases: ["Does not decide final interest, tax, or recovery positions."],
 };
 
 const gstr2bTool: WorkbenchTool = {
@@ -181,7 +181,7 @@ describe("tool output artifact contract", () => {
     );
 
     expect(output).toContain("Acme Components | review-start age missing days");
-    expect(output).toContain("review date missing");
+    expect(output).toContain("candidate marker missing");
     expect(output).toContain("missing-review-date");
     expect(output).toContain(
       "Rows parsed: 1; rows accepted for output: 1; blank rows skipped: 0; invalid rows needing review: 0.",
@@ -201,11 +201,40 @@ describe("tool output artifact contract", () => {
     );
 
     expect(output).toContain("Acme Components | review-start age");
-    expect(output).toContain("review date 2026-05-20");
+    expect(output).toContain("candidate marker 2026-05-20");
     expect(output).toContain(
       "Rows parsed: 1; rows accepted for output: 1; blank rows skipped: 0; invalid rows needing review: 0.",
     );
     expect(output).not.toContain("required-cell-empty");
+  });
+
+  it("uses MSME candidate marker language instead of statutory due-date wording", () => {
+    const output = buildOutput(
+      msmeTool,
+      [
+        "vendor,amount,invoiceDate,writtenAgreement,udyamEvidence",
+        "Invoice Fallback Vendor,125000,2026-05-01,unknown,missing",
+      ].join("\n"),
+      configs["/msme-45-day-payment-due-date-calculator"],
+      "2026-07-02",
+    );
+
+    expect(output).toContain("candidate marker 2026-06-15");
+    expect(output).toContain("days past candidate marker 17");
+    expect(output).toContain("Review start basis: invoice-date-fallback");
+    expect(output).toContain("Missing facts:");
+    expect(output).toContain("invoice date is only a fallback for screening");
+    expect(output).toContain("Next review actions:");
+    expect(output.toLowerCase()).not.toContain("statutory due date");
+    expect(output.toLowerCase()).not.toContain("legal default");
+    expect(output.toLowerCase()).not.toContain("interest payable");
+    expect(output.toLowerCase()).not.toContain("statutory interest calculated");
+    expect(output.toLowerCase()).not.toContain("43b(h) compliant");
+    expect(output.toLowerCase()).not.toContain("eligible to file");
+    expect(output.toLowerCase()).not.toContain("msefc-ready");
+    expect(output.toLowerCase()).not.toContain("admissible claim");
+    expect(output.toLowerCase()).not.toContain("recoverable amount");
+    expect(output.toLowerCase()).not.toContain("verified udyam");
   });
 
   it("reports optional trailing missing cells without excluding otherwise valid rows", () => {
