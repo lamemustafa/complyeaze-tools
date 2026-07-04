@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
 
+const curlMaxTimeSeconds = "15";
+
 export function buildLivePreflightChecks({ imageDigest }) {
   return [
     {
@@ -27,6 +29,19 @@ export function buildLivePreflightChecks({ imageDigest }) {
       command: ["docker", "manifest", "inspect", `ghcr.io/lamemustafa/complyeaze-tools@${imageDigest}`],
       mutates: false,
       requireOutput: true,
+    },
+    {
+      id: "candidate-image-smoke",
+      label: "Candidate image serves expected static-site headers and links",
+      command: [
+        "node",
+        "scripts/candidate-image-smoke.mjs",
+        "--image",
+        `ghcr.io/lamemustafa/complyeaze-tools@${imageDigest}`,
+      ],
+      mutates: false,
+      requireOutput: true,
+      expectedOutput: "Candidate image smoke passed",
     },
     {
       id: "dns-record",
@@ -57,11 +72,7 @@ export function buildLivePreflightChecks({ imageDigest }) {
     {
       id: "live-no-slash-redirect",
       label: "Live no-slash tool redirect does not expose internal :8080",
-      command: [
-        "curl",
-        "-fsSI",
-        "https://tools.complyeaze.com/gst-portal-issue-evidence-memo",
-      ],
+      command: curlHead("https://tools.complyeaze.com/gst-portal-issue-evidence-memo"),
       mutates: false,
       requireOutput: true,
       expectedOutput: "gst-portal-issue-evidence-memo/",
@@ -70,11 +81,7 @@ export function buildLivePreflightChecks({ imageDigest }) {
     {
       id: "live-tool-csp-hydration-compatible",
       label: "Live tool page CSP allows required Astro inline hydration",
-      command: [
-        "curl",
-        "-fsSI",
-        "https://tools.complyeaze.com/gst-portal-issue-evidence-memo/",
-      ],
+      command: curlHead("https://tools.complyeaze.com/gst-portal-issue-evidence-memo/"),
       mutates: false,
       requireOutput: true,
       expectedOutput: "script-src 'self' 'unsafe-inline'",
@@ -82,10 +89,11 @@ export function buildLivePreflightChecks({ imageDigest }) {
     {
       id: "live-manifest-content-type",
       label: "Live manifest has browser-readable content type",
-      command: ["curl", "-fsSI", "https://tools.complyeaze.com/site.webmanifest"],
+      command: curlHead("https://tools.complyeaze.com/site.webmanifest"),
       mutates: false,
       requireOutput: true,
       expectedOutput: "content-type: application/manifest+json",
+      expectedOutputIgnoreCase: true,
     },
     {
       id: "live-hashed-assets-immutable",
@@ -102,7 +110,7 @@ export function buildLivePreflightChecks({ imageDigest }) {
     {
       id: "live-privacy-cloudflare-disclosure",
       label: "Live privacy page discloses Cloudflare security checks",
-      command: ["curl", "-fsSL", "https://tools.complyeaze.com/privacy/"],
+      command: curlGet("https://tools.complyeaze.com/privacy/"),
       mutates: false,
       requireOutput: true,
       expectedOutput: "Cloudflare security checks",
@@ -111,7 +119,7 @@ export function buildLivePreflightChecks({ imageDigest }) {
     {
       id: "live-security-no-email-obfuscation",
       label: "Live security page avoids Cloudflare email-obfuscation script",
-      command: ["curl", "-fsSL", "https://tools.complyeaze.com/security/"],
+      command: curlGet("https://tools.complyeaze.com/security/"),
       mutates: false,
       requireOutput: true,
       expectedOutput: "security at complyeaze dot com",
@@ -120,7 +128,7 @@ export function buildLivePreflightChecks({ imageDigest }) {
     {
       id: "live-homepage-public-links",
       label: "Live homepage does not emit stale :8080 public links",
-      command: ["curl", "-fsSL", "https://tools.complyeaze.com/"],
+      command: curlGet("https://tools.complyeaze.com/"),
       mutates: false,
       requireOutput: true,
       expectedOutput: "https://tools.complyeaze.com",
@@ -129,11 +137,7 @@ export function buildLivePreflightChecks({ imageDigest }) {
     {
       id: "live-tool-public-links",
       label: "Live tool page does not emit stale :8080 public links",
-      command: [
-        "curl",
-        "-fsSL",
-        "https://tools.complyeaze.com/msme-45-day-payment-due-date-calculator/",
-      ],
+      command: curlGet("https://tools.complyeaze.com/msme-45-day-payment-due-date-calculator/"),
       mutates: false,
       requireOutput: true,
       expectedOutput: "https://tools.complyeaze.com/msme-45-day-payment-due-date-calculator",
@@ -142,7 +146,7 @@ export function buildLivePreflightChecks({ imageDigest }) {
     {
       id: "live-sitemap-public-links",
       label: "Live sitemap does not emit stale :8080 public links",
-      command: ["curl", "-fsSL", "https://tools.complyeaze.com/sitemap.xml"],
+      command: curlGet("https://tools.complyeaze.com/sitemap.xml"),
       mutates: false,
       requireOutput: true,
       expectedOutput: "https://tools.complyeaze.com",
@@ -158,7 +162,12 @@ export function runCheck(check) {
   });
   const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
   const hasRequiredOutput = !check.requireOutput || result.stdout.trim().length > 0;
-  const hasExpectedOutput = !check.expectedOutput || output.includes(check.expectedOutput);
+  const comparableOutput = check.expectedOutputIgnoreCase ? output.toLowerCase() : output;
+  const comparableExpectedOutput = check.expectedOutputIgnoreCase
+    ? check.expectedOutput?.toLowerCase()
+    : check.expectedOutput;
+  const hasExpectedOutput =
+    !comparableExpectedOutput || comparableOutput.includes(comparableExpectedOutput);
   const hasForbiddenOutput = (check.forbiddenOutput ?? []).some((forbiddenOutput) =>
     output.includes(forbiddenOutput),
   );
@@ -170,6 +179,14 @@ export function runCheck(check) {
     ok: result.status === 0 && hasRequiredOutput && hasExpectedOutput && !hasForbiddenOutput,
     output,
   };
+}
+
+function curlHead(url) {
+  return ["curl", "--max-time", curlMaxTimeSeconds, "-fsSI", url];
+}
+
+function curlGet(url) {
+  return ["curl", "--max-time", curlMaxTimeSeconds, "-fsSL", url];
 }
 
 export function renderResult(result) {

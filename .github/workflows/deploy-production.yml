@@ -55,7 +55,20 @@ jobs:
             --jq '.[0].headSha' | grep -Fx "${{ inputs.source_sha }}"
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Verify published image digest
-        run: docker buildx imagetools inspect "${{ env.IMAGE_NAME }}@${{ inputs.image_digest }}"
+        run: |
+          set -euo pipefail
+          tag_digest="$(docker buildx imagetools inspect "${{ env.IMAGE_NAME }}:${{ inputs.source_sha }}" --format '{{json .Manifest.Digest}}' | tr -d '"')"
+          if [ -z "${tag_digest}" ] || [ "${tag_digest}" = "null" ]; then
+            echo "Could not resolve digest for source tag ${{ inputs.source_sha }}." >&2
+            exit 1
+          fi
+          if [ "${tag_digest}" != "${{ inputs.image_digest }}" ]; then
+            echo "Image digest does not belong to reviewed source SHA ${{ inputs.source_sha }}." >&2
+            echo "Tag digest: ${tag_digest}" >&2
+            echo "Input digest: ${{ inputs.image_digest }}" >&2
+            exit 1
+          fi
+          docker buildx imagetools inspect "${{ env.IMAGE_NAME }}@${{ inputs.image_digest }}"
       - name: Configure kubeconfig
         run: |
           mkdir -p "$HOME/.kube"

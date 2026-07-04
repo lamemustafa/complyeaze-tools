@@ -21,7 +21,8 @@ export const forbiddenBuiltRuntimePatterns = [
   { label: "WebSocket", pattern: /\bWebSocket\b/ },
   { label: "EventSource", pattern: /\bEventSource\b/ },
   { label: "serviceWorker.register", pattern: /\bserviceWorker\.register\b/ },
-  { label: "remote dynamic import", pattern: /\bimport\s*\(\s*["']https?:\/\// },
+  { label: "remote dynamic import", pattern: /\bimport\s*\(\s*["'](?:https?:)?\/\// },
+  { label: "remote static import", pattern: /\b(?:import|export)(?!\s*\()\s*(?:[^"'()]*)?["'](?:https?:)?\/\// },
 ];
 
 export function listBuiltRuntimeFiles(distDir = join(process.cwd(), "apps", "site", "dist")) {
@@ -39,7 +40,7 @@ export function scanBuiltRuntimeNetwork({
     const source = readFileSync(file, "utf8");
 
     const patternOffenders = forbiddenBuiltRuntimePatterns
-      .filter(({ pattern }) => pattern.test(source))
+      .filter(({ label, pattern }) => shouldScanPattern(label, file) && pattern.test(source))
       .map(({ label }) => `${relative(process.cwd(), file)}: ${label}`);
     const resourceOffenders =
       extname(file) === ".css"
@@ -48,6 +49,11 @@ export function scanBuiltRuntimeNetwork({
 
     return patternOffenders.concat(resourceOffenders);
   });
+}
+
+function shouldScanPattern(label, file) {
+  if (label === "remote static import") return /\.(?:js|mjs)$/.test(file);
+  return true;
 }
 
 function scanHtmlResources(source, file) {
@@ -95,11 +101,11 @@ function scanHtmlResources(source, file) {
 function scanCssResources(source, file) {
   const offenders = [];
 
-  for (const match of source.matchAll(/@import\s+(?:url\(\s*)?(["']?)(https?:\/\/[^'")\s]+)\1/gi)) {
+  for (const match of source.matchAll(/@import\s+(?:url\(\s*)?(["']?)((?:https?:)?\/\/[^'")\s]+)\1/gi)) {
     if (isForbiddenRemoteUrl(match[2])) offenders.push(formatOffender(file, "remote css import", match[2]));
   }
 
-  for (const match of source.matchAll(/url\(\s*(["']?)(https?:\/\/[^'")]+)\1\s*\)/gi)) {
+  for (const match of source.matchAll(/url\(\s*(["']?)((?:https?:)?\/\/[^'")]+)\1\s*\)/gi)) {
     if (isForbiddenRemoteUrl(match[2])) offenders.push(formatOffender(file, "remote css url", match[2]));
   }
 
@@ -122,10 +128,11 @@ function readSrcsetUrls(value) {
 }
 
 function isForbiddenRemoteUrl(value) {
-  if (!/^https?:\/\//i.test(value)) return false;
+  const normalized = value.startsWith("//") ? `https:${value}` : value;
+  if (!/^https?:\/\//i.test(normalized)) return false;
 
   try {
-    return new URL(value).origin !== publicOrigin;
+    return new URL(normalized).origin !== publicOrigin;
   } catch {
     return true;
   }

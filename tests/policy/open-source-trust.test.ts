@@ -57,6 +57,26 @@ describe("open-source trust surface", () => {
     );
   });
 
+  it("publishes status and security evidence matrices without claiming real-time uptime", () => {
+    const statusPage = read("apps/site/src/pages/status.astro");
+    const securityPage = read("apps/site/src/pages/security.astro");
+    const trustEvidence = read("apps/site/src/lib/trust-evidence.ts");
+
+    expect(statusPage).toContain("Verification evidence");
+    expect(statusPage).toContain("verificationEvidence.map");
+    expect(statusPage).toContain("Not a real-time uptime feed");
+    expect(statusPage).toContain("Last source-reviewed date");
+    expect(statusPage).toContain("stale-after window");
+    expect(securityPage).toContain("Security evidence");
+    expect(securityPage).toContain("Runtime boundary evidence");
+    expect(securityPage).toContain("securityBoundaryEvidence.map");
+    expect(trustEvidence).toContain("pnpm verify");
+    expect(trustEvidence).toContain("scan-built-runtime-network");
+    expect(trustEvidence).toContain("connect-src 'none'");
+    expect(trustEvidence).toContain("default-deny egress NetworkPolicy");
+    expect(trustEvidence).not.toContain("real-time uptime");
+  });
+
   it("discloses Cloudflare security checks where the public host uses them", () => {
     const privacyPage = read("apps/site/src/pages/privacy.astro");
     const privacyDoc = read("docs/privacy-local-first.md");
@@ -79,7 +99,10 @@ describe("open-source trust surface", () => {
 
     expect(branchProtection).toContain("Required status check: verify");
     expect(branchProtection).toContain("Required conversation gate");
-    expect(branchProtection).toContain("Required approving reviews / Code Owner reviews: disabled");
+    expect(branchProtection).toContain(
+      "Required pull request reviews: enabled with required approving reviews = 0",
+    );
+    expect(branchProtection).toContain("Code Owner reviews: disabled");
     expect(codeowners).toContain("/deploy/");
     expect(codeowners).toContain("/packages/source-register/");
     expect(prTemplate).toContain("Branch Protection Impact");

@@ -1,0 +1,160 @@
+import { parseSimpleCsv, type CsvRow } from "./csv";
+
+const RATE_CUTOVER_DATE = "2024-07-23";
+const isinPattern = /^[A-Z0-9]{12}$/;
+const isinSentinels = new Set(["INNOTAVAILAB", "INNOTREQUIRD"]);
+
+export type Schedule112ATransferPeriod = "BE" | "AE" | "unknown";
+
+export type Schedule112ARow = {
+  scripName: string;
+  isin: string;
+  isinLooksValid: boolean;
+  quantity: number | null;
+  salePricePerUnit: number | null;
+  fullValueOfConsideration: number | null;
+  saleDate: string;
+  transferPeriod: Schedule112ATransferPeriod;
+  costOfAcquisitionActual: number | null;
+  fmv31Jan2018PerUnit: number | null;
+  acquisitionDate: string;
+  acquiredBefore31Jan2018: boolean | null;
+  totalFmv31Jan2018: number | null;
+  lowerOfFmvAndConsideration: number | null;
+  costOfAcquisitionFinal: number | null;
+  expenditureOnTransfer: number;
+  totalDeductions: number | null;
+  gainOrLoss: number | null;
+  grandfatheringApplied: boolean;
+  flags: string[];
+};
+
+export function buildSchedule112ARows(input: string | CsvRow[]): Schedule112ARow[] {
+  const rows = typeof input === "string" ? parseSimpleCsv(input) : input;
+  return rows.map(buildRow);
+}
+
+function buildRow(row: CsvRow): Schedule112ARow {
+  const scripName = row.scripName || row.name || "Unnamed scrip";
+  const isin = (row.isin || "").trim().toUpperCase();
+  const isinLooksValid = isinSentinels.has(isin) || isinPattern.test(isin);
+  const quantity = parseAmount(row.quantity);
+  const salePricePerUnit = parseAmount(row.salePricePerUnit || row.salePrice);
+  const explicitConsideration = parseAmount(row.fullValueOfConsideration);
+  const fullValueOfConsideration =
+    explicitConsideration ??
+    (quantity !== null && salePricePerUnit !== null ? quantity * salePricePerUnit : null);
+  const saleDate = (row.saleDate || "").trim();
+  const transferPeriod = classifyTransferPeriod(saleDate);
+  const costOfAcquisitionActual = parseAmount(row.costOfAcquisitionActual || row.costOfAcquisition);
+  const fmv31Jan2018PerUnit = parseAmount(row.fmv31Jan2018PerUnit || row.fmv31Jan2018);
+  const acquisitionDate = (row.acquisitionDate || row.purchaseDate || "").trim();
+  const acquiredBefore31Jan2018 = resolveAcquiredBefore31Jan2018(row, acquisitionDate);
+  const canApplyGrandfathering = fmv31Jan2018PerUnit !== null && acquiredBefore31Jan2018 === true;
+  const totalFmv31Jan2018 =
+    canApplyGrandfathering && quantity !== null ? fmv31Jan2018PerUnit * quantity : null;
+  const lowerOfFmvAndConsideration =
+    totalFmv31Jan2018 !== null && fullValueOfConsideration !== null
+      ? Math.min(totalFmv31Jan2018, fullValueOfConsideration)
+      : null;
+  const grandfatheringApplied = lowerOfFmvAndConsideration !== null && costOfAcquisitionActual !== null;
+  const costOfAcquisitionFinal =
+    lowerOfFmvAndConsideration !== null && costOfAcquisitionActual !== null
+      ? Math.max(costOfAcquisitionActual, lowerOfFmvAndConsideration)
+      : costOfAcquisitionActual;
+  const expenditureOnTransfer = parseAmount(row.expenditureOnTransfer) ?? 0;
+  const totalDeductions =
+    costOfAcquisitionFinal !== null ? costOfAcquisitionFinal + expenditureOnTransfer : null;
+  const gainOrLoss =
+    fullValueOfConsideration !== null && totalDeductions !== null
+      ? fullValueOfConsideration - totalDeductions
+      : null;
+
+  const flags: string[] = [];
+  if (!isinLooksValid) flags.push("ISIN does not look like a 12-character alphanumeric ISIN.");
+  if (!saleDate) {
+    flags.push("Missing sale date: cannot classify as before/on-or-after 23 July 2024.");
+  } else if (!isValidIsoDate(saleDate)) {
+    flags.push(
+      "Invalid sale date: use YYYY-MM-DD with a real calendar date before classifying the transfer period.",
+    );
+  }
+  if (costOfAcquisitionActual === null) flags.push("Missing cost of acquisition.");
+  if (fullValueOfConsideration === null) flags.push("Missing quantity/sale price or full value of consideration.");
+  if (fmv31Jan2018PerUnit !== null && acquiredBefore31Jan2018 !== true) {
+    flags.push(
+      "31-Jan-2018 FMV supplied without acquisition evidence on or before 2018-01-31; grandfathering was not applied and actual cost was used.",
+    );
+  }
+  if (!grandfatheringApplied) {
+    flags.push(
+      "No 31-Jan-2018 FMV supplied: grandfathering under Section 55(2)(ac) was not applied, so cost of acquisition uses actual cost only.",
+    );
+  }
+
+  return {
+    scripName,
+    isin,
+    isinLooksValid,
+    quantity,
+    salePricePerUnit,
+    fullValueOfConsideration,
+    saleDate,
+    transferPeriod,
+    costOfAcquisitionActual,
+    fmv31Jan2018PerUnit,
+    acquisitionDate,
+    acquiredBefore31Jan2018,
+    totalFmv31Jan2018,
+    lowerOfFmvAndConsideration,
+    costOfAcquisitionFinal,
+    expenditureOnTransfer,
+    totalDeductions,
+    gainOrLoss,
+    grandfatheringApplied,
+    flags,
+  };
+}
+
+function classifyTransferPeriod(saleDate: string): Schedule112ATransferPeriod {
+  const parsed = parseIsoDate(saleDate);
+  const cutover = parseIsoDate(RATE_CUTOVER_DATE);
+  if (!parsed || !cutover) return "unknown";
+  return parsed.getTime() >= cutover.getTime() ? "AE" : "BE";
+}
+
+function isValidIsoDate(value: string): boolean {
+  return parseIsoDate(value) !== null;
+}
+
+function parseIsoDate(value: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return null;
+  const yyyy = String(date.getUTCFullYear()).padStart(4, "0");
+  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(date.getUTCDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}` === value ? date : null;
+}
+
+function parseAmount(value: string | undefined): number | null {
+  if (!value?.trim()) return null;
+  const parsed = Number(value.replace(/,/g, ""));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function resolveAcquiredBefore31Jan2018(row: CsvRow, acquisitionDate: string): boolean | null {
+  const flag = normalizeBoolean(row.acquiredBefore31Jan2018 || row.acquiredBefore2018 || row.grandfatheringEligible);
+  if (flag !== null) return flag;
+  const parsed = parseIsoDate(acquisitionDate);
+  const cutoff = parseIsoDate("2018-01-31");
+  if (!parsed || !cutoff) return null;
+  return parsed.getTime() <= cutoff.getTime();
+}
+
+function normalizeBoolean(value: string | undefined): boolean | null {
+  const normalized = value?.trim().toLowerCase().replace(/[^a-z0-9]+/g, "") ?? "";
+  if (["yes", "y", "true", "1", "before", "eligible"].includes(normalized)) return true;
+  if (["no", "n", "false", "0", "after", "noteligible"].includes(normalized)) return false;
+  return null;
+}
