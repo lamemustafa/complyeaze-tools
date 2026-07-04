@@ -27,13 +27,13 @@ describe("review findings gate", () => {
     expect(workflow).toContain("schedule:");
     expect(workflow).toContain("cron: \"*/5 * * * *\"");
     expect(workflow).toContain("workflow_dispatch:");
-    expect(workflow).toContain("pull_request_review:");
-    expect(workflow).toContain("types: [submitted, edited, dismissed]");
+    expect(workflow).toContain("required: true");
     expect(workflow).toContain("pull-requests: read");
     expect(workflow).toContain("statuses: write");
     expect(workflow).toContain("GH_TOKEN: ${{ github.token }}");
     expect(workflow).toContain("repository: ${{ github.repository }}");
     expect(workflow).toContain("ref: ${{ github.event.repository.default_branch }}");
+    expect(workflow).not.toContain("pull_request_review:");
     expect(workflow).not.toContain("pull_request_review_comment:");
     expect(workflow).not.toContain("github.event.pull_request.base.sha");
     expect(workflow).not.toContain("github.event.pull_request.base.sha || github.sha");
@@ -73,6 +73,6 @@ describe("review findings gate", () => {
     expect(branchProtection).toContain("trusted status-refresh backstop");
     expect(branchProtection).toContain("Scheduled all-open sweeps may");
     expect(branchProtection).toContain("rerun the `Review gate` check");
-    expect(branchProtection).toContain("Manual dispatches must run trusted default-branch workflow code");
+    expect(branchProtection).toContain("dispatches require a PR number");
   });
 });

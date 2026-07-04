@@ -38,12 +38,12 @@ GitHub branch protection rule or repository ruleset with these requirements:
   use the missing-review bypass so they still catch unresolved threads and
   requested-changes reviews without flipping every open PR red before Codex
   responds, but they must skip writing a green status when the only passing
-  condition is an allowed missing current-head review. Keep the
-  `pull_request_review` trigger limited to submit/edit/dismiss
-  events and keep it on trusted default-branch workflow code. Do not add
-  `pull_request_review_comment` triggers unless the replacement design is proven
-  to execute trusted default-branch workflow code.
-  Manual dispatches must run trusted default-branch workflow code.
+  condition is an allowed missing current-head review. Do not use
+  `pull_request_review` or `pull_request_review_comment` as status-writing
+  triggers; they do not provide the same trusted default-branch/write-token
+  posture as `pull_request_target`, schedule, and manual dispatch. Manual
+  dispatches require a PR number and must run trusted default-branch workflow
+  code.
 - Do not require an approving human review while the repo has only one eligible
   maintainer. A required self-review creates a permanent merge deadlock. Keep the
   required review count at zero unless a second eligible maintainer is active.

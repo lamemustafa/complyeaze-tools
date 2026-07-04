@@ -162,6 +162,37 @@ describe("PR review gate script", () => {
       ]),
     ).toThrow(/Requested-changes reviews/);
   });
+
+  it("keeps current-head requested changes blocking after a stale approval", () => {
+    const fixturePath = writeFixture(
+      "head-requested-stale-approval",
+      reviewFixture({
+        reviews: [
+          review({ state: "CHANGES_REQUESTED", commit: "head-sha" }),
+          review({
+            state: "APPROVED",
+            commit: "old-sha",
+            submittedAt: "2026-07-03T12:05:00Z",
+          }),
+        ],
+      }),
+    );
+
+    expect(() =>
+      runGate([
+        scriptPath,
+        "--repo",
+        "lamemustafa/complyeaze-tools",
+        "--pr",
+        "1",
+        "--fixture",
+        fixturePath,
+        "--strict-head-review",
+        "--required-review-author",
+        "chatgpt-codex-connector",
+      ]),
+    ).toThrow(/Requested-changes reviews/);
+  });
 });
 
 function runGate(args: string[]) {
