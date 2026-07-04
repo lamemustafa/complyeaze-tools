@@ -57,6 +57,7 @@ export function buildReviewFooter(input: string | ReviewFooterOptions): string {
   }
 
   const selectedOptions = formatOptions(input.selectedOptions);
+  const columnMapping = formatColumnMapping(input.selectedOptions);
   const sources = input.officialSources ?? [];
   const unsupportedCases = input.unsupportedCases ?? [];
   const extraCaveats = input.extraCaveats ?? [];
@@ -77,6 +78,7 @@ export function buildReviewFooter(input: string | ReviewFooterOptions): string {
     input.toolkitVersion ? `Tool package: ${input.toolkitVersion}` : null,
     `Artifact schema: ${input.artifactSchemaVersion ?? "review-text-v1"}`,
     `Input basis: ${input.sourceLabel}`,
+    columnMapping ? `Column mapping: ${columnMapping}` : null,
     selectedOptions ? `Selected options: ${selectedOptions}` : null,
     input.requiredColumns?.length
       ? `Expected columns: ${input.requiredColumns.join(", ")}`
@@ -113,9 +115,15 @@ function formatOptions(options: ReviewFooterOptions["selectedOptions"]): string 
   if (!options) return null;
   const entries = Object.entries(options).filter(
     (entry): entry is [string, string | number | boolean] =>
+      entry[0] !== "Column mapping" &&
       entry[1] !== null && entry[1] !== undefined && entry[1] !== "",
   );
   return entries.length ? entries.map(([key, value]) => `${key}=${value}`).join(", ") : null;
+}
+
+function formatColumnMapping(options: ReviewFooterOptions["selectedOptions"]): string | null {
+  const value = options?.["Column mapping"];
+  return typeof value === "string" && value ? value : null;
 }
 
 function formatRowCounts(rowCounts: ArtifactRowCounts): string {

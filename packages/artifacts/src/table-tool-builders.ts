@@ -19,6 +19,7 @@ export function buildMsmeArtifact({
   tool,
   definition,
   asOfDate,
+  options,
   parsed,
   prepared,
 }: ToolArtifactBuilderContext): ToolArtifactResult {
@@ -47,7 +48,7 @@ export function buildMsmeArtifact({
         definition,
         table.parsed,
         table.prepared,
-        { asOfDate },
+        withColumnMappingOption({ asOfDate }, options.columnMapping),
         msmeReviewCaveats,
       ),
     ].join("\n"),
@@ -57,6 +58,7 @@ export function buildMsmeArtifact({
 export function buildGstr2bFollowUpArtifact({
   tool,
   definition,
+  options,
   parsed,
   prepared,
 }: ToolArtifactBuilderContext): ToolArtifactResult {
@@ -68,7 +70,13 @@ export function buildGstr2bFollowUpArtifact({
     text: [
       "Supplier follow-up drafts",
       ...followUps.map((followUp) => followUp.draft),
-      buildFooter(tool, definition, table.parsed, table.prepared),
+      buildFooter(
+        tool,
+        definition,
+        table.parsed,
+        table.prepared,
+        withColumnMappingOption({}, options.columnMapping),
+      ),
     ].join("\n"),
   };
 }
@@ -123,6 +131,7 @@ export function buildGstr2bReconciliationArtifact({
         matchMode: options.strictGstrMatch
           ? "invoiceDate+documentType+amendmentType+contextReview"
           : "basic",
+        ...columnMappingOption(options.columnMapping),
       }),
     ].join("\n"),
   };
@@ -131,6 +140,7 @@ export function buildGstr2bReconciliationArtifact({
 export function buildAisArtifact({
   tool,
   definition,
+  options,
   parsed,
   prepared,
 }: ToolArtifactBuilderContext): ToolArtifactResult {
@@ -157,7 +167,13 @@ export function buildAisArtifact({
       "",
       "Deductor-wise verification drafts",
       ...formatDeductorDrafts(review),
-      buildFooter(tool, definition, table.parsed, table.prepared),
+      buildFooter(
+        tool,
+        definition,
+        table.parsed,
+        table.prepared,
+        withColumnMappingOption({}, options.columnMapping),
+      ),
     ].join("\n"),
   };
 }
@@ -165,6 +181,7 @@ export function buildAisArtifact({
 export function buildGstPortalArtifact({
   tool,
   definition,
+  options,
   parsed,
   prepared,
 }: ToolArtifactBuilderContext): ToolArtifactResult {
@@ -174,7 +191,13 @@ export function buildGstPortalArtifact({
     status: "ready",
     text: [
       buildGstPortalEvidenceMemo(table.prepared.acceptedRows),
-      buildFooter(tool, definition, table.parsed, table.prepared),
+      buildFooter(
+        tool,
+        definition,
+        table.parsed,
+        table.prepared,
+        withColumnMappingOption({}, options.columnMapping),
+      ),
     ].join("\n"),
   };
 }
@@ -392,6 +415,28 @@ const msmeReviewCaveats = [
   "Dates and statuses are based only on pasted rows.",
   "This tool does not verify Udyam registration, resolve disputes, calculate statutory interest, or decide tax disallowance.",
 ];
+
+function withColumnMappingOption(
+  selectedOptions: Record<string, string | number | boolean>,
+  mapping: Record<string, string> | undefined,
+): Record<string, string | number | boolean> {
+  return {
+    ...selectedOptions,
+    ...columnMappingOption(mapping),
+  };
+}
+
+function columnMappingOption(
+  mapping: Record<string, string> | undefined,
+): Record<string, string> {
+  const entries = Object.entries(mapping ?? {}).filter(
+    (entry): entry is [string, string] => Boolean(entry[0]) && Boolean(entry[1]),
+  );
+  if (!entries.length) return {};
+  return {
+    "Column mapping": entries.map(([target, source]) => `${target}<-${source}`).join(", "),
+  };
+}
 
 function countTaxStatementMismatches(
   rows: ReturnType<typeof buildTaxStatementMismatchReview>,
