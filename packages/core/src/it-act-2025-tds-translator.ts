@@ -72,8 +72,8 @@ export const VERIFIED_TDS_MAPPINGS: TdsMappingRow[] = [
     oldSection: "194-IA",
     newCitation: "Section 393(1), Table Sl. No. 3(i)",
     paymentType: "Transfer of certain immovable property (other than agricultural land)",
-    rate: "1%",
-    threshold: "Rs 50 lakh consideration",
+    rate: "1% of the higher of consideration and stamp-duty value",
+    threshold: "Rs 50 lakh, tested against consideration or stamp-duty value as applicable",
   },
   {
     oldSection: "194J",

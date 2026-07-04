@@ -76,9 +76,9 @@ export const configs: Record<string, WorkbenchConfig> = {
     inputLabel: "Scrip-wise sale rows",
     outputLabel: "Schedule 112A field draft",
     guidance:
-      "Paste rows with scripName, isin, quantity, salePricePerUnit, saleDate, and costOfAcquisitionActual. Add fmv31Jan2018PerUnit only if grandfathering should apply.",
+      "Paste rows with scripName, isin, quantity, salePricePerUnit, saleDate, and costOfAcquisitionActual. Add fmv31Jan2018PerUnit together with acquisitionDate, purchaseDate, or acquiredBefore31Jan2018 when grandfathering should apply.",
     sample:
-      "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual,fmv31Jan2018PerUnit\nSample Equity Ltd,INSYNTH00001,100,420,2026-05-10,25000,32000\nSample Fund Units,INSYNTH00002,500,58,2024-06-01,20000,",
+      "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual,fmv31Jan2018PerUnit,acquisitionDate\nSample Equity Ltd,INSYNTH00001,100,420,2026-05-10,25000,32000,2017-12-15\nSample Fund Units,INSYNTH00002,500,58,2024-06-01,20000,,",
   },
   "/labour-code-gratuity-wage-recalculator": {
     inputLabel: "Employee pay-component rows",
@@ -145,6 +145,7 @@ const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
   },
   "/gstr3b-outward-liability-prelock-gap-checker": {
     requiredColumns: ["lineRef", "table", "booksValue", "autoPopulatedValue"],
+    requiredValueColumnGroups: [["lineRef"], ["table"]],
     sourceLabel: "GSTR-3B pre-lock comparison rows",
   },
   "/income-tax-act-2025-tds-section-translator": {
@@ -159,6 +160,15 @@ const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
       "salePricePerUnit",
       "saleDate",
       "costOfAcquisitionActual",
+      "acquisitionDate, purchaseDate, or acquiredBefore31Jan2018 when fmv31Jan2018PerUnit is used",
+    ],
+    requiredColumnGroups: [
+      ["scripName"],
+      ["isin"],
+      ["quantity"],
+      ["salePricePerUnit"],
+      ["saleDate"],
+      ["costOfAcquisitionActual"],
     ],
     sourceLabel: "Schedule 112A sale rows",
   },

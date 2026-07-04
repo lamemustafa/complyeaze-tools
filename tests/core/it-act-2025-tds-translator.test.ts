@@ -25,6 +25,15 @@ describe("buildTdsSectionTranslation", () => {
     expect(results[0].mapping?.paymentType).toContain("immovable property");
   });
 
+  it("includes the stamp-duty value condition for Section 194-IA mappings", () => {
+    const results = buildTdsSectionTranslation("oldSection\n194-IA");
+
+    expect(results[0].status).toBe("matched");
+    expect(results[0].mapping?.rate).toContain("higher of consideration and stamp-duty value");
+    expect(results[0].mapping?.threshold).toContain("stamp-duty value");
+    expect(results[0].mapping?.threshold).toContain("Rs 50 lakh");
+  });
+
   it("does not collapse sub-clause suffixes into a different old section", () => {
     const results = buildTdsSectionTranslation("oldSection\n194-I(a)");
 
