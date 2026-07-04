@@ -28,30 +28,31 @@ export function buildMsmePayableReview(
   asOf = new Date(),
 ): MsmePayableReview[] {
   const rows = typeof input === "string" ? parseSimpleCsv(input) : input;
+  const asOfDate = normalizeDateOnly(asOf);
   return rows.map((row) => {
     const invoiceDate = row.invoiceDate || row.invoice_date || "";
     const acceptanceDate = row.acceptanceDate || invoiceDate || "";
     const deemedAcceptanceDate = row.deemedAcceptanceDate || "";
-    const reviewStartDate = deemedAcceptanceDate || acceptanceDate;
+    const reviewStartDate = acceptanceDate || deemedAcceptanceDate;
     const agreement = normalizeAgreement(row.writtenAgreement || row.agreement || "");
     const agreedPaymentDays = parseWholeNumber(
       row.agreedPaymentDays || row.paymentTermDays || row.agreedDays,
     );
     const reviewBasis = buildReviewBasis(agreement, agreedPaymentDays);
     const reviewDate = buildReviewDate(reviewStartDate, agreement, agreedPaymentDays);
-    const ageDays = daysBetween(reviewStartDate, asOf);
-    const daysPastReviewDate = reviewDate ? daysBetween(reviewDate, asOf, false) : null;
-    const paymentStatus = paymentStatusFor(row);
+    const ageDays = daysBetween(reviewStartDate, asOfDate);
+    const daysPastReviewDate = reviewDate ? daysBetween(reviewDate, asOfDate, false) : null;
+    const paymentStatus = paymentStatusFor(row, asOfDate);
     const udyamEvidenceStatus = normalizeUdyamEvidence(
       row.udyamEvidence || row.udyamEvidenceStatus || row.mseEvidence || "",
     );
-    const disputeStatus = normalizeText(row.disputeStatus || row.dispute || "");
+    const disputed = isDisputed(row.disputeStatus || row.dispute || "");
     const evidenceChecks = buildEvidenceChecks({
       agreement,
       agreedPaymentDays,
       paymentStatus,
       udyamEvidenceStatus,
-      disputeStatus,
+      disputed,
       usedInvoiceDateFallback: !row.acceptanceDate && !row.deemedAcceptanceDate && Boolean(invoiceDate),
     });
 
@@ -73,7 +74,7 @@ export function buildMsmePayableReview(
       possibleFlag: flagFor({
         ageDays,
         daysPastReviewDate,
-        disputeStatus,
+        disputed,
         paymentStatus,
         reviewDate,
       }),
@@ -118,12 +119,12 @@ function buildReviewDate(
 function flagFor(input: {
   ageDays: number | null;
   daysPastReviewDate: number | null;
-  disputeStatus: string;
+  disputed: boolean;
   paymentStatus: MsmePayableReview["paymentStatus"];
   reviewDate: string | null;
 }): MsmePayableReview["possibleFlag"] {
   if (input.ageDays === null || !input.reviewDate) return "missing-review-date";
-  if (input.disputeStatus.includes("disput")) return "disputed-review-context";
+  if (input.disputed) return "disputed-review-context";
   if (input.paymentStatus === "paid") return "paid-review-context";
   return input.daysPastReviewDate !== null && input.daysPastReviewDate > 0
     ? "review-needed"
@@ -135,7 +136,7 @@ function buildEvidenceChecks(input: {
   agreedPaymentDays: number | null;
   paymentStatus: MsmePayableReview["paymentStatus"];
   udyamEvidenceStatus: MsmePayableReview["udyamEvidenceStatus"];
-  disputeStatus: string;
+  disputed: boolean;
   usedInvoiceDateFallback: boolean;
 }): string[] {
   const checks: string[] = [];
@@ -151,7 +152,7 @@ function buildEvidenceChecks(input: {
   if (input.usedInvoiceDateFallback) {
     checks.push("Confirm acceptance or deemed acceptance date; invoice date is only a fallback.");
   }
-  if (input.disputeStatus.includes("disput")) {
+  if (input.disputed) {
     checks.push("Review dispute correspondence separately before sending a demand or management note.");
   }
   if (input.paymentStatus === "partly-paid") {
@@ -160,17 +161,19 @@ function buildEvidenceChecks(input: {
   return checks;
 }
 
-function paymentStatusFor(row: CsvRow): MsmePayableReview["paymentStatus"] {
+function paymentStatusFor(row: CsvRow, asOf: Date): MsmePayableReview["paymentStatus"] {
   const amount = parseAmount(row.amount);
   const paidAmount = parseAmount(row.paidAmount || row.amountPaid);
-  const paymentDate = row.paymentDate || row.paidDate || "";
+  const paymentDate = parseDate(row.paymentDate || row.paidDate || "");
+
+  if (paymentDate && paymentDate.getTime() > asOf.getTime()) return "unpaid";
 
   if (paidAmount !== null && amount !== null) {
     if (paidAmount >= amount) return "paid";
     if (paidAmount > 0) return "partly-paid";
   }
   if (paidAmount !== null && paidAmount > 0) return "partly-paid";
-  if (paymentDate.trim()) return "paid";
+  if (paymentDate) return "paid";
   return "unpaid";
 }
 
@@ -211,6 +214,18 @@ function daysBetween(value: string, asOf: Date, floorAtZero = true): number | nu
   const ms = asOf.getTime() - date.getTime();
   const days = Math.floor(ms / 86_400_000);
   return floorAtZero ? Math.max(0, days) : days;
+}
+
+function isDisputed(value: string): boolean {
+  const normalized = normalizeText(value);
+  if (["notdisputed", "nodispute", "undisputed", "nondisputed"].includes(normalized)) {
+    return false;
+  }
+  return normalized.includes("disput");
+}
+
+function normalizeDateOnly(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
 function parseDate(value: string): Date | null {

@@ -32,7 +32,7 @@ export function buildTaxStatementMismatchReview(
   input: string | CsvRow[],
 ): TaxStatementMismatchReview[] {
   const rows = typeof input === "string" ? parseSimpleCsv(input) : input;
-  const normalizedRows = rows.map(normalizeRow);
+  const normalizedRows = rows.map((row, index) => normalizeRow(row, index));
   const duplicateKeys = findDuplicateKeys(normalizedRows);
 
   return normalizedRows.map((row) => {
@@ -79,20 +79,22 @@ type NormalizedTaxStatementRow = {
   duplicateKey: string;
 };
 
-function normalizeRow(row: CsvRow): NormalizedTaxStatementRow {
+function normalizeRow(row: CsvRow, index: number): NormalizedTaxStatementRow {
   const amount = row.amount || row.reportedAmount || row.statementAmount || "";
   const recordsAmount = row.recordsAmount || row.booksAmount || row.amountInBooks || "";
   const source = row.source || "Unknown source";
   const tan = row.tan || row.deductorTan || "";
-  const deductor = row.deductor || row.deductorName || row.payer || row.reportingSource || "Unknown deductor";
+  const rawDeductor = row.deductor || row.deductorName || row.payer || row.reportingSource || "";
+  const deductor = rawDeductor || "Unknown deductor";
   const section = row.section || row.tdsSection || "";
   const category = row.category || row.incomeCategory || row.reportedCategory || "review";
   const recordsCategory = row.recordsCategory || row.booksCategory || row.categoryInBooks || category;
-  const tdsTcsAmount = row.tdsTcsAmount || row.tdsAmount || row.tcsAmount || "";
+  const tdsTcsAmount = row.tdsTcsAmount || row.tdsTcs || row.tdsAmount || row.tcsAmount || "";
   const note = row.note || "review";
   const reviewAction =
     row.reviewAction || row.feedbackAction || row.action || "Review against taxpayer records";
   const differenceValue = difference(amount, recordsAmount);
+  const identityKey = normalizeText(tan) || normalizeText(rawDeductor) || `missing-deductor-${index}`;
 
   return {
     source,
@@ -111,11 +113,11 @@ function normalizeRow(row: CsvRow): NormalizedTaxStatementRow {
     explicitMismatchCategory: normalizeMismatchCategory(row.mismatchCategory || row.mismatchType || ""),
     duplicateKey: [
       normalizeText(source),
-      normalizeText(tan || deductor),
+      identityKey,
       normalizeText(section),
       normalizeText(category),
-      normalizeText(amount),
-      normalizeText(recordsAmount),
+      normalizeAmountForKey(amount),
+      normalizeAmountForKey(recordsAmount),
     ].join(":"),
   };
 }
@@ -150,24 +152,46 @@ function normalizeMismatchCategory(value: string): TaxStatementMismatchCategory 
   const normalized = normalizeText(value);
   if (!normalized) return null;
   if (normalized.includes("duplicate")) return "duplicate-statement";
-  if (normalized.includes("missinginbooks") || normalized.includes("omittedinbooks")) {
+  if (
+    [
+      "reportednotinrecords",
+      "reportednotinbooks",
+      "missinginbooks",
+      "omittedinbooks",
+    ].includes(normalized)
+  ) {
     return "reported-not-in-records";
   }
   if (
-    normalized.includes("missinginstatement") ||
-    normalized.includes("missinginais") ||
-    normalized.includes("missinginform26as") ||
-    normalized.includes("omittedinstatement")
+    [
+      "recordsnotinstatement",
+      "booksnotinstatement",
+      "missinginstatement",
+      "missinginais",
+      "missinginform26as",
+      "omittedinstatement",
+    ].includes(normalized)
   ) {
     return "records-not-in-statement";
   }
-  if (normalized.includes("category") || normalized.includes("incomehead")) {
+  if (
+    normalized === "identityorsectionreview" ||
+    normalized.includes("category") ||
+    normalized.includes("incomehead")
+  ) {
     return "identity-or-section-review";
   }
-  if (normalized.includes("amount") || normalized.includes("tds") || normalized.includes("tcs")) {
+  if (
+    normalized === "amountdifference" ||
+    normalized.includes("amount") ||
+    normalized.includes("tds") ||
+    normalized.includes("tcs")
+  ) {
     return "amount-difference";
   }
-  if (normalized.includes("match")) return "matched";
+  if (["notmatched", "unmatched", "mismatch", "mismatched"].includes(normalized)) return null;
+  if (normalized === "matched" || normalized === "match") return "matched";
+  if (normalized === "manualreview") return "manual-review";
   return "manual-review";
 }
 
@@ -209,6 +233,11 @@ function parseAmount(value: string): number | null {
   if (!value.trim()) return null;
   const parsed = Number(value.replace(/,/g, ""));
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function normalizeAmountForKey(value: string): string {
+  const parsed = parseAmount(value);
+  return parsed === null ? `text:${value.trim()}` : `number:${parsed}`;
 }
 
 function normalizeText(value: string): string {

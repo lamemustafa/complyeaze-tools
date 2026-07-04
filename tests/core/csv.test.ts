@@ -32,6 +32,19 @@ describe("parseDelimitedTable", () => {
     });
   });
 
+  it("treats literal TSV quotes inside cells as text", () => {
+    const parsed = parseDelimitedTable(
+      'Supplier\tNote\nAcme Components\t5" pipe\nNorthline Supplies\tplain note',
+    );
+
+    expect(parsed.delimiter).toBe("\t");
+    expect(parsed.rows).toEqual([
+      { supplier: "Acme Components", note: '5" pipe' },
+      { supplier: "Northline Supplies", note: "plain note" },
+    ]);
+    expect(parsed.issues).toEqual([]);
+  });
+
   it("supports semicolon-delimited paste", () => {
     const parsed = parseDelimitedTable("source;supplier;invoice\n2b;Metro Inputs;INV-777");
 
@@ -117,5 +130,6 @@ describe("normalizeHeaderKey", () => {
     expect(normalizeHeaderKey("invoice_date")).toBe("invoiceDate");
     expect(normalizeHeaderKey("GSTIN")).toBe("gstin");
     expect(normalizeHeaderKey("TDS/TCS Amount")).toBe("tdsTcsAmount");
+    expect(normalizeHeaderKey("TDS/TCS")).toBe("tdsTcsAmount");
   });
 });

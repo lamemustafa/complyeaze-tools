@@ -61,6 +61,18 @@ const statuses: Gstr2bRecoStatus[] = [
   "matched",
 ];
 
+const amendmentTables = new Set([
+  "b2ba",
+  "b2bcdnra",
+  "cdnra",
+  "isda",
+  "ecoa",
+  "impgamendments",
+  "impgsezamendments",
+  "b2baitcreversal",
+  "b2bdnra",
+]);
+
 export function buildGstr2bReconciliationTriage(
   input: string | CsvRow[],
   optionsOrTolerance: number | Gstr2bRecoOptions = 2,
@@ -182,20 +194,8 @@ function normalizeDate(value: string) {
 function normalizeAmendmentType(value: string) {
   const normalized = normalizeText(value);
   if (!normalized) return "";
-  if (
-    normalized.includes("amend") ||
-    [
-      "b2ba",
-      "b2bcdnra",
-      "cdnra",
-      "isda",
-      "ecoa",
-      "impgamendments",
-      "impgsezamendments",
-      "b2baitcreversal",
-      "b2bdnra",
-    ].includes(normalized)
-  ) {
+  if (amendmentTables.has(normalized)) return normalized;
+  if (normalized.includes("amend")) {
     return "amendment";
   }
   return "original";
@@ -270,7 +270,7 @@ function classifyGroup(
 
 function buildContextFlags(row: NormalizedRow): string[] {
   const flags: string[] = [];
-  if (["no", "notavailable", "notavail", "ineligible", "unavailable"].includes(row.itcAvailability)) {
+  if (["no", "n", "notavailable", "notavail", "ineligible", "unavailable"].includes(row.itcAvailability)) {
     flags.push("ITC availability marked not available");
   }
   if (["rejected", "reject"].includes(row.imsStatus)) {
@@ -278,7 +278,7 @@ function buildContextFlags(row: NormalizedRow): string[] {
   } else if (["pending", "deferred", "noaction"].includes(row.imsStatus)) {
     flags.push("IMS status marked pending");
   }
-  if (row.amendmentType === "amendment") {
+  if (row.amendmentType !== "" && row.amendmentType !== "original") {
     flags.push("Amendment table or flag present");
   }
   if (["yes", "y", "true", "rcm", "reversecharge"].includes(row.reverseCharge)) {

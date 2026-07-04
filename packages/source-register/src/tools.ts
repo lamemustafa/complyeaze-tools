@@ -500,7 +500,7 @@ export const TOOLS: ToolMeta[] = [
         "Sharing the draft before checking whether the placeholders changed the meaning.",
       ],
       reviewChecklist: [
-        "Check PAN, TAN, GSTIN, CIN, Udyam, DIN/DPIN, LLPIN, Aadhaar-like, bank, email, phone, and UPI placeholders.",
+        "Review the generated mask report for every supported pattern check.",
         "Manually inspect names, addresses, file names, and contextual identifiers.",
         "Use Axal templates and review trails for controlled recurring handoffs.",
       ],

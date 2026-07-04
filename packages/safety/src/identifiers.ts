@@ -40,17 +40,17 @@ type Detector = {
 const detectors: Detector[] = [
   {
     key: "gstin",
-    pattern: /\b[0-9]{2}[\s-]?[A-Z](?:[\s-]?[A-Z]){4}[\s-]?[0-9](?:[\s-]?[0-9]){3}[\s-]?[A-Z][\s-]?[1-9A-Z][\s-]?Z[\s-]?[0-9A-Z]\b/gi,
+    pattern: /\b[0-9]{2}[ \t-]?[A-Z](?:[ \t-]?[A-Z]){4}[ \t-]?[0-9](?:[ \t-]?[0-9]){3}[ \t-]?[A-Z][ \t-]?[1-9A-Z][ \t-]?Z[ \t-]?[0-9A-Z]\b/gi,
     replacement: "[GSTIN masked]",
   },
   {
     key: "pan",
-    pattern: /\b[A-Z](?:[\s-]?[A-Z]){4}[\s-]?[0-9](?:[\s-]?[0-9]){3}[\s-]?[A-Z]\b/gi,
+    pattern: /\b[A-Z](?:[ \t-]?[A-Z]){4}[ \t-]?[0-9](?:[ \t-]?[0-9]){3}[ \t-]?[A-Z]\b/gi,
     replacement: "[PAN masked]",
   },
   {
     key: "tan",
-    pattern: /\b[A-Z](?:[\s-]?[A-Z]){3}[\s-]?[0-9](?:[\s-]?[0-9]){4}[\s-]?[A-Z]\b/gi,
+    pattern: /\b[A-Z](?:[ \t-]?[A-Z]){3}[ \t-]?[0-9](?:[ \t-]?[0-9]){4}[ \t-]?[A-Z]\b/gi,
     replacement: "[TAN masked]",
   },
   {
@@ -60,7 +60,7 @@ const detectors: Detector[] = [
   },
   {
     key: "udyam",
-    pattern: /\bUDYAM[\s-]?[A-Z]{2}[\s-]?[0-9]{2}[\s-]?[0-9]{7}\b/gi,
+    pattern: /\bUDYAM[ \t-]?[A-Z]{2}[ \t-]?[0-9]{2}[ \t-]?[0-9]{7}\b/gi,
     replacement: "[Udyam registration masked]",
   },
   {
@@ -97,14 +97,14 @@ const detectors: Detector[] = [
       `${prefix.trimEnd()} [bank-account-like number masked]`,
   },
   {
+    key: "phone",
+    pattern: /(^|[^0-9])((?:\+91[ \t-]?)?(?:\(?[6-9][0-9]{4}\)?[ \t-]?[0-9]{5}|[6-9][0-9]{4}[ \t-]?[0-9]{5}))\b/g,
+    replacement: (_match, prefix: string) => `${prefix}[phone-like number masked]`,
+  },
+  {
     key: "aadhaar",
     pattern: /\b[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}\b/g,
     replacement: "[Aadhaar-like number masked]",
-  },
-  {
-    key: "phone",
-    pattern: /(^|[^a-zA-Z0-9])((?:\+91[\s-]?)?(?:\(?[6-9][0-9]{4}\)?[\s-]?[0-9]{5}|[6-9][0-9]{4}[\s-]?[0-9]{5}))\b/g,
-    replacement: (_match, prefix: string) => `${prefix}[phone-like number masked]`,
   },
 ];
 

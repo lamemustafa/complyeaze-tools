@@ -76,7 +76,7 @@ export function buildToolReviewArtifact({
     }
     const review = buildMsmePayableReview(
       prepared.acceptedRows,
-      new Date(`${asOfDate}T00:00:00`),
+      new Date(`${asOfDate}T00:00:00Z`),
     );
     return {
       status: "ready",

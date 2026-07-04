@@ -82,9 +82,11 @@ describe("tool source register", () => {
       ]),
     );
     expect(reviewCopyTool?.seoDepth.reviewChecklist.join(" ")).toContain(
+      "generated mask report",
+    );
+    expect(reviewCopyTool?.seoDepth.reviewChecklist.join(" ")).toContain(
       "Manually inspect names, addresses",
     );
-    expect(reviewCopyTool?.seoDepth.reviewChecklist.join(" ")).toContain("CIN");
     expect(reviewCopyTool?.seoDepth.exampleWorkflow.join(" ")).toContain(
       "found/masked/not-checked report",
     );

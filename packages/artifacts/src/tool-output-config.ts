@@ -15,7 +15,7 @@ export const configs: Record<string, WorkbenchConfig> = {
     guidance:
       "Paste rows with supplier, GSTIN, invoice, invoiceDate, taxPeriod, documentType, taxableValue, taxAmount, status, and optional escalationLevel. This creates follow-up text only, not ITC eligibility conclusions.",
     sample:
-      "supplier,gstin,invoice,invoiceDate,taxPeriod,documentType,taxableValue,taxAmount,status,escalationLevel\nAcme Components,27ABCDE1234F1Z5,INV-102,2026-05-01,May 2026,Tax Invoice,100000,18000,missing in 2B,first reminder\nNorthline Supplies,29ABCDE1234F1Z7,INV-205,2026-06-01,June 2026,Tax Invoice,40000,7200,value mismatch,second reminder",
+      "supplier,gstin,invoice,invoiceDate,taxPeriod,documentType,taxableValue,taxAmount,status,escalationLevel\nAcme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,May 2026,Tax Invoice,100000,18000,missing in 2B,first reminder\nNorthline Supplies,SYNTH-NORTH-GSTIN,INV-205,2026-06-01,June 2026,Tax Invoice,40000,7200,value mismatch,second reminder",
   },
   "/gstr-2b-purchase-reconciliation-triage": {
     inputLabel: "Purchase and GSTR-2B rows",
@@ -67,18 +67,24 @@ const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
     sourceLabel: "GSTR-2B and purchase rows",
   },
   "/gstr-2b-purchase-reconciliation-triage": {
-    requiredColumns: ["source", "supplier", "invoice", "taxAmount or split igst/cgst/sgst"],
+    requiredColumns: ["source", "supplier or gstin", "invoice", "taxAmount or split igst/cgst/sgst"],
     requiredColumnGroups: [
       ["source"],
-      ["supplier"],
+      ["supplier", "gstin"],
       ["invoice"],
       ["taxAmount", "itcAmount", "amount", "igst", "cgst", "sgst"],
     ],
-    requiredValueColumnGroups: [["source"], ["supplier"], ["invoice"]],
+    requiredValueColumnGroups: [["source"], ["supplier", "gstin"], ["invoice"]],
     sourceLabel: "GSTR-2B reconciliation triage rows",
   },
   "/ais-form-26as-mismatch-checker": {
-    requiredColumns: ["source", "category", "amount", "recordsAmount"],
+    requiredColumns: ["source", "category or incomeCategory", "amount", "recordsAmount or amountInBooks"],
+    requiredColumnGroups: [
+      ["source"],
+      ["category", "incomeCategory", "reportedCategory"],
+      ["amount", "reportedAmount", "statementAmount"],
+      ["recordsAmount", "booksAmount", "amountInBooks"],
+    ],
     sourceLabel: "AIS/Form 26AS review rows",
   },
   "/gst-portal-issue-evidence-memo": {

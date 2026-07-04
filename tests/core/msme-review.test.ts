@@ -130,4 +130,41 @@ describe("buildMsmePayableReview", () => {
     expect(rows[1].evidenceChecks).toContain("Review dispute correspondence separately before sending a demand or management note.");
     expect(rows[1].evidenceChecks).toContain("Confirm whether the paid amount is partial and whether a balance remains open.");
   });
+
+  it("prefers actual acceptance date over deemed acceptance date when both are present", () => {
+    const rows = buildMsmePayableReview(
+      [
+        "vendor,amount,acceptanceDate,deemedAcceptanceDate,writtenAgreement",
+        "Acme Components,125000,2026-05-01,2026-05-10,no",
+      ].join("\n"),
+      new Date("2026-07-02T18:30:00Z"),
+    );
+
+    expect(rows[0]).toEqual(
+      expect.objectContaining({
+        reviewDate: "2026-05-17",
+        ageDays: 62,
+      }),
+    );
+  });
+
+  it("does not count future payments or negative dispute labels as current review context", () => {
+    const rows = buildMsmePayableReview(
+      [
+        "vendor,amount,acceptanceDate,paymentDate,paidAmount,disputeStatus",
+        "Future Paid Vendor,10000,2026-05-01,2026-07-10,10000,not disputed",
+      ].join("\n"),
+      new Date("2026-07-02T18:30:00Z"),
+    );
+
+    expect(rows[0]).toEqual(
+      expect.objectContaining({
+        paymentStatus: "unpaid",
+        possibleFlag: "review-needed",
+      }),
+    );
+    expect(rows[0].evidenceChecks).not.toContain(
+      "Review dispute correspondence separately before sending a demand or management note.",
+    );
+  });
 });
