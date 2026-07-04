@@ -40,6 +40,12 @@ const freshnessIssueUrl =
             </li>
           ))}
         </ul>
+        <h3>Unsupported cases</h3>
+        <ul>
+          {tool.unsupportedCases.map((unsupportedCase) => (
+            <li>{unsupportedCase}</li>
+          ))}
+        </ul>
         <p>
           <a href={publicSiteUrl(tool.slug)}>Open this tool</a>
           {" "}or{" "}
