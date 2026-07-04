@@ -1,4 +1,5 @@
 import { parseDelimitedTable } from "@complyeaze-tools/core";
+import { applyColumnMapping, filterColumnMapping } from "./column-mapping";
 import { getToolArtifactBuilder } from "./tool-builders";
 import { getToolArtifactDefinition } from "./tool-output-config";
 import {
@@ -10,6 +11,7 @@ import {
 import type {
   BuildOutputOptions,
   BuildToolReviewArtifactInput,
+  ToolArtifactDefinition,
   ToolArtifactResult,
   WorkbenchConfig,
   WorkbenchTool,
@@ -43,7 +45,14 @@ export function buildToolReviewArtifact({
     return builder.build({ tool, definition, input, asOfDate, options });
   }
 
-  const parsed = parseDelimitedTable(input);
+  const parsedInput = parseDelimitedTable(input);
+  const columnMapping = filterColumnMapping(
+    options.columnMapping ?? {},
+    getMappableTargetColumns(definition),
+    parsedInput.headers,
+  );
+  const buildOptions = { ...options, columnMapping };
+  const parsed = applyColumnMapping(parsedInput, columnMapping);
   const preValidationError = builder?.preValidateParsed?.(parsed);
   if (preValidationError) return preValidationError;
 
@@ -57,7 +66,7 @@ export function buildToolReviewArtifact({
       definition,
       input,
       asOfDate,
-      options,
+      options: buildOptions,
       parsed,
       prepared,
     });
@@ -83,4 +92,15 @@ export function buildOutput(
     asOfDate,
     options,
   }).text;
+}
+
+function getMappableTargetColumns(definition: ToolArtifactDefinition): string[] {
+  const groups =
+    definition.requiredColumnGroups ??
+    definition.requiredColumns
+      ?.filter((column) => /^[a-z][a-zA-Z0-9]*$/.test(column))
+      .map((column) => [column]) ??
+    [];
+
+  return groups.flat();
 }

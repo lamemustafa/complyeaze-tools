@@ -31,6 +31,7 @@ export type ToolArtifactDefinition = {
 
 export type BuildOutputOptions = {
   strictGstrMatch?: boolean;
+  columnMapping?: Record<string, string>;
 };
 
 export type BuildToolReviewArtifactInput = {
