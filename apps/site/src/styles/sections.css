@@ -88,6 +88,59 @@
   background: var(--soft);
 }
 
+.evidence-section {
+  padding: 18px 0 52px;
+}
+
+.evidence-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.evidence-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.evidence-table th,
+.evidence-table td {
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.evidence-table thead th {
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.evidence-table tbody th {
+  width: 170px;
+  font-weight: 720;
+}
+
+.evidence-table tr:last-child th,
+.evidence-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.evidence-table code {
+  color: var(--accent);
+  font-size: 13px;
+  white-space: normal;
+}
+
+.evidence-table-compact {
+  min-width: 720px;
+}
+
 @media (max-width: 820px) {
   .workflow-grid {
     grid-template-columns: 1fr;
