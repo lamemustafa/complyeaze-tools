@@ -57,7 +57,7 @@ const tableBuilders: Record<string, ToolArtifactBuilder> = {
     inputMode: "table",
     build: buildLabourCodeGratuityArtifact,
   },
-  "/maharera-form3-withdrawal-worksheet": {
+  "/maharera-form-3-withdrawal-worksheet": {
     inputMode: "table",
     build: buildMahareraForm3Artifact,
   },

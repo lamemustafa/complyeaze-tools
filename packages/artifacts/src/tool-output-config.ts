@@ -88,7 +88,7 @@ export const configs: Record<string, WorkbenchConfig> = {
     sample:
       "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService,terminationReason\nSample Employee A,20000,0,0,56000,permanent,7,ordinary\nSample Employee B,35000,5000,0,25000,fixed-term,1.2,ordinary",
   },
-  "/maharera-form3-withdrawal-worksheet": {
+  "/maharera-form-3-withdrawal-worksheet": {
     inputLabel: "Project cost rows",
     outputLabel: "Withdrawal ceiling worksheet draft",
     guidance:
@@ -173,7 +173,7 @@ const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
     ],
     sourceLabel: "Labour Code wage/gratuity rows",
   },
-  "/maharera-form3-withdrawal-worksheet": {
+  "/maharera-form-3-withdrawal-worksheet": {
     requiredColumns: [
       "projectName",
       "totalEstimatedLandCost",
