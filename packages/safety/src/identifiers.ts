@@ -98,8 +98,9 @@ const detectors: Detector[] = [
   },
   {
     key: "phone",
-    pattern: /(^|[^0-9])((?:\+91[ \t-]?)?(?:\(?[6-9][0-9]{4}\)?[ \t-]?[0-9]{5}|[6-9][0-9]{4}[ \t-]?[0-9]{5}))\b/g,
-    replacement: (_match, prefix: string) => `${prefix}[phone-like number masked]`,
+    pattern: /(^|[^0-9])(\+91[ \t-]?(?:\(?[6-9][0-9]{4}\)?[ \t-]?[0-9]{5}|[6-9][0-9]{4}[ \t-]?[0-9]{5}))\b|(^|[^A-Za-z0-9])((?:\(?[6-9][0-9]{4}\)?[ \t-]?[0-9]{5}|[6-9][0-9]{4}[ \t-]?[0-9]{5}))\b/g,
+    replacement: (_match, intlPrefix: string | undefined, _intlPhone: string | undefined, localPrefix: string | undefined) =>
+      `${intlPrefix ?? localPrefix ?? ""}[phone-like number masked]`,
   },
   {
     key: "aadhaar",

@@ -230,6 +230,23 @@ describe("buildGstr2bReconciliationTriage", () => {
     expect(summary.counts.matched).toBe(1);
   });
 
+  it("uses GSTIN as the display label when supplier is omitted", () => {
+    const summary = buildGstr2bReconciliationTriage(
+      [
+        "source,gstin,invoice,taxAmount",
+        "purchase,SYNTH-ONLY-GSTIN,INV-102,18000",
+        "2b,SYNTH-ONLY-GSTIN,INV-102,18000",
+      ].join("\n"),
+    );
+
+    expect(summary.counts.matched).toBe(1);
+    expect(summary.issues[0]).toEqual(
+      expect.objectContaining({
+        supplier: "SYNTH-ONLY-GSTIN",
+      }),
+    );
+  });
+
   it("skips rows without a real GSTIN or supplier key", () => {
     const summary = buildGstr2bReconciliationTriage(
       [

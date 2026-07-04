@@ -276,6 +276,7 @@ describe("buildMsmePayableReview", () => {
     expect(rows[0]).toEqual(
       expect.objectContaining({
         paymentStatus: "unpaid",
+        openBalance: 10000,
         possibleFlag: "review-needed",
       }),
     );

@@ -22,7 +22,7 @@ export const forbiddenBuiltRuntimePatterns = [
   { label: "EventSource", pattern: /\bEventSource\b/ },
   { label: "serviceWorker.register", pattern: /\bserviceWorker\.register\b/ },
   { label: "remote dynamic import", pattern: /\bimport\s*\(\s*["'](?:https?:)?\/\// },
-  { label: "remote static import", pattern: /\b(?:import|export)\s+(?:(?:[^"';]+?)\s+from\s+)?["'](?:https?:)?\/\// },
+  { label: "remote static import", pattern: /\b(?:import|export)(?!\s*\()\s*(?:[^"'()]*)?["'](?:https?:)?\/\// },
 ];
 
 export function listBuiltRuntimeFiles(distDir = join(process.cwd(), "apps", "site", "dist")) {
@@ -40,7 +40,7 @@ export function scanBuiltRuntimeNetwork({
     const source = readFileSync(file, "utf8");
 
     const patternOffenders = forbiddenBuiltRuntimePatterns
-      .filter(({ pattern }) => pattern.test(source))
+      .filter(({ label, pattern }) => shouldScanPattern(label, file) && pattern.test(source))
       .map(({ label }) => `${relative(process.cwd(), file)}: ${label}`);
     const resourceOffenders =
       extname(file) === ".css"
@@ -49,6 +49,11 @@ export function scanBuiltRuntimeNetwork({
 
     return patternOffenders.concat(resourceOffenders);
   });
+}
+
+function shouldScanPattern(label, file) {
+  if (label === "remote static import") return /\.(?:js|mjs)$/.test(file);
+  return true;
 }
 
 function scanHtmlResources(source, file) {

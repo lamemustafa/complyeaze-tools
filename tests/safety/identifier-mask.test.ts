@@ -117,6 +117,17 @@ describe("maskIndianIdentifiers", () => {
     expect(result.text).toContain("PAN ABCDE\n1234F");
   });
 
+  it("does not mask compact phone-like digits inside alphanumeric references", () => {
+    const result = maskIndianIdentifiersWithReport(
+      "invoice INV9876543210, file REF9123456789, mobile +919876543210",
+    );
+
+    expect(result.text).toContain("invoice INV9876543210");
+    expect(result.text).toContain("file REF9123456789");
+    expect(result.text).toContain("mobile [phone-like number masked]");
+    expect(result.counts.phone).toBe(1);
+  });
+
   it("masks compact Indian phone numbers when a label directly precedes the plus sign", () => {
     const result = maskIndianIdentifiersWithReport("Mobile+919876543210");
 

@@ -124,7 +124,7 @@ describe("built runtime network scanner", () => {
     try {
       writeFileSync(
         join(distDir, "chunk.js"),
-        "export * from 'https://cdn.example/x.js'; export { foo } from '//cdn.example/y.js';",
+        "export*from'https://cdn.example/x.js'; export{foo}from'//cdn.example/y.js'; import{bar}from'https://cdn.example/z.js';",
       );
 
       expect(scanBuiltRuntimeNetwork({ distDir })).toEqual([

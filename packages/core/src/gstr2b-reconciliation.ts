@@ -116,7 +116,8 @@ function normalizeRow(
   if (!source) return null;
 
   const supplierName = row.supplier || row.vendor || "";
-  const gstin = normalizeText(row.gstin ?? "");
+  const rawGstin = (row.gstin ?? "").trim();
+  const gstin = normalizeText(rawGstin);
   const invoice = normalizeText(row.invoice || row.invoiceNumber || row.documentNumber || "");
   const invoiceDate = normalizeDate(row.invoiceDate || row.date || "");
   const documentType = normalizeText(row.documentType || row.docType || row.type || "");
@@ -143,7 +144,7 @@ function normalizeRow(
 
   return {
     source,
-    supplier: supplierName || "Unknown supplier",
+    supplier: supplierName || rawGstin || "Unknown supplier",
     gstin,
     invoice,
     invoiceDate,

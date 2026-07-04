@@ -49,8 +49,11 @@ export function reviewMsmePayableRow(row: CsvRow, asOf: Date): MsmePayableReview
   const paymentStatus = paymentStatusFor(row, asOf);
   const amountValue = parseAmount(row.amount);
   const paidAmount = parseAmount(row.paidAmount || row.amountPaid);
+  const asOfPaidAmount = hasFuturePaymentDate(row, asOf) ? 0 : paidAmount;
   const openBalance =
-    amountValue !== null && paidAmount !== null ? Math.max(0, amountValue - paidAmount) : null;
+    amountValue !== null && asOfPaidAmount !== null
+      ? Math.max(0, amountValue - asOfPaidAmount)
+      : null;
   const udyamEvidenceStatus = normalizeUdyamEvidence(
     row.udyamEvidence || row.udyamEvidenceStatus || row.mseEvidence || "",
   );
@@ -285,7 +288,7 @@ function paymentStatusFor(row: CsvRow, asOf: Date): MsmePaymentStatus {
   const paidAmount = parseAmount(row.paidAmount || row.amountPaid);
   const paymentDate = row.paymentDate || row.paidDate || "";
 
-  if (paymentDate.trim() && isAfter(paymentDate, formatDate(asOf))) return "unpaid";
+  if (hasFuturePaymentDate(row, asOf)) return "unpaid";
 
   if (paidAmount !== null && amount !== null) {
     if (paidAmount >= amount) return "paid";
@@ -294,4 +297,9 @@ function paymentStatusFor(row: CsvRow, asOf: Date): MsmePaymentStatus {
   if (paidAmount !== null && paidAmount > 0) return "partly-paid";
   if (paymentDate.trim()) return "unknown";
   return "unpaid";
+}
+
+function hasFuturePaymentDate(row: CsvRow, asOf: Date): boolean {
+  const paymentDate = row.paymentDate || row.paidDate || "";
+  return Boolean(paymentDate.trim()) && isAfter(paymentDate, formatDate(asOf));
 }
