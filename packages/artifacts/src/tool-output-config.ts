@@ -21,9 +21,9 @@ export const configs: Record<string, WorkbenchConfig> = {
     inputLabel: "Purchase and GSTR-2B rows",
     outputLabel: "Reconciliation triage draft",
     guidance:
-      "Paste one CSV/TSV with source, supplier, gstin, invoice, and taxAmount. Use source values purchase or 2b.",
+      "Paste one CSV/TSV with source, supplier, gstin, invoice, and taxAmount. Optional professional-mode columns include invoiceDate, documentType, table, itcAvailability, imsStatus, reverseCharge, and split igst/cgst/sgst.",
     sample:
-      "source,supplier,gstin,invoice,taxAmount\npurchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,18000\n2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,18000\npurchase,Northline Supplies,SYNTH-NORTH-GSTIN,INV-205,7560\n2b,Northline Supplies,SYNTH-NORTH-GSTIN,INV-205,7000\npurchase,Delta Traders,SYNTH-DELTA-GSTIN,INV-301,5400\n2b,Metro Inputs,SYNTH-METRO-GSTIN,INV-777,900",
+      "source,supplier,gstin,invoice,invoiceDate,documentType,table,taxAmount,itcAvailability,imsStatus\npurchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,B2B,18000,,\n2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,B2B,18000,Yes,Accepted\npurchase,Northline Supplies,SYNTH-NORTH-GSTIN,INV-205,2026-06-01,Invoice,B2B,7560,,\n2b,Northline Supplies,SYNTH-NORTH-GSTIN,INV-205,2026-06-01,Invoice,B2B,7000,Yes,Accepted\npurchase,Delta Traders,SYNTH-DELTA-GSTIN,INV-301,2026-05-15,Invoice,B2B,5400,,\n2b,Metro Inputs,SYNTH-METRO-GSTIN,INV-777,2026-05-18,Invoice,B2BA,900,No,Rejected",
   },
   "/ais-form-26as-mismatch-checker": {
     inputLabel: "Mismatch rows",

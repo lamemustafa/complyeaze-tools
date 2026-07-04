@@ -103,32 +103,46 @@ export function buildToolReviewArtifact({
 
   if (tool.slug === "/gstr-2b-purchase-reconciliation-triage") {
     const matchFields = options.strictGstrMatch
-      ? (["invoiceDate", "documentType"] as const)
+      ? (["invoiceDate", "documentType", "amendmentType"] as const)
       : [];
     const summary = buildGstr2bReconciliationTriage(prepared.acceptedRows, {
       tolerance: 2,
       matchFields: [...matchFields],
+      reviewContext: Boolean(options.strictGstrMatch),
     });
+    const matchMode = options.strictGstrMatch
+      ? "GSTIN/supplier + invoice + invoice date + document type + amendment table context"
+      : "GSTIN/supplier + invoice";
     return {
       status: "ready",
       text: [
         "GSTR-2B purchase reconciliation triage",
-        `Match mode: ${options.strictGstrMatch ? "GSTIN/supplier + invoice + invoice date + document type" : "GSTIN/supplier + invoice"}`,
+        `Match mode: ${matchMode}`,
         `Rows reviewed: ${summary.totalRows}`,
         `Rows skipped by domain checks: ${summary.skippedRowCount}`,
         `Missing in 2B: ${summary.counts["missing-in-2b"]}`,
         `Extra in 2B: ${summary.counts["extra-in-2b"]}`,
         `Value mismatch: ${summary.counts["value-mismatch"]}`,
         `Duplicate keys: ${summary.counts["duplicate-key"]}`,
+        `ITC/IMS context review: ${summary.counts["context-review"]}`,
         `Matched within tolerance: ${summary.counts.matched}`,
         "",
         ...summary.issues.map(
           (issue) =>
-            `${issue.status} | ${issue.supplier} | ${issue.invoice} | purchase ${formatAmount(issue.purchaseTaxAmount)} | 2B ${formatAmount(issue.gstr2bTaxAmount)} | diff ${formatAmount(issue.difference)} | ${issue.note}`,
+            [
+              `${issue.status} | ${issue.supplier} | ${issue.invoice} | purchase ${formatAmount(issue.purchaseTaxAmount)} | 2B ${formatAmount(issue.gstr2bTaxAmount)} | diff ${formatAmount(issue.difference)} | ${issue.note}`,
+              issue.contextFlags.length
+                ? `Professional context: ${issue.contextFlags.join("; ")}`
+                : null,
+            ]
+              .filter((line): line is string => Boolean(line))
+              .join("\n"),
         ),
         buildFooter(tool, definition, parsed, prepared, {
           tolerance: 2,
-          matchMode: options.strictGstrMatch ? "invoiceDate+documentType" : "basic",
+          matchMode: options.strictGstrMatch
+            ? "invoiceDate+documentType+amendmentType+contextReview"
+            : "basic",
         }),
       ].join("\n"),
     };

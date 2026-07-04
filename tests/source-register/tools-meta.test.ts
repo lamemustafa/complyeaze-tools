@@ -101,4 +101,23 @@ describe("tool source register", () => {
     expect(unsupported).toContain("client references");
     expect(unsupported).toContain("screenshots, PDFs, or scanned text");
   });
+
+  it("documents GSTR-2B professional context columns without ITC overclaims", () => {
+    const gstrTool = TOOLS.find(
+      (tool) => tool.slug === "/gstr-2b-purchase-reconciliation-triage",
+    );
+    const supportedInputs = gstrTool?.supportedInputs.join(" ") ?? "";
+    const reviewChecklist = gstrTool?.seoDepth.reviewChecklist.join(" ") ?? "";
+    const unsupported = gstrTool?.unsupportedCases.join(" ") ?? "";
+
+    expect(supportedInputs).toContain("invoice date");
+    expect(supportedInputs).toContain("document type");
+    expect(supportedInputs).toContain("IMS");
+    expect(supportedInputs).toContain("ITC availability");
+    expect(supportedInputs).toContain("amendment");
+    expect(reviewChecklist).toContain("IMS");
+    expect(reviewChecklist).toContain("ITC availability");
+    expect(reviewChecklist).toContain("amendment");
+    expect(unsupported).toContain("Does not determine ITC eligibility or filing positions.");
+  });
 });

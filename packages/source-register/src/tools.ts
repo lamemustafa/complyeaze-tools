@@ -259,6 +259,7 @@ export const TOOLS: ToolMeta[] = [
       "pasted purchase-register rows",
       "pasted GSTR-2B rows",
       "manual tax-amount comparison table",
+      "optional invoice date, document type, amendment table, ITC availability, and IMS status columns",
     ],
     unsupportedCases: [
       "Does not determine ITC eligibility or filing positions.",
@@ -279,7 +280,7 @@ export const TOOLS: ToolMeta[] = [
     seoDepth: {
       inputGuide: [
         "Paste purchase-register and GSTR-2B rows together with a source column set to purchase or 2b.",
-        "Include supplier or GSTIN, invoice, and taxAmount. Add invoiceDate and document type when available for manual review.",
+        "Include supplier or GSTIN, invoice, and taxAmount. Add invoice date, document type, amendment table, ITC availability, and IMS status when available for professional-mode review.",
       ],
       exampleWorkflow: [
         "Paste a small reconciliation slice from books and GSTR-2B.",
@@ -289,10 +290,12 @@ export const TOOLS: ToolMeta[] = [
       commonMistakes: [
         "Comparing only invoice numbers when supplier GSTIN or invoice date differs.",
         "Treating a matched tax amount as a final credit decision without reviewing document type and portal state.",
+        "Ignoring amendment, ITC availability, IMS, or reverse-charge context when the amount appears to match.",
       ],
       reviewChecklist: [
         "Check duplicate keys before acting on missing or extra buckets.",
         "Review amount differences against tax components and invoice amendments.",
+        "Review ITC availability, IMS status, amendment table, document type, and reverse-charge columns when the export includes them.",
         "Move large, recurring, or IMS-linked reconciliations into Axal for saved mappings and review history.",
       ],
       sourceExplainer:
@@ -306,7 +309,7 @@ export const TOOLS: ToolMeta[] = [
         {
           question: "Does this cover IMS actions?",
           answer:
-            "No. IMS-linked review needs saved context and professional workflow; use the output only as an exception draft.",
+            "No. Professional mode can flag pasted IMS/ITC context when present, but IMS actions still need saved context and professional workflow.",
         },
       ],
     },

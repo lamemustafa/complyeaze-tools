@@ -116,6 +116,52 @@ describe("buildGstr2bReconciliationTriage", () => {
     expect(strict.counts["extra-in-2b"]).toBe(1);
   });
 
+  it("flags matched tax rows when professional GSTR-2B context needs review", () => {
+    const summary = buildGstr2bReconciliationTriage(
+      [
+        "source,supplier,gstin,invoice,invoiceDate,documentType,taxAmount,itcAvailability,imsStatus",
+        "purchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,18000,,",
+        "2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,18000,No,Rejected",
+      ].join("\n"),
+      {
+        matchFields: ["invoiceDate", "documentType"],
+        reviewContext: true,
+      },
+    );
+
+    expect(summary.counts["context-review"]).toBe(1);
+    expect(summary.counts.matched).toBe(0);
+    expect(summary.issues[0]).toEqual(
+      expect.objectContaining({
+        status: "context-review",
+        supplier: "Acme Components",
+        difference: 0,
+        contextFlags: [
+          "ITC availability marked not available",
+          "IMS status marked rejected",
+        ],
+      }),
+    );
+    expect(summary.issues[0]?.note).toContain("ITC availability or IMS context");
+  });
+
+  it("can include amendment table context in the professional review key", () => {
+    const summary = buildGstr2bReconciliationTriage(
+      [
+        "source,supplier,gstin,invoice,invoiceDate,documentType,table,taxAmount",
+        "purchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,B2B,18000",
+        "2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,B2BA,18000",
+      ].join("\n"),
+      {
+        matchFields: ["invoiceDate", "documentType", "amendmentType"],
+      },
+    );
+
+    expect(summary.counts["missing-in-2b"]).toBe(1);
+    expect(summary.counts["extra-in-2b"]).toBe(1);
+    expect(summary.counts.matched).toBe(0);
+  });
+
   it("sums tax components when a total tax amount column is absent", () => {
     const summary = buildGstr2bReconciliationTriage(
       [

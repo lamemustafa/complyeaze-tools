@@ -253,6 +253,29 @@ describe("tool output artifact contract", () => {
     expect(output).not.toContain("required-cell-empty");
   });
 
+  it("surfaces professional GSTR-2B context flags in strict-match output", () => {
+    const output = buildOutput(
+      gstr2bTool,
+      [
+        "source,supplier,gstin,invoice,invoiceDate,documentType,taxAmount,itcAvailability,imsStatus",
+        "purchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,18000,,",
+        "2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,18000,No,Rejected",
+      ].join("\n"),
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+      { strictGstrMatch: true },
+    );
+
+    expect(output).toContain(
+      "Match mode: GSTIN/supplier + invoice + invoice date + document type + amendment table context",
+    );
+    expect(output).toContain("ITC/IMS context review: 1");
+    expect(output).toContain("context-review | Acme Components | inv102");
+    expect(output).toContain(
+      "Professional context: ITC availability marked not available; IMS status marked rejected",
+    );
+  });
+
   it("preserves blank-tax GSTR rows so reconciliation can surface amount mismatches", () => {
     const output = buildOutput(
       gstr2bTool,
