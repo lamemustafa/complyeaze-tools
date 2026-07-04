@@ -118,10 +118,10 @@ const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
     sourceLabel: "GSTR-2B and purchase rows",
   },
   "/gstr-2b-purchase-reconciliation-triage": {
-    requiredColumns: ["source", "supplier", "invoice", "taxAmount or split igst/cgst/sgst"],
+    requiredColumns: ["source", "supplier or gstin", "invoice", "taxAmount or split igst/cgst/sgst"],
     requiredColumnGroups: [
       ["source"],
-      ["supplier"],
+      ["supplier", "gstin"],
       ["invoice"],
       ["taxAmount", "itcAmount", "amount", "igst", "cgst", "sgst"],
     ],
@@ -133,11 +133,17 @@ const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
       "imsStatus",
       "reverseCharge",
     ],
-    requiredValueColumnGroups: [["source"], ["supplier"], ["invoice"]],
+    requiredValueColumnGroups: [["source"], ["supplier", "gstin"], ["invoice"]],
     sourceLabel: "GSTR-2B reconciliation triage rows",
   },
   "/ais-form-26as-mismatch-checker": {
-    requiredColumns: ["source", "category", "amount", "recordsAmount"],
+    requiredColumns: ["source", "category or incomeCategory", "amount", "recordsAmount or amountInBooks"],
+    requiredColumnGroups: [
+      ["source"],
+      ["category", "incomeCategory", "reportedCategory"],
+      ["amount", "reportedAmount", "statementAmount"],
+      ["recordsAmount", "booksAmount", "amountInBooks"],
+    ],
     sourceLabel: "AIS/Form 26AS review rows",
   },
   "/gst-portal-issue-evidence-memo": {

@@ -162,6 +162,40 @@ describe("buildGstr2bReconciliationTriage", () => {
     expect(summary.counts.matched).toBe(0);
   });
 
+  it("keeps distinct amendment tables separate in strict keys", () => {
+    const summary = buildGstr2bReconciliationTriage(
+      [
+        "source,supplier,gstin,invoice,invoiceDate,documentType,table,taxAmount",
+        "purchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,B2BA,18000",
+        "2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,CDNRA,18000",
+      ].join("\n"),
+      {
+        matchFields: ["invoiceDate", "documentType", "amendmentType"],
+      },
+    );
+
+    expect(summary.counts["missing-in-2b"]).toBe(1);
+    expect(summary.counts["extra-in-2b"]).toBe(1);
+    expect(summary.counts.matched).toBe(0);
+  });
+
+  it("treats N as unavailable ITC context", () => {
+    const summary = buildGstr2bReconciliationTriage(
+      [
+        "source,supplier,gstin,invoice,invoiceDate,documentType,taxAmount,itcAvailability",
+        "purchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,18000,",
+        "2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,18000,N",
+      ].join("\n"),
+      {
+        matchFields: ["invoiceDate", "documentType"],
+        reviewContext: true,
+      },
+    );
+
+    expect(summary.counts["context-review"]).toBe(1);
+    expect(summary.issues[0]?.contextFlags).toContain("ITC availability marked not available");
+  });
+
   it("sums tax components when a total tax amount column is absent", () => {
     const summary = buildGstr2bReconciliationTriage(
       [
@@ -194,6 +228,23 @@ describe("buildGstr2bReconciliationTriage", () => {
     expect(summary.totalRows).toBe(2);
     expect(summary.skippedRowCount).toBe(1);
     expect(summary.counts.matched).toBe(1);
+  });
+
+  it("uses GSTIN as the display label when supplier is omitted", () => {
+    const summary = buildGstr2bReconciliationTriage(
+      [
+        "source,gstin,invoice,taxAmount",
+        "purchase,SYNTH-ONLY-GSTIN,INV-102,18000",
+        "2b,SYNTH-ONLY-GSTIN,INV-102,18000",
+      ].join("\n"),
+    );
+
+    expect(summary.counts.matched).toBe(1);
+    expect(summary.issues[0]).toEqual(
+      expect.objectContaining({
+        supplier: "SYNTH-ONLY-GSTIN",
+      }),
+    );
   });
 
   it("skips rows without a real GSTIN or supplier key", () => {

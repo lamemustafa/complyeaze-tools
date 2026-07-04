@@ -12,6 +12,7 @@ const relatedTools = tool.relatedSlugs
   .map((slug) => allTools.find((candidate) => candidate.slug === slug))
   .filter((candidate): candidate is ToolMeta => Boolean(candidate));
 const faqItems = tool.seoDepth.faqItems;
+const acceptsPlainText = tool.slug === "/privacy/review-copy-builder";
 const latestSourceReviewDate = tool.officialSources
   .map((source) => source.lastReviewedAt)
   .sort()
@@ -134,7 +135,13 @@ const toolSchema = [
     <h2>Downloaded draft includes</h2>
     <ul>
       <li>generated timestamp, local artifact ID, tool page, and package version</li>
-      <li>expected columns, detected delimiter, input headers, and row diagnostics</li>
+      {
+        acceptsPlainText ? (
+          <li>masked text, found/not-found pattern report, and manual review checklist</li>
+        ) : (
+          <li>expected columns, detected delimiter, input headers, and row diagnostics</li>
+        )
+      }
       <li>source links, source review dates, unsupported cases, and review caveats</li>
       <li><a href={termsUrl}>Terms and disclaimer reference</a></li>
     </ul>

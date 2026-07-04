@@ -15,6 +15,8 @@ describe("Docker static image policy", () => {
     expect(dockerfile).toContain("ASTRO_TELEMETRY_DISABLED=1");
     expect(dockerfile).toContain("pnpm install --frozen-lockfile");
     expect(dockerfile).toContain("HEALTHCHECK");
+    expect(dockerfile).toContain("curl -fsS http://127.0.0.1:8080/-/health");
+    expect(dockerfile).not.toContain("wget -qO-");
     expect(dockerfile).not.toContain("DATABASE_URL");
     expect(dockerfile).not.toContain("REDIS");
   });

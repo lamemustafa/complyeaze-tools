@@ -109,6 +109,32 @@ describe("maskIndianIdentifiers", () => {
     });
   });
 
+  it("keeps identifier separator tolerance within a single line", () => {
+    const result = maskIndianIdentifiersWithReport("PAN ABCDE\n1234F\nGSTIN 27ABCDE\n1234F1Z5");
+
+    expect(result.counts.pan).toBe(0);
+    expect(result.counts.gstin).toBe(0);
+    expect(result.text).toContain("PAN ABCDE\n1234F");
+  });
+
+  it("does not mask compact phone-like digits inside alphanumeric references", () => {
+    const result = maskIndianIdentifiersWithReport(
+      "invoice INV9876543210, file REF9123456789, mobile +919876543210",
+    );
+
+    expect(result.text).toContain("invoice INV9876543210");
+    expect(result.text).toContain("file REF9123456789");
+    expect(result.text).toContain("mobile [phone-like number masked]");
+    expect(result.counts.phone).toBe(1);
+  });
+
+  it("masks compact Indian phone numbers when a label directly precedes the plus sign", () => {
+    const result = maskIndianIdentifiersWithReport("Mobile+919876543210");
+
+    expect(result.text).toBe("Mobile[phone-like number masked]");
+    expect(result.counts.phone).toBe(1);
+  });
+
   it("makes residual manual-review risk explicit even when no supported patterns match", () => {
     const result = maskIndianIdentifiersWithReport(
       "Client reference Alpha review note for May ledger.",

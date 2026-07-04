@@ -244,6 +244,7 @@ it("emits Schedule 112A export fields, not only a human-readable summary", () =>
     expect(targets).toEqual([
       { column: "source", label: "source" },
       { column: "supplier", label: "supplier" },
+      { column: "gstin", label: "gstin" },
       { column: "invoice", label: "invoice" },
       { column: "taxAmount", label: "taxAmount" },
       { column: "itcAmount", label: "itcAmount" },

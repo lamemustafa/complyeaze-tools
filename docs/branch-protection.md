@@ -20,6 +20,9 @@ GitHub branch protection rule or repository ruleset with these requirements:
 - Require conversation resolution before merge. Codex and other automated review
   comments count through unresolved review threads, not through an approving
   reviewer requirement.
+- After resolving review conversations without pushing a new commit, manually
+  re-run `Review gate` or use `workflow_dispatch`; GitHub Actions does not expose
+  a review-thread resolution trigger for this workflow.
 - If an unresolved review thread is resolved but GitHub does not rerun the
   custom check automatically, rerun the `Review gate` check from the Checks UI
   before merging.

@@ -69,4 +69,61 @@ describe("buildTaxStatementMismatchReview", () => {
     ]);
     expect(review[0]?.correctionDraft).toContain("duplicate statement rows");
   });
+
+  it("uses canonical category labels and avoids negative match labels being matched", () => {
+    const review = buildTaxStatementMismatchReview(
+      [
+        "source,deductor,tan,section,category,recordsCategory,amount,recordsAmount,mismatchCategory",
+        "AIS,Metro Bank,SYNTH12345A,194A,Interest,Interest,5400,0,reported-not-in-records",
+        "AIS,Northline Works,SYNTH54321B,194C,Contract,Contract,1200,1000,not matched",
+      ].join("\n"),
+    );
+
+    expect(review.map((row) => row.mismatchCategory)).toEqual([
+      "reported-not-in-records",
+      "amount-difference",
+    ]);
+  });
+
+  it("does not dedupe missing identities or distinct signed amounts", () => {
+    const missingIdentityRows = buildTaxStatementMismatchReview(
+      [
+        "source,deductor,tan,section,category,amount,recordsAmount",
+        "AIS,,,194A,Interest,5400,5400",
+        "AIS,,,194A,Interest,5400,5400",
+      ].join("\n"),
+    );
+    const signedAmountRows = buildTaxStatementMismatchReview(
+      [
+        "source,deductor,tan,section,category,amount,recordsAmount",
+        "AIS,Metro Bank,SYNTH12345A,194A,Interest,-100,0",
+        "AIS,Metro Bank,SYNTH12345A,194A,Interest,100,0",
+      ].join("\n"),
+    );
+
+    expect(missingIdentityRows.map((row) => row.mismatchCategory)).toEqual(["matched", "matched"]);
+    expect(signedAmountRows.map((row) => row.mismatchCategory)).toEqual([
+      "amount-difference",
+      "reported-not-in-records",
+    ]);
+  });
+
+  it("preserves descriptive missing-in-books and missing-in-AIS labels", () => {
+    const review = buildTaxStatementMismatchReview(
+      [
+        "source,category,recordsCategory,amount,recordsAmount,mismatchCategory",
+        "AIS,Interest,Interest,5400,0,amount missing in books",
+        "AIS,Interest,Interest,0,5000,missing from AIS",
+        "AIS,Interest,Interest,0,5000,records missing in AIS",
+        "Form 26AS,Contract,Contract,0,7000,books missing in statement",
+      ].join("\n"),
+    );
+
+    expect(review.map((row) => row.mismatchCategory)).toEqual([
+      "reported-not-in-records",
+      "records-not-in-statement",
+      "records-not-in-statement",
+      "records-not-in-statement",
+    ]);
+  });
 });

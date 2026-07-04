@@ -144,10 +144,10 @@ describe("tool output artifact contract", () => {
 
     expect(source).not.toContain("@complyeaze-tools/source-register");
     expect(getToolArtifactDefinition("/gstr-2b-purchase-reconciliation-triage")).toEqual({
-      requiredColumns: ["source", "supplier", "invoice", "taxAmount or split igst/cgst/sgst"],
+      requiredColumns: ["source", "supplier or gstin", "invoice", "taxAmount or split igst/cgst/sgst"],
       requiredColumnGroups: [
         ["source"],
-        ["supplier"],
+        ["supplier", "gstin"],
         ["invoice"],
         ["taxAmount", "itcAmount", "amount", "igst", "cgst", "sgst"],
       ],
@@ -159,8 +159,18 @@ describe("tool output artifact contract", () => {
         "imsStatus",
         "reverseCharge",
       ],
-      requiredValueColumnGroups: [["source"], ["supplier"], ["invoice"]],
+      requiredValueColumnGroups: [["source"], ["supplier", "gstin"], ["invoice"]],
       sourceLabel: "GSTR-2B reconciliation triage rows",
+    });
+    expect(getToolArtifactDefinition("/ais-form-26as-mismatch-checker")).toEqual({
+      requiredColumns: ["source", "category or incomeCategory", "amount", "recordsAmount or amountInBooks"],
+      requiredColumnGroups: [
+        ["source"],
+        ["category", "incomeCategory", "reportedCategory"],
+        ["amount", "reportedAmount", "statementAmount"],
+        ["recordsAmount", "booksAmount", "amountInBooks"],
+      ],
+      sourceLabel: "AIS/Form 26AS review rows",
     });
   });
 
@@ -419,7 +429,9 @@ describe("tool output artifact contract", () => {
     expect(output).toContain(
       "Rows parsed: 3; rows accepted for output: 2; blank rows skipped: 0; invalid rows needing review: 1.",
     );
-    expect(output).toContain("Row 3: required-cell-empty - Missing required value for supplier.");
+    expect(output).toContain(
+      "Row 3: required-cell-empty - Missing required value for supplier or gstin.",
+    );
   });
 
   it("preserves GSTR reconciliation rows that use split tax components instead of taxAmount", () => {
@@ -429,6 +441,26 @@ describe("tool output artifact contract", () => {
         "source,supplier,invoice,taxAmount,igst,cgst,sgst",
         "purchase,Acme Components,INV-102,,0,9000,9000",
         "2b,Acme Components,INV-102,,0,9000,9000",
+      ].join("\n"),
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+    );
+
+    expect(output).toContain("Rows reviewed: 2");
+    expect(output).toContain("Matched within tolerance: 1");
+    expect(output).toContain(
+      "Rows parsed: 2; rows accepted for output: 2; blank rows skipped: 0; invalid rows needing review: 0.",
+    );
+    expect(output).not.toContain("required-cell-empty");
+  });
+
+  it("preserves GSTR reconciliation rows that use GSTIN as the party key", () => {
+    const output = buildOutput(
+      gstr2bTool,
+      [
+        "source,supplier,gstin,invoice,taxAmount",
+        "purchase,,SYNTH-ACME-GSTIN,INV-102,18000",
+        "2b,,SYNTH-ACME-GSTIN,INV-102,18000",
       ].join("\n"),
       configs["/gstr-2b-purchase-reconciliation-triage"],
       "",
@@ -598,5 +630,21 @@ describe("tool output artifact contract", () => {
     expect(output).toContain("Metro Bank (SYNTH12345A)");
     expect(output).toContain("Northline Works (SYNTH54321B)");
     expect(output).toContain("Ask deductor to verify");
+  });
+
+  it("accepts advertised AIS alias columns before building the review", () => {
+    const output = buildOutput(
+      aisTool,
+      [
+        "source,deductor,TDS/TCS,section,income category,amount,amount in books",
+        "AIS,Metro Bank,540,194A,Interest,5400,0",
+      ].join("\n"),
+      configs["/ais-form-26as-mismatch-checker"],
+      "",
+    );
+
+    expect(output).toContain("Reported not in records: 1");
+    expect(output).toContain("TDS/TCS 540");
+    expect(output).not.toContain("Missing:");
   });
 });

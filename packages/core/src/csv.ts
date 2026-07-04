@@ -58,6 +58,7 @@ const knownHeaderKeys: Record<string, string> = {
   status: "status",
   supplier: "supplier",
   taxamount: "taxAmount",
+  tdstcs: "tdsTcsAmount",
   vendor: "vendor",
   vendorname: "vendorName",
 };
@@ -194,7 +195,18 @@ function parseRecords(
         lastCharWasRecordBreak = false;
         continue;
       }
-      quoted = !quoted;
+      if (quoted) {
+        quoted = false;
+        lastCharWasRecordBreak = false;
+        continue;
+      }
+      if (current.length === 0 || /^\s+$/.test(current)) {
+        current = "";
+        quoted = true;
+        lastCharWasRecordBreak = false;
+        continue;
+      }
+      current += char;
       lastCharWasRecordBreak = false;
       continue;
     }
