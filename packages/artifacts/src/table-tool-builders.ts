@@ -92,8 +92,9 @@ export function buildGstr2bReconciliationArtifact({
   const matchFields = options.strictGstrMatch
     ? (["invoiceDate", "documentType", "amendmentType"] as const)
     : [];
+  const tolerance = normalizeGstrTolerance(options.gstrTolerance);
   const summary = buildGstr2bReconciliationTriage(table.prepared.acceptedRows, {
-    tolerance: 2,
+    tolerance,
     matchFields: [...matchFields],
     reviewContext: Boolean(options.strictGstrMatch),
   });
@@ -106,6 +107,7 @@ export function buildGstr2bReconciliationArtifact({
     text: [
       "GSTR-2B purchase reconciliation triage",
       `Match mode: ${matchMode}`,
+      `Tax tolerance: ${formatTolerance(tolerance)}`,
       `Rows reviewed: ${summary.totalRows}`,
       `Rows skipped by domain checks: ${summary.skippedRowCount}`,
       `Missing in 2B: ${summary.counts["missing-in-2b"]}`,
@@ -127,7 +129,7 @@ export function buildGstr2bReconciliationArtifact({
             .join("\n"),
       ),
       buildFooter(tool, definition, table.parsed, table.prepared, {
-        tolerance: 2,
+        tolerance: formatTolerance(tolerance),
         matchMode: options.strictGstrMatch
           ? "invoiceDate+documentType+amendmentType+contextReview"
           : "basic",
@@ -347,7 +349,6 @@ function formatAmount(value: number | null) {
   return value === null ? "-" : value.toFixed(2);
 }
 
-
 function formatSchedule112AExport(rows: ReturnType<typeof buildSchedule112ARows>): string {
   const headers = [
     "scripName",
@@ -393,6 +394,14 @@ function formatCsvField(value: string | number | null): string {
 
 function formatExportNumber(value: number): string {
   return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(2)));
+}
+
+function normalizeGstrTolerance(value: number | undefined): number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : 2;
+}
+
+function formatTolerance(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
 }
 
 function formatMsmeReviewRow(row: ReturnType<typeof buildMsmePayableReview>[number]): string[] {

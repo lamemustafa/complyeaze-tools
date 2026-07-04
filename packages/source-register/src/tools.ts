@@ -471,7 +471,7 @@ export const TOOLS: ToolMeta[] = [
         {
           question: "What tolerance does the triage use?",
           answer:
-            "The V0 workbench uses a small default tax-amount tolerance and surfaces rows outside that range for review.",
+            "The V0 workbench starts with a small default tax-amount tolerance. You can adjust the browser-local tolerance before generating a first-pass review draft.",
         },
         {
           question: "Does this cover IMS actions?",

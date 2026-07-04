@@ -264,6 +264,21 @@ it("emits Schedule 112A export fields, not only a human-readable summary", () =>
     ).toEqual({ source: "sourceType" });
   });
 
+  it("shows optional GSTR professional mapping targets only when requested", () => {
+    const definition = getToolArtifactDefinition("/gstr-2b-purchase-reconciliation-triage");
+    const headers = ["source", "supplier", "invoice", "taxAmount", "billDate", "docType", "itc", "ims"];
+
+    expect(getColumnMappingTargets(definition, headers)).toEqual([]);
+    expect(getColumnMappingTargets(definition, headers, { includeOptional: true })).toEqual([
+      { column: "invoiceDate", label: "invoiceDate" },
+      { column: "documentType", label: "documentType" },
+      { column: "amendmentType", label: "amendmentType" },
+      { column: "itcAvailability", label: "itcAvailability" },
+      { column: "imsStatus", label: "imsStatus" },
+      { column: "reverseCharge", label: "reverseCharge" },
+    ]);
+  });
+
   it("does not present a no-match Review Copy report as an all-clear", () => {
     const output = buildOutput(
       reviewCopyTool,

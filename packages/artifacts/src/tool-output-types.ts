@@ -26,11 +26,13 @@ export type ToolArtifactDefinition = {
   requiredColumns?: string[];
   requiredColumnGroups?: string[][];
   requiredValueColumnGroups?: string[][];
+  optionalMappableColumns?: string[];
   sourceLabel: string;
 };
 
 export type BuildOutputOptions = {
   strictGstrMatch?: boolean;
+  gstrTolerance?: number;
   gstr3bAlreadyFiled?: boolean;
   columnMapping?: Record<string, string>;
 };
