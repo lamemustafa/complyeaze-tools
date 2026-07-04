@@ -3,6 +3,7 @@ import { parseDelimitedTable } from "@complyeaze-tools/core";
 import { toolInputClass } from "@complyeaze-tools/ui-react";
 import {
   buildToolReviewArtifact,
+  buildWorkbenchDiagnostics,
   configs,
   filterWorkbenchColumnMapping,
   getColumnMappingTargets,
@@ -75,6 +76,7 @@ export default function ToolWorkbench({ tool }: Props) {
   );
   const output = artifactResult.text;
   const blockedOutput = artifactResult.status === "blocked";
+  const diagnostics = buildWorkbenchDiagnostics(artifactResult);
   const outputStatus = blockedOutput
     ? output
     : "Draft output updated. Review it before downloading or sharing.";
@@ -191,6 +193,23 @@ export default function ToolWorkbench({ tool }: Props) {
         <label className="field-label" htmlFor="tool-output">
           {config.outputLabel}
         </label>
+        {diagnostics ? (
+          <section className="workbench-diagnostics" aria-label="Input diagnostics">
+            <h2>{diagnostics.title}</h2>
+            <ul className="diagnostic-summary">
+              {diagnostics.summary.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+            {diagnostics.issues.length ? (
+              <ul className="diagnostic-issues">
+                {diagnostics.issues.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
+        ) : null}
         <textarea
           id="tool-output"
           className={toolInputClass}

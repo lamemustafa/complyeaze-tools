@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildOutput,
+  buildWorkbenchDiagnostics,
   configs,
   filterWorkbenchColumnMapping,
   getColumnMappingTargets,
@@ -292,5 +293,37 @@ it("emits Schedule 112A export fields, not only a human-readable summary", () =>
     expect(output).toContain("partial or non-standard identifiers");
     expect(output).toContain("client references");
     expect(output).not.toContain("Checked, not found");
+  });
+
+  it("builds safe row diagnostics without echoing pasted cell values", () => {
+    const diagnostics = buildWorkbenchDiagnostics({
+      status: "ready",
+      rowCounts: {
+        parsedRows: 4,
+        acceptedRows: 2,
+        skippedBlankRows: 1,
+        skippedInvalidRows: 1,
+      },
+      parseIssues: [
+        {
+          rowNumber: 4,
+          code: "required-cell-empty",
+          column: "vendor",
+          message: "Missing required value for vendor.",
+        },
+      ],
+    });
+
+    expect(diagnostics).toEqual({
+      title: "Input diagnostics",
+      summary: [
+        "Rows accepted for draft: 2 of 4 parsed.",
+        "Blank rows skipped: 1.",
+        "Rows needing review: 1.",
+      ],
+      issues: ["Row 4: required-cell-empty - Missing required value for vendor."],
+    });
+    expect(JSON.stringify(diagnostics)).not.toContain("Acme Components");
+    expect(JSON.stringify(diagnostics)).not.toContain("125000");
   });
 });

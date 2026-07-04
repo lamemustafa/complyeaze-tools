@@ -1,5 +1,5 @@
 import type { ParsedTable } from "@complyeaze-tools/core";
-import { buildReviewFooter, type ArtifactParseIssue } from "./text";
+import { buildReviewFooter, type ArtifactParseIssue, type ArtifactRowCounts } from "./text";
 import type {
   ArtifactToolContext,
   PreparedRows,
@@ -79,21 +79,26 @@ export function buildFooter(
     requiredColumns: definition.requiredColumns,
     detectedDelimiter: parsed?.delimiter,
     inputHeaders: parsed?.originalHeaders,
-    rowCounts: parsed
-      ? {
-          parsedRows: parsed.rows.length,
-          acceptedRows: prepared?.acceptedRows.length ?? parsed.rows.length,
-          skippedBlankRows: parsed.skippedBlankRows,
-          skippedInvalidRows:
-            prepared?.invalidRowNumbers.size ??
-            new Set(parsed.issues.map((issue) => issue.rowNumber)).size,
-        }
-      : undefined,
+    rowCounts: parsed ? buildRowCounts(parsed, prepared) : undefined,
     parseIssues: prepared?.diagnostics ?? parsed?.issues,
     officialSources: tool.officialSources,
     unsupportedCases: tool.unsupportedCases,
     extraCaveats,
   });
+}
+
+export function buildRowCounts(
+  parsed: ParsedTable,
+  prepared?: PreparedRows,
+): ArtifactRowCounts {
+  return {
+    parsedRows: parsed.rows.length,
+    acceptedRows: prepared?.acceptedRows.length ?? parsed.rows.length,
+    skippedBlankRows: parsed.skippedBlankRows,
+    skippedInvalidRows:
+      prepared?.invalidRowNumbers.size ??
+      new Set(parsed.issues.map((issue) => issue.rowNumber)).size,
+  };
 }
 
 export function validateRows(
