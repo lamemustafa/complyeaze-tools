@@ -35,7 +35,11 @@ for (const target of targets) {
     continue;
   }
 
-  setReviewGateStatus(target, "failure", "Unresolved review thread or requested changes found.");
+  setReviewGateStatus(
+    target,
+    "failure",
+    "Unresolved thread, requested changes, or missing current-head review found.",
+  );
   targetedFailure = true;
 }
 

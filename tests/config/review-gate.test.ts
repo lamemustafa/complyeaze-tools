@@ -30,9 +30,7 @@ describe("review findings gate", () => {
     expect(workflow).toContain("statuses: write");
     expect(workflow).toContain("GH_TOKEN: ${{ github.token }}");
     expect(workflow).toContain("repository: ${{ github.repository }}");
-    expect(workflow).toContain(
-      "ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.repository.default_branch }}",
-    );
+    expect(workflow).toContain("ref: ${{ github.event.repository.default_branch }}");
     expect(workflow).not.toContain("pull_request_review:");
     expect(workflow).not.toContain("pull_request_review_comment:");
     expect(workflow).not.toContain("github.event.pull_request.base.sha");
@@ -42,9 +40,12 @@ describe("review findings gate", () => {
     expect(workflow).toContain("--required-review-author chatgpt-codex-connector");
     expect(workflow).toContain("--skip-pending-status");
     expect(workflow).toContain(
+      'args+=(--all-open --wait-head-review-ms 0 --allow-missing-head-review --skip-pending-status)',
+    );
+    expect(workflow).toContain('args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000)');
+    expect(workflow).not.toContain(
       'args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000 --allow-missing-head-review)',
     );
-    expect(workflow).not.toContain("--all-open --wait-head-review-ms 0 --allow-missing-head-review");
     expect(syncScript).toContain("readLatestReviewGateStatus");
     expect(syncScript).toContain("Review gate status already");
     expect(syncScript).toContain("pullRequests(states:OPEN,first:100");
@@ -64,8 +65,8 @@ describe("review findings gate", () => {
     expect(branchProtection).toContain("pending or rejected reviews");
     expect(branchProtection).toContain("immediate guard");
     expect(branchProtection).toContain("trusted status-refresh backstop");
-    expect(branchProtection).toContain("Scheduled all-open sweeps must not use");
+    expect(branchProtection).toContain("Scheduled all-open sweeps may");
     expect(branchProtection).toContain("rerun the `Review gate` check");
-    expect(branchProtection).toContain("Manual dispatches should normally run from `main`");
+    expect(branchProtection).toContain("Manual dispatches must run trusted default-branch workflow code");
   });
 });

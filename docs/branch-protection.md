@@ -33,14 +33,14 @@ GitHub branch protection rule or repository ruleset with these requirements:
   approvals are the immediate guard for pending or rejected reviews; the
   scheduled Review gate sweep is only the trusted status-refresh backstop after
   review threads are resolved, reviews are dismissed, or old statuses need to be
-  corrected. Targeted PR runs may pass after waiting for Codex even when no
-  formal bot review object is present; they still fail on unresolved threads and
-  requested-changes reviews. Scheduled all-open sweeps must not use that
-  missing-review bypass. Do not add
+  corrected. Targeted PR/manual runs must fail after waiting for Codex when no
+  formal current-head bot review object is present. Scheduled all-open sweeps may
+  use the missing-review bypass so they still catch unresolved threads and
+  requested-changes reviews without flipping every open PR red before Codex
+  responds. Do not add
   `pull_request_review` or `pull_request_review_comment` triggers unless the
   replacement design is proven to execute trusted default-branch workflow code.
-  Manual dispatches should normally run from `main`; selecting another ref is a
-  maintainer-only recovery path for workflow-transition PRs.
+  Manual dispatches must run trusted default-branch workflow code.
 - Do not require an approving human review while the repo has only one eligible
   maintainer. A required self-review creates a permanent merge deadlock. Keep the
   required review count at zero unless a second eligible maintainer is active.
