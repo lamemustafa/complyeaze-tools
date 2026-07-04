@@ -150,14 +150,26 @@ export function buildToolReviewArtifact({
 
   if (tool.slug === "/ais-form-26as-mismatch-checker") {
     const review = buildTaxStatementMismatchReview(prepared.acceptedRows);
+    const counts = countTaxStatementMismatches(review);
     return {
       status: "ready",
       text: [
         "Tax statement mismatch review",
+        `Reported not in records: ${counts["reported-not-in-records"]}`,
+        `Records not in AIS/Form 26AS: ${counts["records-not-in-statement"]}`,
+        `Amount difference: ${counts["amount-difference"]}`,
+        `Duplicate statement rows: ${counts["duplicate-statement"]}`,
+        `Identity/category/section review: ${counts["identity-or-section-review"]}`,
+        `Manual review: ${counts["manual-review"]}`,
+        `Matched rows: ${counts.matched}`,
+        "",
         ...review.map(
           (row) =>
-            `${row.source} ${row.category}${row.section ? ` section ${row.section}` : ""}: reported ${row.amount}, records ${row.recordsAmount || "-"}, difference ${formatAmount(row.difference)}; ${row.note}; action: ${row.feedbackAction}`,
+            `${row.mismatchCategory} | ${row.deductor} | ${row.tan || "-"} | ${row.source} ${row.category}${row.section ? ` section ${row.section}` : ""}: reported ${row.amount || "-"}, records ${row.recordsAmount || "-"}, TDS/TCS ${row.tdsTcsAmount || "-"}, difference ${formatAmount(row.difference)}; ${row.note}; review action: ${row.reviewAction}`,
         ),
+        "",
+        "Deductor-wise verification drafts",
+        ...formatDeductorDrafts(review),
         buildFooter(tool, definition, parsed, prepared),
       ].join("\n"),
     };
@@ -251,3 +263,37 @@ const msmeReviewCaveats = [
   "Dates and statuses are based only on pasted rows.",
   "This tool does not verify Udyam registration, resolve disputes, calculate statutory interest, or decide tax disallowance.",
 ];
+
+function countTaxStatementMismatches(
+  rows: ReturnType<typeof buildTaxStatementMismatchReview>,
+) {
+  const statuses = [
+    "reported-not-in-records",
+    "records-not-in-statement",
+    "amount-difference",
+    "duplicate-statement",
+    "identity-or-section-review",
+    "manual-review",
+    "matched",
+  ] as const;
+
+  return Object.fromEntries(
+    statuses.map((status) => [
+      status,
+      rows.filter((row) => row.mismatchCategory === status).length,
+    ]),
+  ) as Record<(typeof statuses)[number], number>;
+}
+
+function formatDeductorDrafts(rows: ReturnType<typeof buildTaxStatementMismatchReview>) {
+  const grouped = new Map<string, typeof rows>();
+  for (const row of rows) {
+    const key = `${row.deductor} (${row.deductorKey})`;
+    grouped.set(key, [...(grouped.get(key) ?? []), row]);
+  }
+
+  return [...grouped.entries()].flatMap(([deductor, group]) => [
+    deductor,
+    ...group.map((row) => `- ${row.correctionDraft}`),
+  ]);
+}

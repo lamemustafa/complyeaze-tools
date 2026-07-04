@@ -44,6 +44,20 @@ const gstrFollowUpTool: WorkbenchTool = {
   unsupportedCases: ["Does not determine ITC eligibility."],
 };
 
+const aisTool: WorkbenchTool = {
+  slug: "/ais-form-26as-mismatch-checker",
+  h1: "AIS and Form 26AS Mismatch Checker",
+  officialSources: [
+    {
+      publisher: "Income Tax Department",
+      title: "Annual Information Statement FAQ",
+      url: "https://www.incometax.gov.in/iec/foportal/ais-faq",
+      lastReviewedAt: "2026-07-02",
+    },
+  ],
+  unsupportedCases: ["Does not compute ITR tax payable, refunds, or upload AIS feedback."],
+};
+
 describe("tool output artifact contract", () => {
   it("includes row-count, source, boundary, and trust links for every parsed tool output", () => {
     for (const [slug, config] of Object.entries(configs)) {
@@ -311,5 +325,27 @@ describe("tool output artifact contract", () => {
     expect(output).toContain("Tax period: May 2026");
     expect(output).toContain("Document type: Tax Invoice");
     expect(output).toContain("Tax amount: 18000");
+  });
+
+  it("groups AIS/Form 26AS mismatch output by category and deductor", () => {
+    const output = buildOutput(
+      aisTool,
+      [
+        "source,deductor,tan,section,category,recordsCategory,amount,recordsAmount,tdsTcsAmount,note,reviewAction",
+        "AIS,Metro Bank,SYNTH12345A,194A,Interest,Interest,5400,0,540,missing in books,Review AIS row against books",
+        "Form 26AS,Northline Works,SYNTH54321B,194C,Contract,Contract,1200,1000,120,TDS amount mismatch,Ask deductor to verify",
+        "AIS,Acme Advisors,SYNTH22222C,194J,Professional fees,Professional fees,0,5000,,missing in AIS,Review reporting source",
+      ].join("\n"),
+      configs["/ais-form-26as-mismatch-checker"],
+      "",
+    );
+
+    expect(output).toContain("Reported not in records: 1");
+    expect(output).toContain("Records not in AIS/Form 26AS: 1");
+    expect(output).toContain("Amount difference: 1");
+    expect(output).toContain("Deductor-wise verification drafts");
+    expect(output).toContain("Metro Bank (SYNTH12345A)");
+    expect(output).toContain("Northline Works (SYNTH54321B)");
+    expect(output).toContain("Ask deductor to verify");
   });
 });

@@ -321,7 +321,7 @@ export const TOOLS: ToolMeta[] = [
     h1: "AIS and Form 26AS Mismatch Checker",
     seoTitle: "AIS and Form 26AS Mismatch Checker",
     metaDescription:
-      "Prepare an AIS/Form 26AS mismatch table and correction request drafts before filing review.",
+      "Prepare AIS/Form 26AS mismatch categories and deductor-wise verification drafts before tax-record review.",
     title: "AIS and Form 26AS Mismatch Checker",
     status: "mvp",
     audiences: ["taxpayers", "CAs", "tax preparers", "finance teams"],
@@ -329,15 +329,19 @@ export const TOOLS: ToolMeta[] = [
     accountRequired: false,
     fileUploadRequired: false,
     telemetry: "none",
-    supportedInputs: ["pasted AIS summary rows", "manual Form 26AS comparison table"],
+    supportedInputs: [
+      "pasted AIS summary rows",
+      "manual Form 26AS comparison table",
+      "optional deductor, TAN, section, income category, TDS/TCS, amount in books, mismatch category, and review action columns",
+    ],
     unsupportedCases: [
       "Does not compute ITR tax payable or refunds.",
       "Does not upload AIS feedback or submit portal corrections.",
     ],
     outputArtifacts: [
-      "plain-text mismatch table",
+      "plain-text mismatch category table",
       "review checklist text",
-      "deductor correction draft",
+      "deductor-wise verification draft",
     ],
     officialSources: [aisFaq, incomeTaxTdsTransition],
     relatedSlugs: [
@@ -349,7 +353,7 @@ export const TOOLS: ToolMeta[] = [
     seoDepth: {
       inputGuide: [
         "Use one row per AIS/Form 26AS mismatch with source, category, amount, recordsAmount, and note.",
-        "Add TAN, section, and feedbackAction when available so the draft points to the next review step.",
+        "Add deductor, TAN, section, income category, TDS/TCS amount, mismatch category, and reviewAction when available so the draft points to the next review step.",
       ],
       exampleWorkflow: [
         "Paste a small mismatch list from AIS, Form 26AS, or a working sheet.",
@@ -359,10 +363,12 @@ export const TOOLS: ToolMeta[] = [
       commonMistakes: [
         "Mixing AIS and Form 26AS rows without marking the source.",
         "Sending a correction request before checking section, TAN, and income category.",
+        "Treating duplicate, omitted, or incorrect-category rows as tax computation conclusions.",
       ],
       reviewChecklist: [
         "Check source, TAN, section, amount, and recordsAmount for every row.",
-        "Separate missing-in-books cases from amount differences.",
+        "Separate duplicate, omitted, amount mismatch, and incorrect category cases before deductor follow-up.",
+        "Confirm TDS/TCS amount and income category against taxpayer records before portal feedback.",
         "Keep taxpayer evidence and portal screenshots in a controlled workpaper or Axal.",
       ],
       sourceExplainer:

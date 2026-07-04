@@ -29,9 +29,9 @@ export const configs: Record<string, WorkbenchConfig> = {
     inputLabel: "Mismatch rows",
     outputLabel: "Tax statement review draft",
     guidance:
-      "Paste rows with source, category, amount, recordsAmount, and note. This prepares a review table and correction request text.",
+      "Paste rows with source, deductor, TAN, section, category, amount, recordsAmount, and optional tdsTcsAmount, mismatchCategory, note, and reviewAction. This prepares review categories and deductor-wise verification draft text only.",
     sample:
-      "source,category,amount,recordsAmount,note\nAIS,Interest,5400,0,missing in books\nForm 26AS,TDS,1200,1000,TDS amount mismatch",
+      "source,deductor,tan,section,category,recordsCategory,amount,recordsAmount,tdsTcsAmount,note,reviewAction\nAIS,Metro Bank,SYNTH12345A,194A,Interest,Interest,5400,0,540,missing in books,Review AIS row against books\nForm 26AS,Northline Works,SYNTH54321B,194C,Contract,Contract,1200,1000,120,TDS amount mismatch,Ask deductor to verify\nAIS,Acme Advisors,SYNTH22222C,194J,Professional fees,Professional fees,0,5000,,missing in AIS,Review reporting source",
   },
   "/gst-portal-issue-evidence-memo": {
     inputLabel: "Attempt timeline rows",
