@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: azure/setup-kubectl@c0c8b32d33a5244f1e5947304550403b63930415 # v4
       - name: Validate digest input
         run: |
@@ -53,7 +53,7 @@ jobs:
             --status success \
             --json databaseId,headSha,conclusion \
             --jq '.[0].headSha' | grep -Fx "${{ inputs.source_sha }}"
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
       - name: Verify published image digest
         run: |
           set -euo pipefail
