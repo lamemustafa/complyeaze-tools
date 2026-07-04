@@ -497,6 +497,102 @@ describe("tool output artifact contract", () => {
     );
   });
 
+  it("adds a copyable GSTR-2B exception table without matched rows", () => {
+    const output = buildOutput(
+      gstr2bTool,
+      [
+        "source,supplier,gstin,invoice,invoiceDate,documentType,taxAmount,itcAvailability,imsStatus",
+        "purchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,18000,,",
+        "2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,2026-05-01,Invoice,18000,Yes,Accepted",
+        "purchase,Northline Supplies,SYNTH-NORTH-GSTIN,INV-205,2026-06-01,Invoice,7560,,",
+        "2b,Northline Supplies,SYNTH-NORTH-GSTIN,INV-205,2026-06-01,Invoice,7000,Yes,Accepted",
+        "purchase,Delta Traders,SYNTH-DELTA-GSTIN,INV-301,2026-05-15,Invoice,5400,,",
+        "2b,Metro Inputs,SYNTH-METRO-GSTIN,INV-777,2026-05-18,Invoice,900,No,Rejected",
+      ].join("\n"),
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+      { strictGstrMatch: true },
+    );
+
+    expect(output).toContain("Exception table - first-pass review only");
+    expect(output).toContain(
+      "This is a browser-local first-pass exception table for professional review. It does not determine ITC eligibility, filing positions, IMS actions, tax-disallowance positions, or books adjustments.",
+    );
+    expect(output).toContain(
+      "status,bucket,supplier,invoice,invoiceDate,documentType,amendmentContext,purchaseTaxAmount,gstr2bTaxAmount,difference,contextFlags,reviewAction",
+    );
+    expect(output).toContain(
+      "missing-in-2b,Missing in GSTR-2B,Delta Traders,inv301,2026-05-15,invoice,,5400,,,," +
+        "\"Check supplier filing, amendment table, period, and invoice-number mapping before taking any ITC position.\"",
+    );
+    expect(output).toContain(
+      "extra-in-2b,Extra in GSTR-2B,Metro Inputs,inv777,2026-05-18,invoice,,," +
+        "900,,\"ITC availability marked not available; IMS status marked rejected\"," +
+        "\"Trace whether this is unbooked, period-shifted, duplicate, or needs books/vendor follow-up.\"",
+    );
+    expect(output).toContain(
+      "value-mismatch,Tax value mismatch,Northline Supplies,inv205,2026-06-01,invoice,,7560,7000,560,," +
+        "\"Compare tax components, debit/credit notes, amendments, and rounding tolerance before adjustment.\"",
+    );
+    expect(output).not.toContain("matched,Acme Components,inv102");
+    expect(output).toContain("Exception table excludes rows matched within tolerance.");
+    expect(output.toLowerCase()).not.toContain("itc eligible");
+    expect(output.toLowerCase()).not.toContain("claimable itc");
+  });
+
+  it("keeps negative GSTR-2B exception differences numeric", () => {
+    const output = buildOutput(
+      gstr2bTool,
+      [
+        "source,supplier,gstin,invoice,taxAmount",
+        "purchase,Northline Supplies,SYNTH-NORTH-GSTIN,INV-205,7000",
+        "2b,Northline Supplies,SYNTH-NORTH-GSTIN,INV-205,7560",
+      ].join("\n"),
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+    );
+
+    expect(output).toContain(
+      "value-mismatch,Tax value mismatch,Northline Supplies,inv205,,,,7000,7560,-560,,",
+    );
+    expect(output).not.toContain("7000,7560,'-560");
+  });
+
+  it("explains when the GSTR-2B exception table has no exception rows", () => {
+    const output = buildOutput(
+      gstr2bTool,
+      [
+        "source,supplier,gstin,invoice,taxAmount",
+        "purchase,Acme Components,SYNTH-ACME-GSTIN,INV-102,18000",
+        "2b,Acme Components,SYNTH-ACME-GSTIN,INV-102,18000",
+      ].join("\n"),
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+    );
+
+    expect(output).toContain("Exception table - first-pass review only");
+    expect(output).toContain(
+      "No exception rows surfaced from the pasted rows that passed domain checks. Review matched rows and source records before relying on the draft.",
+    );
+    expect(output).not.toContain("matched,Matched within tolerance");
+  });
+
+  it("escapes formula-like supplier text in the GSTR-2B exception table", () => {
+    const output = buildOutput(
+      gstr2bTool,
+      [
+        "source,supplier,invoice,taxAmount",
+        "purchase,=HYPERLINK(\"\"https://example.test\"\") ,INV-900,18000",
+      ].join("\n"),
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+    );
+
+    expect(output).toContain(
+      'missing-in-2b,Missing in GSTR-2B,"\'=HYPERLINK(""""https://example.test"""")",inv900,,,,18000',
+    );
+  });
+
   it("preserves blank-tax GSTR rows so reconciliation can surface amount mismatches", () => {
     const output = buildOutput(
       gstr2bTool,
