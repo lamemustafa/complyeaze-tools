@@ -19,6 +19,7 @@ export type ColumnMappingTarget = {
 export function getColumnMappingTargets(
   definition: ToolArtifactDefinition,
   headers: string[],
+  options: { includeOptional?: boolean } = {},
 ): ColumnMappingTarget[] {
   if (!headers.length) return [];
 
@@ -28,8 +29,11 @@ export function getColumnMappingTargets(
       ?.filter((column) => /^[a-z][a-zA-Z0-9]*$/.test(column))
       .map((column) => [column]) ??
     [];
+  const optionalGroups = options.includeOptional
+    ? (definition.optionalMappableColumns ?? []).map((column) => [column])
+    : [];
 
-  return groups
+  return [...groups, ...optionalGroups]
     .filter((group) => !group.some((column) => headers.includes(column)))
     .flatMap((group) => group.map((column) => ({ column, label: column })));
 }

@@ -24,6 +24,7 @@ export default function ToolWorkbench({ tool }: Props) {
       : "",
   );
   const [strictGstrMatch, setStrictGstrMatch] = useState(false);
+  const [gstrTolerance, setGstrTolerance] = useState("2");
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const inputHelpId = "tool-input-help";
   const outputStatusId = "tool-output-status";
@@ -31,9 +32,12 @@ export default function ToolWorkbench({ tool }: Props) {
   const mappingTargets = useMemo(
     () =>
       parsedInput.headers.length
-        ? getColumnMappingTargets(artifactDefinition, parsedInput.headers)
+        ? getColumnMappingTargets(artifactDefinition, parsedInput.headers, {
+            includeOptional:
+              tool.slug === "/gstr-2b-purchase-reconciliation-triage" && strictGstrMatch,
+          })
         : [],
-    [artifactDefinition, parsedInput.headers],
+    [artifactDefinition, parsedInput.headers, strictGstrMatch, tool.slug],
   );
   const effectiveColumnMapping = useMemo(
     () => filterWorkbenchColumnMapping(columnMapping, mappingTargets, parsedInput.headers),
@@ -51,9 +55,13 @@ export default function ToolWorkbench({ tool }: Props) {
         },
         input,
         asOfDate,
-        options: { strictGstrMatch, columnMapping: effectiveColumnMapping },
+        options: {
+          strictGstrMatch,
+          gstrTolerance: parseGstrTolerance(gstrTolerance),
+          columnMapping: effectiveColumnMapping,
+        },
       }),
-    [tool, input, asOfDate, strictGstrMatch, effectiveColumnMapping],
+    [tool, input, asOfDate, strictGstrMatch, gstrTolerance, effectiveColumnMapping],
   );
   const output = artifactResult.text;
   const blockedOutput = artifactResult.status === "blocked";
@@ -83,18 +91,31 @@ export default function ToolWorkbench({ tool }: Props) {
           </label>
         ) : null}
         {tool.slug === "/gstr-2b-purchase-reconciliation-triage" ? (
-          <label className="option-control">
-            <span>Professional context check</span>
-            <input
-              type="checkbox"
-              checked={strictGstrMatch}
-              onChange={(event) => setStrictGstrMatch(event.currentTarget.checked)}
-              aria-describedby={outputStatusId}
-            />
-            <span>
-              Include invoice date, document type, amendment table, and ITC/IMS context when present
-            </span>
-          </label>
+          <div className="gstr-options">
+            <label className="option-control">
+              <span>Professional context check</span>
+              <input
+                type="checkbox"
+                checked={strictGstrMatch}
+                onChange={(event) => setStrictGstrMatch(event.currentTarget.checked)}
+                aria-describedby={outputStatusId}
+              />
+              <span>
+                Include invoice date, document type, amendment table, and ITC/IMS context when present
+              </span>
+            </label>
+            <label className="as-of-control">
+              <span>Tax tolerance</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={gstrTolerance}
+                onChange={(event) => setGstrTolerance(event.currentTarget.value)}
+                aria-describedby={outputStatusId}
+              />
+            </label>
+          </div>
         ) : null}
         {mappingTargets.length ? (
           <div className="column-mapping-panel">
@@ -186,4 +207,9 @@ function downloadText(filename: string, text: string) {
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+function parseGstrTolerance(value: string): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 2;
 }

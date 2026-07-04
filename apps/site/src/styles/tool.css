@@ -152,6 +152,17 @@
   accent-color: var(--accent);
 }
 
+.gstr-options {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.gstr-options .option-control,
+.gstr-options .as-of-control {
+  margin-bottom: 0;
+}
+
 .field-label {
   display: block;
   margin-bottom: 8px;
