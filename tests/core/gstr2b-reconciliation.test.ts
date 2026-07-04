@@ -145,6 +145,33 @@ describe("buildGstr2bReconciliationTriage", () => {
     expect(summary.issues[0]?.note).toContain("ITC availability or IMS context");
   });
 
+  it("preserves professional context flags on extra GSTR-2B rows", () => {
+    const summary = buildGstr2bReconciliationTriage(
+      [
+        "source,supplier,gstin,invoice,invoiceDate,documentType,taxAmount,itcAvailability,imsStatus",
+        "2b,Metro Inputs,SYNTH-METRO-GSTIN,INV-777,2026-05-18,Invoice,900,No,Rejected",
+      ].join("\n"),
+      {
+        matchFields: ["invoiceDate", "documentType"],
+        reviewContext: true,
+      },
+    );
+
+    expect(summary.counts["extra-in-2b"]).toBe(1);
+    expect(summary.issues[0]).toEqual(
+      expect.objectContaining({
+        status: "extra-in-2b",
+        invoiceDate: "2026-05-18",
+        documentType: "invoice",
+        amendmentType: "",
+        contextFlags: [
+          "ITC availability marked not available",
+          "IMS status marked rejected",
+        ],
+      }),
+    );
+  });
+
   it("can include amendment table context in the professional review key", () => {
     const summary = buildGstr2bReconciliationTriage(
       [
