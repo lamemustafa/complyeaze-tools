@@ -151,6 +151,14 @@ describe("tool output artifact contract", () => {
         ["invoice"],
         ["taxAmount", "itcAmount", "amount", "igst", "cgst", "sgst"],
       ],
+      optionalMappableColumns: [
+        "invoiceDate",
+        "documentType",
+        "amendmentType",
+        "itcAvailability",
+        "imsStatus",
+        "reverseCharge",
+      ],
       requiredValueColumnGroups: [["source"], ["supplier", "gstin"], ["invoice"]],
       sourceLabel: "GSTR-2B reconciliation triage rows",
     });
@@ -232,6 +240,40 @@ describe("tool output artifact contract", () => {
     expect(output).toContain(
       "Rows parsed: 1; rows accepted for output: 1; blank rows skipped: 0; invalid rows needing review: 0.",
     );
+    expect(output).not.toContain("required-cell-empty");
+  });
+
+  it("documents acquisition evidence for Schedule 112A grandfathering inputs", () => {
+    const config = configs["/schedule-112a-capital-gains-csv-builder"];
+    const definition = getToolArtifactDefinition("/schedule-112a-capital-gains-csv-builder");
+
+    expect(config.guidance).toContain("acquisitionDate");
+    expect(config.guidance).toContain("purchaseDate");
+    expect(config.guidance).toContain("acquiredBefore31Jan2018");
+    expect(config.sample).toContain("acquisitionDate");
+    expect(config.sample).toContain("2017-12-15");
+    expect(definition.requiredColumns).toContain(
+      "acquisitionDate, purchaseDate, or acquiredBefore31Jan2018 when fmv31Jan2018PerUnit is used",
+    );
+  });
+
+  it("lets GSTR-3B pre-lock rows with blank amount values reach missing-data review", () => {
+    const output = buildOutput(
+      {
+        slug: "/gstr3b-outward-liability-prelock-gap-checker",
+        h1: "GSTR-3B Outward Liability Pre-lock Gap Checker",
+        officialSources: gstr2bTool.officialSources,
+        unsupportedCases: ["Synthetic boundary for test."],
+      },
+      "lineRef,table,booksValue,autoPopulatedValue\nB2B outward,3.1,,405000",
+      configs["/gstr3b-outward-liability-prelock-gap-checker"],
+      "",
+    );
+
+    expect(output).toContain("Table 3.1 | B2B outward");
+    expect(output).toContain("| missing-data |");
+    expect(output).toContain("booksValue and autoPopulatedValue must both be numbers");
+    expect(output).toContain("Rows parsed: 1; rows accepted for output: 1");
     expect(output).not.toContain("required-cell-empty");
   });
 
@@ -436,6 +478,82 @@ describe("tool output artifact contract", () => {
       "Rows parsed: 2; rows accepted for output: 2; blank rows skipped: 0; invalid rows needing review: 0.",
     );
     expect(output).not.toContain("extra-in-2b | Acme Components");
+  });
+
+  it("uses a user-selected GSTR-2B tax tolerance in reconciliation output", () => {
+    const input = [
+      "source,supplier,invoice,taxAmount",
+      "purchase,Acme Components,INV-102,18000",
+      "2b,Acme Components,INV-102,18004",
+    ].join("\n");
+    const defaultOutput = buildOutput(
+      gstr2bTool,
+      input,
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+    );
+    const widerToleranceOutput = buildOutput(
+      gstr2bTool,
+      input,
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+      { gstrTolerance: 5 },
+    );
+
+    expect(defaultOutput).toContain("Value mismatch: 1");
+    expect(defaultOutput).toContain("Selected options: tolerance=2");
+    expect(widerToleranceOutput).toContain("Value mismatch: 0");
+    expect(widerToleranceOutput).toContain("Matched within tolerance: 1");
+    expect(widerToleranceOutput).toContain("Selected options: tolerance=5");
+  });
+
+  it("maps optional GSTR-2B professional context fields before strict review", () => {
+    const output = buildOutput(
+      gstr2bTool,
+      [
+        "Source Type,Party Name,Bill No,Tax,Bill Date,Doc Type,ITC,IMS",
+        "purchase,Acme Components,INV-102,18000,2026-05-01,Invoice,,",
+        "2b,Acme Components,INV-102,18000,2026-05-01,Invoice,No,Rejected",
+      ].join("\n"),
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+      {
+        strictGstrMatch: true,
+        columnMapping: {
+          source: "sourceType",
+          supplier: "partyName",
+          invoice: "billNo",
+          taxAmount: "tax",
+          invoiceDate: "billDate",
+          documentType: "docType",
+          itcAvailability: "itc",
+          imsStatus: "ims",
+        },
+      },
+    );
+
+    expect(output).toContain("ITC/IMS context review: 1");
+    expect(output).toContain("Professional context: ITC availability marked not available; IMS status marked rejected");
+    expect(output).toContain(
+      "Column mapping: source<-sourceType, supplier<-partyName, invoice<-billNo, taxAmount<-tax, invoiceDate<-billDate, documentType<-docType, itcAvailability<-itc, imsStatus<-ims",
+    );
+  });
+
+  it("falls back to the default GSTR-2B tolerance when the option is invalid", () => {
+    const output = buildOutput(
+      gstr2bTool,
+      [
+        "source,supplier,invoice,taxAmount",
+        "purchase,Acme Components,INV-102,18000",
+        "2b,Acme Components,INV-102,18004",
+      ].join("\n"),
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+      { gstrTolerance: -1 },
+    );
+
+    expect(output).toContain("Value mismatch: 1");
+    expect(output).toContain("Selected options: tolerance=2");
   });
 
   it("uses rich public sample fields for supplier follow-up drafts", () => {

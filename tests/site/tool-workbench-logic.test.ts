@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   buildOutput,
   configs,
+  filterWorkbenchColumnMapping,
+  getColumnMappingTargets,
+  getToolArtifactDefinition,
   type WorkbenchTool,
 } from "../../apps/site/src/islands/tool-workbench-logic";
 
@@ -50,6 +53,20 @@ const gstPortalTool: WorkbenchTool = {
   unsupportedCases: ["Does not prove global portal downtime or guarantee extension."],
 };
 
+const schedule112aTool: WorkbenchTool = {
+  slug: "/schedule-112a-capital-gains-csv-builder",
+  h1: "Schedule 112A Capital Gains CSV Builder",
+  officialSources: [
+    {
+      publisher: "Income Tax Department",
+      title: "ITR-2 validation rules",
+      url: "https://www.incometax.gov.in/iec/foportal/sites/default/files/2025-07/CBDT__e-Filing_ITR%202_Validation%20Rules_AY%202025-26_V1.0.pdf",
+      lastReviewedAt: "2026-07-02",
+    },
+  ],
+  unsupportedCases: ["Does not confirm the live portal bulk-upload template."],
+};
+
 describe("tool workbench logic", () => {
   it("surfaces MSME review basis, candidate marker, and evidence checks in the draft", () => {
     const output = buildOutput(
@@ -84,6 +101,26 @@ describe("tool workbench logic", () => {
     expect(output.toLowerCase()).not.toContain("admissible claim");
     expect(output.toLowerCase()).not.toContain("recoverable amount");
     expect(output.toLowerCase()).not.toContain("verified udyam");
+  });
+
+it("emits Schedule 112A export fields, not only a human-readable summary", () => {
+    const output = buildOutput(
+      schedule112aTool,
+      [
+        "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual,fmv31Jan2018PerUnit,acquisitionDate,expenditureOnTransfer",
+        "Sample Equity Ltd,INSYNTH00001,100,420,2026-05-10,25000,320,2017-12-20,500",
+      ].join("\n"),
+      configs["/schedule-112a-capital-gains-csv-builder"],
+      "",
+    );
+
+    expect(output).toContain("Schedule 112A field export");
+    expect(output).toContain(
+      "scripName,isin,quantity,salePricePerUnit,fullValueOfConsideration,saleDate,transferPeriod,costOfAcquisitionActual,fmv31Jan2018PerUnit,lowerOfFmvAndConsideration,costOfAcquisitionFinal,expenditureOnTransfer,totalDeductions,gainOrLoss",
+    );
+    expect(output).toContain(
+      "Sample Equity Ltd,INSYNTH00001,100,420,42000,2026-05-10,AE,25000,320,32000,32000,500,32500,9500",
+    );
   });
 
   it("makes Review Copy masking limits and manual checks visible in the draft", () => {
@@ -131,6 +168,116 @@ describe("tool workbench logic", () => {
     expect(output).toContain("Browser-local draft");
     expect(output.toLowerCase()).not.toContain("portal outage proven");
     expect(output.toLowerCase()).not.toContain("extension granted");
+  });
+
+  it("uses browser-local column mapping for pasted export headers", () => {
+    const output = buildOutput(
+      {
+        slug: "/gstr-2b-purchase-reconciliation-triage",
+        h1: "GSTR-2B Purchase Reconciliation Triage",
+        officialSources: [
+          {
+            publisher: "GST Tutorials",
+            title: "GSTR-2B User Manual",
+            url: "https://tutorial.gst.gov.in/userguide/returns/Manual_gstr2b.htm",
+            lastReviewedAt: "2026-07-02",
+          },
+        ],
+        unsupportedCases: ["Does not determine ITC eligibility."],
+      },
+      [
+        "Source Type,Party Name,Bill No,Tax",
+        "purchase,Acme Components,INV-102,18000",
+        "2b,Acme Components,INV-102,18000",
+      ].join("\n"),
+      configs["/gstr-2b-purchase-reconciliation-triage"],
+      "",
+      {
+        columnMapping: {
+          source: "sourceType",
+          supplier: "partyName",
+          invoice: "billNo",
+          taxAmount: "tax",
+        },
+      },
+    );
+
+    expect(output).toContain("GSTR-2B purchase reconciliation triage");
+    expect(output).toContain("Matched within tolerance: 1");
+    expect(output).toContain(
+      "Column mapping: source<-sourceType, supplier<-partyName, invoice<-billNo, taxAmount<-tax",
+    );
+  });
+
+  it("maps alternative required fields to the selected target, not the first group member", () => {
+    const output = buildOutput(
+      msmeTool,
+      "Vendor,Amount,Bill Date\nAcme Components,125000,2026-05-01",
+      configs["/msme-45-day-payment-due-date-calculator"],
+      "2026-07-02",
+      {
+        columnMapping: {
+          invoiceDate: "billDate",
+        },
+      },
+    );
+
+    expect(output).toContain("Review start basis: invoice-date-fallback");
+    expect(output).toContain(
+      "Confirm acceptance or deemed acceptance date; invoice date is only a fallback for screening.",
+    );
+    expect(output).toContain("Column mapping: invoiceDate<-billDate");
+    expect(output).not.toContain("acceptanceDate<-billDate");
+  });
+
+  it("does not expose active column mapping targets before a header row exists", () => {
+    const definition = getToolArtifactDefinition("/gstr-2b-purchase-reconciliation-triage");
+
+    expect(getColumnMappingTargets(definition, [])).toEqual([]);
+  });
+
+  it("filters stale workbench mappings to visible missing targets and detected headers", () => {
+    const definition = getToolArtifactDefinition("/gstr-2b-purchase-reconciliation-triage");
+    const targets = getColumnMappingTargets(definition, ["sourceType", "partyName", "billNo", "tax"]);
+
+    expect(targets).toEqual([
+      { column: "source", label: "source" },
+      { column: "supplier", label: "supplier" },
+      { column: "gstin", label: "gstin" },
+      { column: "invoice", label: "invoice" },
+      { column: "taxAmount", label: "taxAmount" },
+      { column: "itcAmount", label: "itcAmount" },
+      { column: "amount", label: "amount" },
+      { column: "igst", label: "igst" },
+      { column: "cgst", label: "cgst" },
+      { column: "sgst", label: "sgst" },
+    ]);
+    expect(
+      filterWorkbenchColumnMapping(
+        {
+          source: "sourceType",
+          supplier: "missingHeader",
+          arbitraryNote: "partyName",
+        },
+        targets,
+        ["sourceType", "partyName", "billNo", "tax"],
+      ),
+    ).toEqual({ source: "sourceType" });
+  });
+
+  it("shows optional GSTR professional mapping targets only when requested", () => {
+    const definition = getToolArtifactDefinition("/gstr-2b-purchase-reconciliation-triage");
+    const headers = ["source", "supplier", "invoice", "taxAmount", "billDate", "docType", "itc", "ims"];
+
+    expect(getColumnMappingTargets(definition, headers)).toEqual([]);
+    expect(getColumnMappingTargets(definition, headers, { includeOptional: true })).toEqual([
+      { column: "invoiceDate", label: "invoiceDate" },
+      { column: "documentType", label: "documentType" },
+      { column: "amendmentType", label: "amendmentType" },
+      { column: "itcAvailability", label: "itcAvailability" },
+      { column: "imsStatus", label: "imsStatus" },
+      { column: "reverseCharge", label: "reverseCharge" },
+    ]);
   });
 
   it("does not present a no-match Review Copy report as an all-clear", () => {

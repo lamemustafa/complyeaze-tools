@@ -1,0 +1,11 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ToolShell from "../components/ToolShell.astro";
+import { getToolBySlug } from "../lib/tools";
+
+const tool = getToolBySlug("/gstr3b-outward-liability-prelock-gap-checker");
+---
+
+<BaseLayout title={tool.seoTitle} description={tool.metaDescription}>
+  <ToolShell tool={tool} />
+</BaseLayout>

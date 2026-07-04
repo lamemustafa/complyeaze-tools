@@ -49,6 +49,53 @@ export const configs: Record<string, WorkbenchConfig> = {
     sample:
       "Paste compliance review text here. Replace any taxpayer identifiers before sharing the draft.",
   },
+  "/gstr1-gstr3b-liability-mismatch-pre-checker": {
+    inputLabel: "Period-wise liability rows",
+    outputLabel: "Liability gap review draft",
+    guidance:
+      "Paste rows with gstin, period, gstr1Liability, and gstr3bLiability. This flags periods where GSTR-1 liability exceeds GSTR-3B liability for review, without claiming to know GSTN's undisclosed Rule 88C threshold.",
+    sample:
+      "gstin,period,gstr1Liability,gstr3bLiability\nSYNTH-ACME-GSTIN,2026-05,412000,398500\nSYNTH-NORTH-GSTIN,2026-05,275000,275000\nSYNTH-DELTA-GSTIN,2026-05,190000,215000",
+  },
+  "/gstr3b-outward-liability-prelock-gap-checker": {
+    inputLabel: "Books vs auto-populated liability rows",
+    outputLabel: "Pre-lock gap review draft",
+    guidance:
+      "Paste rows with lineRef, table (3.1 or 3.2), booksValue, and autoPopulatedValue. Set whether GSTR-3B for the period is already filed, since that changes the correction path.",
+    sample:
+      "lineRef,table,booksValue,autoPopulatedValue\nB2B outward - 18%,3.1,412000,405000\nInter-state to unregistered,3.2,58000,58000\nB2C outward - 5%,3.1,76500,71200",
+  },
+  "/income-tax-act-2025-tds-section-translator": {
+    inputLabel: "Old section numbers",
+    outputLabel: "Section translation draft",
+    guidance:
+      "Paste rows with oldSection, one old Income-tax Act, 1961 section per row, such as 194C. Only independently verified sections are matched; others are marked not verified.",
+    sample: "oldSection\n194C\n194J\n194N",
+  },
+  "/schedule-112a-capital-gains-csv-builder": {
+    inputLabel: "Scrip-wise sale rows",
+    outputLabel: "Schedule 112A field draft",
+    guidance:
+      "Paste rows with scripName, isin, quantity, salePricePerUnit, saleDate, and costOfAcquisitionActual. Add fmv31Jan2018PerUnit together with acquisitionDate, purchaseDate, or acquiredBefore31Jan2018 when grandfathering should apply.",
+    sample:
+      "scripName,isin,quantity,salePricePerUnit,saleDate,costOfAcquisitionActual,fmv31Jan2018PerUnit,acquisitionDate\nSample Equity Ltd,INSYNTH00001,100,420,2026-05-10,25000,32000,2017-12-15\nSample Fund Units,INSYNTH00002,500,58,2024-06-01,20000,,",
+  },
+  "/labour-code-gratuity-wage-recalculator": {
+    inputLabel: "Employee pay-component rows",
+    outputLabel: "Wage-test and gratuity comparison draft",
+    guidance:
+      "Paste rows with employeeName, basic, da, otherComponents, employmentType (permanent or fixed-term), and yearsOfService. Optional: retainingAllowance and terminationReason for under-5 permanent death/disablement review.",
+    sample:
+      "employeeName,basic,da,retainingAllowance,otherComponents,employmentType,yearsOfService,terminationReason\nSample Employee A,20000,0,0,56000,permanent,7,ordinary\nSample Employee B,35000,5000,0,25000,fixed-term,1.2,ordinary",
+  },
+  "/maharera-form-3-withdrawal-worksheet": {
+    inputLabel: "Project cost rows",
+    outputLabel: "Withdrawal ceiling worksheet draft",
+    guidance:
+      "Paste rows with projectName, totalEstimatedLandCost, totalEstimatedConstructionCost, landCostIncurred, constructionCostIncurred, and amountWithdrawnTillDate. Optional: financingCostIncurred, designatedAccountBalance.",
+    sample:
+      "projectName,totalEstimatedLandCost,totalEstimatedConstructionCost,landCostIncurred,constructionCostIncurred,amountWithdrawnTillDate,designatedAccountBalance\nSample Project A,20000000,80000000,8000000,32000000,18000000,25000000",
+  },
 };
 
 const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
@@ -78,6 +125,14 @@ const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
       ["invoice"],
       ["taxAmount", "itcAmount", "amount", "igst", "cgst", "sgst"],
     ],
+    optionalMappableColumns: [
+      "invoiceDate",
+      "documentType",
+      "amendmentType",
+      "itcAvailability",
+      "imsStatus",
+      "reverseCharge",
+    ],
     requiredValueColumnGroups: [["source"], ["supplier", "gstin"], ["invoice"]],
     sourceLabel: "GSTR-2B reconciliation triage rows",
   },
@@ -97,6 +152,61 @@ const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
   },
   "/privacy/review-copy-builder": {
     sourceLabel: "review copy input",
+  },
+  "/gstr1-gstr3b-liability-mismatch-pre-checker": {
+    requiredColumns: ["gstin", "period", "gstr1Liability", "gstr3bLiability"],
+    sourceLabel: "GSTR-1/GSTR-3B liability rows",
+  },
+  "/gstr3b-outward-liability-prelock-gap-checker": {
+    requiredColumns: ["lineRef", "table", "booksValue", "autoPopulatedValue"],
+    requiredValueColumnGroups: [["lineRef"], ["table"]],
+    sourceLabel: "GSTR-3B pre-lock comparison rows",
+  },
+  "/income-tax-act-2025-tds-section-translator": {
+    requiredColumns: ["oldSection"],
+    sourceLabel: "old TDS section rows",
+  },
+  "/schedule-112a-capital-gains-csv-builder": {
+    requiredColumns: [
+      "scripName",
+      "isin",
+      "quantity",
+      "salePricePerUnit",
+      "saleDate",
+      "costOfAcquisitionActual",
+      "acquisitionDate, purchaseDate, or acquiredBefore31Jan2018 when fmv31Jan2018PerUnit is used",
+    ],
+    requiredColumnGroups: [
+      ["scripName"],
+      ["isin"],
+      ["quantity"],
+      ["salePricePerUnit"],
+      ["saleDate"],
+      ["costOfAcquisitionActual"],
+    ],
+    sourceLabel: "Schedule 112A sale rows",
+  },
+  "/labour-code-gratuity-wage-recalculator": {
+    requiredColumns: [
+      "employeeName",
+      "basic",
+      "da",
+      "otherComponents",
+      "employmentType",
+      "yearsOfService",
+    ],
+    sourceLabel: "Labour Code wage/gratuity rows",
+  },
+  "/maharera-form-3-withdrawal-worksheet": {
+    requiredColumns: [
+      "projectName",
+      "totalEstimatedLandCost",
+      "totalEstimatedConstructionCost",
+      "landCostIncurred",
+      "constructionCostIncurred",
+      "amountWithdrawnTillDate",
+    ],
+    sourceLabel: "MahaRERA Form 3 project rows",
   },
 };
 

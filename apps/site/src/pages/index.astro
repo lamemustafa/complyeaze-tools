@@ -27,6 +27,33 @@ const clusters = [
       "Create first-pass mismatch and payables-age review drafts before professional verification.",
     slugs: ["/ais-form-26as-mismatch-checker", "/msme-45-day-payment-due-date-calculator"],
   },
+  {
+    title: "GST filing safety",
+    description:
+      "Check liability gaps and pre-lock figures before GSTR-1/GSTR-3B filing closes the correction window.",
+    slugs: [
+      "/gstr1-gstr3b-liability-mismatch-pre-checker",
+      "/gstr3b-outward-liability-prelock-gap-checker",
+    ],
+  },
+  {
+    title: "Income tax and TDS transition",
+    description:
+      "Translate old TDS sections into the Income-tax Act, 2025 and format capital-gains rows for Schedule 112A.",
+    slugs: [
+      "/income-tax-act-2025-tds-section-translator",
+      "/schedule-112a-capital-gains-csv-builder",
+    ],
+  },
+  {
+    title: "Payroll and sector-specific compliance",
+    description:
+      "Recalculate gratuity under the new wage definition and work through a MahaRERA withdrawal ceiling.",
+    slugs: [
+      "/labour-code-gratuity-wage-recalculator",
+      "/maharera-form-3-withdrawal-worksheet",
+    ],
+  },
 ].map((cluster) => ({
   ...cluster,
   tools: cluster.slugs
