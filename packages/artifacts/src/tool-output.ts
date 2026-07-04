@@ -102,5 +102,5 @@ function getMappableTargetColumns(definition: ToolArtifactDefinition): string[] 
       .map((column) => [column]) ??
     [];
 
-  return groups.flat();
+  return [...groups.flat(), ...(definition.optionalMappableColumns ?? [])];
 }
