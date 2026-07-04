@@ -14,6 +14,9 @@ export type Gstr2bRecoIssue = {
   status: Gstr2bRecoStatus;
   supplier: string;
   invoice: string;
+  invoiceDate: string;
+  documentType: string;
+  amendmentType: string;
   key: string;
   purchaseTaxAmount: number | null;
   gstr2bTaxAmount: number | null;
@@ -251,7 +254,10 @@ function classifyGroup(
   const row = purchaseRow ?? gstr2bRow;
   if (!row) return [];
 
-  if (!purchaseRow) return [issue("extra-in-2b", row, key, null, gstr2bRow, null)];
+  if (!purchaseRow) {
+    const contextFlags = reviewContext ? buildContextFlags(gstr2bRow) : [];
+    return [issue("extra-in-2b", row, key, null, gstr2bRow, null, contextFlags)];
+  }
   if (!gstr2bRow) return [issue("missing-in-2b", row, key, purchaseRow, null, null)];
 
   const difference = amountDifference(purchaseRow.taxAmount, gstr2bRow.taxAmount);
@@ -306,6 +312,9 @@ function issue(
     status,
     supplier: row.supplier,
     invoice: row.invoice,
+    invoiceDate: row.invoiceDate,
+    documentType: row.documentType,
+    amendmentType: row.amendmentType,
     key,
     purchaseTaxAmount: purchase?.taxAmount ?? null,
     gstr2bTaxAmount: gstr2b?.taxAmount ?? null,
