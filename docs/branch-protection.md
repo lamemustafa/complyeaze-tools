@@ -5,10 +5,12 @@ GitHub branch protection rule or repository ruleset with these requirements:
 
 - Require pull requests before merge.
 - Require the `verify` status check from `.github/workflows/ci.yml`.
-- Require the `Review gate` status check from
+- Require the `Review gate` commit-status context written by
   `.github/workflows/review-gate.yml`; this blocks unresolved current-head
-  review findings without requiring an approving reviewer. Branch protection
-  should block on review findings, not on an approving reviewer count.
+  review findings without requiring an approving reviewer. The Actions job is
+  named `Review gate status sync` so GitHub does not require both a check run
+  and a commit status named `Review gate`. Branch protection should block on
+  review findings, not on an approving reviewer count.
 - Require pull request reviews with `required_approving_review_count: 0`.
   This does not create a self-review approval deadlock, but it lets GitHub
   natively block pending or rejected reviews immediately. The Review gate then
@@ -21,26 +23,29 @@ GitHub branch protection rule or repository ruleset with these requirements:
   comments count through unresolved review threads, not through an approving
   reviewer requirement.
 - After resolving review conversations without pushing a new commit, manually
-  re-run `Review gate` or use `workflow_dispatch`; GitHub Actions does not expose
-  a review-thread resolution trigger for this workflow.
+  re-run the latest trusted `Review gate` check from the Checks UI; GitHub
+  Actions does not expose a review-thread resolution trigger for this workflow.
 - If an unresolved review thread is resolved but GitHub does not rerun the
   custom check automatically, rerun the `Review gate` check from the Checks UI
   before merging.
-- The `Review gate` workflow intentionally runs on `pull_request_target`,
-  schedule, and manual dispatch. It updates the `Review gate` commit status for
+- The `Review gate` workflow intentionally runs on `pull_request_target` and
+  schedule. It updates the `Review gate` commit status for
   PR heads from trusted default-branch code without running PR-controlled
   workflow code. Native required pull request reviews with zero required
   approvals are the immediate guard for pending or rejected reviews; the
   scheduled Review gate sweep is only the trusted status-refresh backstop after
   review threads are resolved, reviews are dismissed, or old statuses need to be
-  corrected. Targeted PR runs may pass after waiting for Codex even when no
-  formal bot review object is present; they still fail on unresolved threads and
-  requested-changes reviews. Scheduled all-open sweeps must not use that
-  missing-review bypass. Do not add
-  `pull_request_review` or `pull_request_review_comment` triggers unless the
-  replacement design is proven to execute trusted default-branch workflow code.
-  Manual dispatches should normally run from `main`; selecting another ref is a
-  maintainer-only recovery path for workflow-transition PRs.
+  corrected. Targeted PR/manual runs must fail after waiting for Codex when no
+  formal current-head bot review object is present. Scheduled all-open sweeps may
+  use the missing-review bypass so they still catch unresolved threads and
+  requested-changes reviews without flipping every open PR red before Codex
+  responds, but they must skip writing a green status when the only passing
+  condition is an allowed missing current-head review. Do not use
+  `pull_request_review` or `pull_request_review_comment` as status-writing
+  triggers; they do not provide the same trusted default-branch/write-token
+  posture as `pull_request_target` and schedule. Do not expose
+  `workflow_dispatch` on the privileged status-writer workflow because manual
+  dispatch can be started from a non-default workflow ref.
 - Do not require an approving human review while the repo has only one eligible
   maintainer. A required self-review creates a permanent merge deadlock. Keep the
   required review count at zero unless a second eligible maintainer is active.
@@ -68,7 +73,7 @@ Suggested GitHub checks:
 
 ```text
 Required status check: verify
-Required review findings check: Review gate
+Required review findings status context: Review gate
 Required security checks: Analyze, Review dependency changes
 Required pull request reviews: enabled with required approving reviews = 0
 Required conversation gate: all current-head review threads resolved
