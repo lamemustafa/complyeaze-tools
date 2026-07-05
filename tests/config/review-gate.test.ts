@@ -26,8 +26,8 @@ describe("review findings gate", () => {
     expect(workflow).toContain("pull_request_target:");
     expect(workflow).toContain("schedule:");
     expect(workflow).toContain("cron: \"*/5 * * * *\"");
-    expect(workflow).toContain("workflow_dispatch:");
-    expect(workflow).toContain("required: true");
+    expect(workflow).not.toContain("workflow_dispatch:");
+    expect(workflow).not.toContain("github.event.inputs");
     expect(workflow).toContain("pull-requests: read");
     expect(workflow).toContain("statuses: write");
     expect(workflow).toContain("GH_TOKEN: ${{ github.token }}");
@@ -53,6 +53,7 @@ describe("review findings gate", () => {
     expect(syncScript).toContain("readLatestReviewGateStatus");
     expect(syncScript).toContain("Review gate status already");
     expect(syncScript).toContain("Skipping Review gate success");
+    expect(syncScript).toContain("clearing stale Review gate success");
     expect(checkScript).toContain("review-gate:allowed-missing-head-review");
     expect(syncScript).toContain("pullRequests(states:OPEN,first:100");
     expect(syncScript).toContain("pageInfo{hasNextPage endCursor}");
@@ -73,6 +74,6 @@ describe("review findings gate", () => {
     expect(branchProtection).toContain("trusted status-refresh backstop");
     expect(branchProtection).toContain("Scheduled all-open sweeps may");
     expect(branchProtection).toContain("rerun the `Review gate` check");
-    expect(branchProtection).toContain("dispatches require a PR number");
+    expect(branchProtection).toContain("Do not expose");
   });
 });

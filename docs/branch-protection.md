@@ -21,13 +21,13 @@ GitHub branch protection rule or repository ruleset with these requirements:
   comments count through unresolved review threads, not through an approving
   reviewer requirement.
 - After resolving review conversations without pushing a new commit, manually
-  re-run `Review gate` or use `workflow_dispatch`; GitHub Actions does not expose
-  a review-thread resolution trigger for this workflow.
+  re-run the latest trusted `Review gate` check from the Checks UI; GitHub
+  Actions does not expose a review-thread resolution trigger for this workflow.
 - If an unresolved review thread is resolved but GitHub does not rerun the
   custom check automatically, rerun the `Review gate` check from the Checks UI
   before merging.
-- The `Review gate` workflow intentionally runs on `pull_request_target`,
-  schedule, and manual dispatch. It updates the `Review gate` commit status for
+- The `Review gate` workflow intentionally runs on `pull_request_target` and
+  schedule. It updates the `Review gate` commit status for
   PR heads from trusted default-branch code without running PR-controlled
   workflow code. Native required pull request reviews with zero required
   approvals are the immediate guard for pending or rejected reviews; the
@@ -41,9 +41,9 @@ GitHub branch protection rule or repository ruleset with these requirements:
   condition is an allowed missing current-head review. Do not use
   `pull_request_review` or `pull_request_review_comment` as status-writing
   triggers; they do not provide the same trusted default-branch/write-token
-  posture as `pull_request_target`, schedule, and manual dispatch. Manual
-  dispatches require a PR number and must run trusted default-branch workflow
-  code.
+  posture as `pull_request_target` and schedule. Do not expose
+  `workflow_dispatch` on the privileged status-writer workflow because manual
+  dispatch can be started from a non-default workflow ref.
 - Do not require an approving human review while the repo has only one eligible
   maintainer. A required self-review creates a permanent merge deadlock. Keep the
   required review count at zero unless a second eligible maintainer is active.

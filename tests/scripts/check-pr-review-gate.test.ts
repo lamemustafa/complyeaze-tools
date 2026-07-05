@@ -193,6 +193,46 @@ describe("PR review gate script", () => {
       ]),
     ).toThrow(/Requested-changes reviews/);
   });
+
+  it("allows a stale approval to clear an older requested-changes review", () => {
+    const fixturePath = writeFixture(
+      "old-request-approved-before-head",
+      reviewFixture({
+        reviews: [
+          review({
+            state: "CHANGES_REQUESTED",
+            commit: "old-sha",
+            submittedAt: "2026-07-03T12:00:00Z",
+          }),
+          review({
+            state: "APPROVED",
+            commit: "old-sha",
+            submittedAt: "2026-07-03T12:05:00Z",
+          }),
+          review({
+            state: "COMMENTED",
+            commit: "head-sha",
+            submittedAt: "2026-07-03T12:10:00Z",
+          }),
+        ],
+      }),
+    );
+
+    const output = runGate([
+      scriptPath,
+      "--repo",
+      "lamemustafa/complyeaze-tools",
+      "--pr",
+      "1",
+      "--fixture",
+      fixturePath,
+      "--strict-head-review",
+      "--required-review-author",
+      "chatgpt-codex-connector",
+    ]);
+
+    expect(output).toContain("PR review gate passed");
+  });
 });
 
 function runGate(args: string[]) {
