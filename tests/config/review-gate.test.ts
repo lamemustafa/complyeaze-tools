@@ -50,10 +50,11 @@ describe("review findings gate", () => {
     expect(workflow).not.toContain(
       'args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000 --allow-missing-head-review)',
     );
+    expect(workflow).toContain("--all-open --wait-head-review-ms 0 --allow-missing-head-review");
     expect(syncScript).toContain("readLatestReviewGateStatus");
     expect(syncScript).toContain("Review gate status already");
-    expect(syncScript).toContain("Skipping Review gate success");
-    expect(syncScript).toContain("clearing stale Review gate success");
+    expect(syncScript).toContain("--expected-head-oid");
+    expect(syncScript).toContain("No active review blockers; Codex review missing.");
     expect(checkScript).toContain("review-gate:allowed-missing-head-review");
     expect(syncScript).toContain("pullRequests(states:OPEN,first:100");
     expect(syncScript).toContain("pageInfo{hasNextPage endCursor}");
