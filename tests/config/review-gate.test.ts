@@ -46,8 +46,7 @@ describe("review findings gate", () => {
     expect(workflow).toContain(
       'args+=(--all-open --wait-head-review-ms 0 --allow-missing-head-review --skip-pending-status)',
     );
-    expect(workflow).toContain('args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000)');
-    expect(workflow).not.toContain(
+    expect(workflow).toContain(
       'args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000 --allow-missing-head-review)',
     );
     expect(workflow).toContain("--all-open --wait-head-review-ms 0 --allow-missing-head-review");
@@ -73,7 +72,9 @@ describe("review findings gate", () => {
     expect(branchProtection).toContain("pending or rejected reviews");
     expect(branchProtection).toContain("immediate guard");
     expect(branchProtection).toContain("trusted status-refresh backstop");
-    expect(branchProtection).toContain("Scheduled all-open sweeps may");
+    expect(branchProtection).toContain("Both targeted PR events and scheduled all-open sweeps");
+    expect(branchProtection).toContain("audited success");
+    expect(branchProtection).toContain("status reflects the current review state");
     expect(branchProtection).toContain("rerun the `Review gate` check");
     expect(branchProtection).toContain("Do not expose");
   });
