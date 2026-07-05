@@ -138,3 +138,4 @@ jobs:
           test "${healthy:-}" = "1"
           curl -fsSI http://127.0.0.1:18080/ | grep -i "content-security-policy"
           curl -fsSL http://127.0.0.1:18080/sitemap.xml | grep -F "https://tools.complyeaze.com"
+          curl -fsSL http://127.0.0.1:18080/sanchika/ | grep -F "Sanchika"

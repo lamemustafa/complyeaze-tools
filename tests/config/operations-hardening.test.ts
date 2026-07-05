@@ -32,6 +32,7 @@ describe("operations hardening", () => {
       "https://tools.complyeaze.com/",
       "https://tools.complyeaze.com/-/health",
       "https://tools.complyeaze.com/gstr-2b-purchase-reconciliation-triage/",
+      "https://tools.complyeaze.com/sanchika/",
       "https://tools.complyeaze.com/sitemap.xml",
       "https://tools.complyeaze.com/site.webmanifest",
     ]) {
@@ -41,6 +42,16 @@ describe("operations hardening", () => {
     expect(uptimeDoc).toMatch(/must not claim\s+real-time uptime/);
     expect(statusPage).toContain("External monitor targets are defined");
     expect(statusPage).toContain("do not treat this page as a real-time uptime feed");
+  });
+
+  it("documents Sanchika public-edge triage separately from Kubernetes deploys", () => {
+    const goLive = read("docs/go-live-runbook.md");
+
+    expect(goLive).toContain("curl --fail --location https://tools.complyeaze.com/sanchika/");
+    expect(goLive).toContain("public `/sanchika/` route returns `403`");
+    expect(goLive).toContain("Cloudflare, DNS, or WAF edge behavior");
+    expect(goLive).toContain("cf-ray");
+    expect(goLive).toContain("do not redeploy or mutate Kubernetes");
   });
 
   it("links operational docs from release and deployment runbooks", () => {

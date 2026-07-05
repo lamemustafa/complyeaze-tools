@@ -13,6 +13,7 @@ Create HTTPS monitors for:
 | `https://tools.complyeaze.com/` | HTTP 200 and page body contains `ComplyEaze Tools` |
 | `https://tools.complyeaze.com/-/health` | HTTP 200 and exact body `ok` |
 | `https://tools.complyeaze.com/gstr-2b-purchase-reconciliation-triage/` | HTTP 200 and no `:8080` redirect |
+| `https://tools.complyeaze.com/sanchika/` | HTTP 200 and page body contains `Sanchika` |
 | `https://tools.complyeaze.com/sitemap.xml` | HTTP 200 and body contains `https://tools.complyeaze.com` |
 | `https://tools.complyeaze.com/site.webmanifest` | HTTP 200 and `application/manifest+json` content type |
 
@@ -42,7 +43,10 @@ incident routing.
 3. Inspect the latest `Deploy Production` and `Publish Image` runs.
 4. Check DNS and Cloudflare edge status.
 5. Check Kubernetes rollout and ingress status from an admin workstation.
-6. If the failure is caused by a bad deploy, redeploy the previous reviewed
+6. If `/sanchika/` returns `403` while the deploy workflow service smoke passed,
+   capture response headers such as `cf-ray` and review Cloudflare security
+   events before changing Kubernetes.
+7. If the failure is caused by a bad deploy, redeploy the previous reviewed
    digest through `Deploy Production`; do not mutate the live deployment by hand.
 
 ## Public Status Page Boundary
