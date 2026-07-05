@@ -4,7 +4,7 @@
 
 - [ ] `pnpm verify`
 - [ ] `pnpm scan:source-freshness`
-- [ ] `pnpm review:gate -- --repo lamemustafa/complyeaze-tools --pr <number> --strict-head-review --required-review-author chatgpt-codex-connector --allow-missing-head-review` when checking local PR readiness, or reason not run:
+- [ ] `pnpm review:gate -- --repo lamemustafa/complyeaze-tools --pr <number> --strict-head-review --required-review-author chatgpt-codex-connector` when checking local PR readiness, or reason not run:
 - [ ] Live preflight updated or run when deployment/runtime behavior changed
 
 ## Safety Checks
