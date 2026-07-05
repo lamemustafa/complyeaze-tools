@@ -98,6 +98,7 @@ describe("PR review gate script", () => {
       ]);
 
     expect(output).toContain("PR review gate passed");
+    expect(output).toContain("review-gate:allowed-missing-head-review");
   });
 
   it("blocks on missing bot review in strict mode without allow-missing-head-review", () => {
@@ -125,7 +126,7 @@ describe("PR review gate script", () => {
     );
   });
 
-  it("ignores outdated unresolved threads and stale requested-changes reviews", () => {
+  it("clears older requested-changes reviews after a current-head re-review", () => {
     const fixturePath = writeFixture(
       "outdated-and-stale",
       reviewFixture({
@@ -147,6 +148,38 @@ describe("PR review gate script", () => {
     );
 
     const output = runGate([
+      scriptPath,
+      "--repo",
+      "lamemustafa/complyeaze-tools",
+      "--pr",
+      "1",
+      "--fixture",
+      fixturePath,
+      "--strict-head-review",
+      "--required-review-author",
+      "chatgpt-codex-connector",
+    ]);
+
+    expect(output).toContain("PR review gate passed");
+  });
+
+  it("keeps current-head requested changes blocking after a stale approval", () => {
+    const fixturePath = writeFixture(
+      "head-requested-stale-approval",
+      reviewFixture({
+        reviews: [
+          review({ state: "CHANGES_REQUESTED", commit: "head-sha" }),
+          review({
+            state: "APPROVED",
+            commit: "old-sha",
+            submittedAt: "2026-07-03T12:05:00Z",
+          }),
+        ],
+      }),
+    );
+
+    expect(() =>
+      runGate([
         scriptPath,
         "--repo",
         "lamemustafa/complyeaze-tools",
@@ -157,7 +190,46 @@ describe("PR review gate script", () => {
         "--strict-head-review",
         "--required-review-author",
         "chatgpt-codex-connector",
-      ]);
+      ]),
+    ).toThrow(/Requested-changes reviews/);
+  });
+
+  it("allows a stale approval to clear an older requested-changes review", () => {
+    const fixturePath = writeFixture(
+      "old-request-approved-before-head",
+      reviewFixture({
+        reviews: [
+          review({
+            state: "CHANGES_REQUESTED",
+            commit: "old-sha",
+            submittedAt: "2026-07-03T12:00:00Z",
+          }),
+          review({
+            state: "APPROVED",
+            commit: "old-sha",
+            submittedAt: "2026-07-03T12:05:00Z",
+          }),
+          review({
+            state: "COMMENTED",
+            commit: "head-sha",
+            submittedAt: "2026-07-03T12:10:00Z",
+          }),
+        ],
+      }),
+    );
+
+    const output = runGate([
+      scriptPath,
+      "--repo",
+      "lamemustafa/complyeaze-tools",
+      "--pr",
+      "1",
+      "--fixture",
+      fixturePath,
+      "--strict-head-review",
+      "--required-review-author",
+      "chatgpt-codex-connector",
+    ]);
 
     expect(output).toContain("PR review gate passed");
   });

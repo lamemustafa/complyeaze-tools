@@ -30,7 +30,7 @@ HIGH/CRITICAL scanning and upload SARIF evidence from
 
 `main` must be protected before production promotion. Required branch controls
 are listed in `docs/branch-protection.md`; the required CI check name is
-`verify` and the required review-findings check name is `Review gate`.
+`verify` and the required review-findings status context is `Review gate`.
 
 To go live:
 
