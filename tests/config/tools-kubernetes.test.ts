@@ -109,6 +109,8 @@ describe("Kubernetes static deployment policy", () => {
     expect(workflow).toContain("port-forward service/complyeaze-tools 18080:80");
     expect(workflow).toContain("complyeaze-tools-port-forward.log");
     expect(workflow).toContain("http://127.0.0.1:18080/-/health");
+    expect(workflow).toContain("http://127.0.0.1:18080/sanchika/");
+    expect(workflow).toContain('grep -F "Sanchika"');
   });
 
   it("keeps GitHub deploy access namespace-scoped", () => {

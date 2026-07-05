@@ -91,6 +91,7 @@ After first deployment, schedule the rotation issue workflow and follow
    ```bash
    curl -I https://tools.complyeaze.com/
    curl -I https://tools.complyeaze.com/-/health
+   curl --fail --location https://tools.complyeaze.com/sanchika/
    ```
 
 5. Confirm cert-manager created `complyeaze-tools-tls`:
@@ -105,3 +106,22 @@ After first deployment, schedule the rotation issue workflow and follow
 
 Do not promote a mutable tag or manually edit the live deployment image outside
 the digest-pinned workflow.
+
+## Waiting Deploys
+
+Production uses the GitHub `production` environment. If a new deployment appears
+stuck before Kubernetes steps start, check for older waiting `Deploy Production`
+runs in the same environment. Cancel superseded waiting runs before approving the
+current digest-pinned run. Do not approve a stale run whose `source_sha` is no
+longer the reviewed image intended for promotion.
+
+The workflow's service smoke checks run through a namespace port-forward and
+include `/sanchika/` so GitHub-hosted runner access to Cloudflare is not the
+authoritative deploy gate. Keep external public-edge monitoring in the uptime
+monitor plan.
+
+If the public `/sanchika/` route returns `403` while the port-forward service
+smoke passed, treat it as Cloudflare, DNS, or WAF edge behavior first. Capture
+response headers such as `cf-ray`, check Cloudflare security events and rules
+for `tools.complyeaze.com`, and do not redeploy or mutate Kubernetes unless the
+internal service smoke also fails.
