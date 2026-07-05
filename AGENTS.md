@@ -88,8 +88,11 @@ requests are made.
   accessibility review. Keep PNG social previews in sync with the SVG source.
 
 The primary protected CI check name is `verify`; the protected review-findings
-check name is `Review gate`. Do not rename either job without updating
-`docs/branch-protection.md` and GitHub branch protection.
+status context is `Review gate`. The Actions job is intentionally named
+`Review gate status sync` so GitHub does not require both a check run and a
+commit status with the same name. Do not rename the protected context or job
+without updating `docs/branch-protection.md`, tests, and GitHub branch
+protection.
 
 While this repo has only one eligible maintainer, branch protection should block
 on required checks and unresolved review conversations, not on an approving
