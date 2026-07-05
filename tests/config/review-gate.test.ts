@@ -15,6 +15,7 @@ describe("review findings gate", () => {
     };
     const workflow = read(".github/workflows/review-gate.yml");
     const syncScript = read("scripts/sync-review-gate-status.mjs");
+    const checkScript = read("scripts/check-pr-review-gate.mjs");
     const branchProtection = read("docs/branch-protection.md");
 
     expect(existsSync(join(root, "scripts", "check-pr-review-gate.mjs"))).toBe(true);
@@ -25,28 +26,35 @@ describe("review findings gate", () => {
     expect(workflow).toContain("pull_request_target:");
     expect(workflow).toContain("schedule:");
     expect(workflow).toContain("cron: \"*/5 * * * *\"");
-    expect(workflow).toContain("workflow_dispatch:");
+    expect(workflow).not.toContain("workflow_dispatch:");
+    expect(workflow).not.toContain("github.event.inputs");
     expect(workflow).toContain("pull-requests: read");
     expect(workflow).toContain("statuses: write");
     expect(workflow).toContain("GH_TOKEN: ${{ github.token }}");
     expect(workflow).toContain("repository: ${{ github.repository }}");
-    expect(workflow).toContain(
-      "ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.repository.default_branch }}",
-    );
+    expect(workflow).toContain("ref: ${{ github.event.repository.default_branch }}");
     expect(workflow).not.toContain("pull_request_review:");
     expect(workflow).not.toContain("pull_request_review_comment:");
     expect(workflow).not.toContain("github.event.pull_request.base.sha");
     expect(workflow).not.toContain("github.event.pull_request.base.sha || github.sha");
     expect(workflow).toContain("node scripts/sync-review-gate-status.mjs");
+    expect(workflow).toContain("name: Review gate status sync");
+    expect(workflow).toContain("Review gate scripts are not present on the trusted default branch yet");
     expect(workflow).toContain("--strict-head-review");
     expect(workflow).toContain("--required-review-author chatgpt-codex-connector");
     expect(workflow).toContain("--skip-pending-status");
     expect(workflow).toContain(
+      'args+=(--all-open --wait-head-review-ms 0 --allow-missing-head-review --skip-pending-status)',
+    );
+    expect(workflow).toContain('args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000)');
+    expect(workflow).not.toContain(
       'args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000 --allow-missing-head-review)',
     );
-    expect(workflow).not.toContain("--all-open --wait-head-review-ms 0 --allow-missing-head-review");
     expect(syncScript).toContain("readLatestReviewGateStatus");
     expect(syncScript).toContain("Review gate status already");
+    expect(syncScript).toContain("Skipping Review gate success");
+    expect(syncScript).toContain("clearing stale Review gate success");
+    expect(checkScript).toContain("review-gate:allowed-missing-head-review");
     expect(syncScript).toContain("pullRequests(states:OPEN,first:100");
     expect(syncScript).toContain("pageInfo{hasNextPage endCursor}");
     expect(syncScript).not.toContain('"pr",\n    "list"');
@@ -64,8 +72,8 @@ describe("review findings gate", () => {
     expect(branchProtection).toContain("pending or rejected reviews");
     expect(branchProtection).toContain("immediate guard");
     expect(branchProtection).toContain("trusted status-refresh backstop");
-    expect(branchProtection).toContain("Scheduled all-open sweeps must not use");
+    expect(branchProtection).toContain("Scheduled all-open sweeps may");
     expect(branchProtection).toContain("rerun the `Review gate` check");
-    expect(branchProtection).toContain("Manual dispatches should normally run from `main`");
+    expect(branchProtection).toContain("Do not expose");
   });
 });
