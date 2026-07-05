@@ -101,6 +101,30 @@ describe("PR review gate script", () => {
     expect(output).toContain("review-gate:allowed-missing-head-review");
   });
 
+  it("fails when the evaluated PR head does not match the expected SHA", () => {
+    const fixturePath = writeFixture(
+      "head-mismatch",
+      reviewFixture({
+        reviews: [review({ state: "COMMENTED", commit: "head-sha" })],
+      }),
+    );
+
+    expectGateFailure(
+      [
+        scriptPath,
+        "--repo",
+        "lamemustafa/complyeaze-tools",
+        "--pr",
+        "1",
+        "--fixture",
+        fixturePath,
+        "--expected-head-oid",
+        "older-sha",
+      ],
+      /PR head changed while evaluating/,
+    );
+  });
+
   it("blocks on missing bot review in strict mode without allow-missing-head-review", () => {
     const fixturePath = writeFixture(
       "missing-blocked",
