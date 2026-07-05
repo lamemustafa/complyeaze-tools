@@ -5,10 +5,12 @@ GitHub branch protection rule or repository ruleset with these requirements:
 
 - Require pull requests before merge.
 - Require the `verify` status check from `.github/workflows/ci.yml`.
-- Require the `Review gate` status check from
+- Require the `Review gate` commit-status context written by
   `.github/workflows/review-gate.yml`; this blocks unresolved current-head
-  review findings without requiring an approving reviewer. Branch protection
-  should block on review findings, not on an approving reviewer count.
+  review findings without requiring an approving reviewer. The Actions job is
+  named `Review gate status sync` so GitHub does not require both a check run
+  and a commit status named `Review gate`. Branch protection should block on
+  review findings, not on an approving reviewer count.
 - Require pull request reviews with `required_approving_review_count: 0`.
   This does not create a self-review approval deadlock, but it lets GitHub
   natively block pending or rejected reviews immediately. The Review gate then
@@ -71,7 +73,7 @@ Suggested GitHub checks:
 
 ```text
 Required status check: verify
-Required review findings check: Review gate
+Required review findings status context: Review gate
 Required security checks: Analyze, Review dependency changes
 Required pull request reviews: enabled with required approving reviews = 0
 Required conversation gate: all current-head review threads resolved
