@@ -14,7 +14,10 @@ GitHub branch protection rule or repository ruleset with these requirements:
 - Require pull request reviews with `required_approving_review_count: 0`.
   This does not create a self-review approval deadlock, but it lets GitHub
   natively block pending or rejected reviews immediately. The Review gate then
-  handles unresolved current-head review threads and bot-review freshness.
+  handles unresolved current-head review threads and requested-changes reviews.
+  Missing current-head Codex review objects are surfaced in the status
+  description, but they must not keep the required findings gate red when no
+  active review blockers exist.
 - After the first successful run, also require the `Analyze` and
   `Review dependency changes` check contexts so CodeQL and dependency review
   block unsafe pull requests.
@@ -35,12 +38,10 @@ GitHub branch protection rule or repository ruleset with these requirements:
   approvals are the immediate guard for pending or rejected reviews; the
   scheduled Review gate sweep is only the trusted status-refresh backstop after
   review threads are resolved, reviews are dismissed, or old statuses need to be
-  corrected. Targeted PR/manual runs must fail after waiting for Codex when no
-  formal current-head bot review object is present. Scheduled all-open sweeps may
-  use the missing-review bypass so they still catch unresolved threads and
-  requested-changes reviews without flipping every open PR red before Codex
-  responds, but they must skip writing a green status when the only passing
-  condition is an allowed missing current-head review. Do not use
+  corrected. Targeted PR and scheduled all-open runs may use the missing-review
+  bypass so they still catch unresolved threads and requested-changes reviews
+  without flipping an otherwise clean PR red when Codex does not create a formal
+  review object. Do not use
   `pull_request_review` or `pull_request_review_comment` as status-writing
   triggers; they do not provide the same trusted default-branch/write-token
   posture as `pull_request_target` and schedule. Do not expose

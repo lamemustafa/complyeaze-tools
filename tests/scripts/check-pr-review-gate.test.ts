@@ -126,6 +126,34 @@ describe("PR review gate script", () => {
     );
   });
 
+  it("fails when the PR head changed from the expected status target", () => {
+    const fixturePath = writeFixture(
+      "head-changed",
+      reviewFixture({
+        headRefOid: "new-head-sha",
+        reviews: [review({ state: "COMMENTED", commit: "new-head-sha" })],
+      }),
+    );
+
+    expectGateFailure(
+      [
+        scriptPath,
+        "--repo",
+        "lamemustafa/complyeaze-tools",
+        "--pr",
+        "1",
+        "--fixture",
+        fixturePath,
+        "--strict-head-review",
+        "--required-review-author",
+        "chatgpt-codex-connector",
+        "--expected-head-oid",
+        "old-head-sha",
+      ],
+      /PR head changed while evaluating/,
+    );
+  });
+
   it("clears older requested-changes reviews after a current-head re-review", () => {
     const fixturePath = writeFixture(
       "outdated-and-stale",

@@ -97,7 +97,9 @@ protection.
 While this repo has only one eligible maintainer, branch protection should block
 on required checks and unresolved review conversations, not on an approving
 reviewer count. Treat Codex review comments as blocking when they create
-current-head unresolved review threads or requested-changes reviews.
+current-head unresolved review threads or requested-changes reviews. A missing
+current-head Codex review object is review-coverage evidence, not a permanent
+required-status failure when no active review blockers exist.
 
 For closed or merged PR review cleanup, audit unresolved threads against current
 `main`, classify stale versus still-valid findings, create or link a GitHub issue

@@ -29,7 +29,7 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           persist-credentials: false
 
-      - name: Sync current-head review status
+      - name: Sync review gate status
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -58,7 +58,7 @@ jobs:
               echo "Could not determine pull request number." >&2
               exit 1
             fi
-            args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000)
+            args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000 --allow-missing-head-review)
           fi
 
           node scripts/sync-review-gate-status.mjs "${args[@]}"
