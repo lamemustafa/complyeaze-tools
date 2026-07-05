@@ -15,6 +15,8 @@ const strictHeadReview = args.has("--strict-head-review");
 const allowMissingHeadReview = args.has("--allow-missing-head-review");
 const skipPendingStatus = args.has("--skip-pending-status");
 const requiredReviewAuthor = readArgValue("--required-review-author");
+const ALLOWED_MISSING_HEAD_REVIEW_MARKER =
+  "review-gate:allowed-missing-head-review";
 
 if (!repo || !repo.includes("/")) fail("Pass --repo owner/name.");
 if (!allOpen && (!explicitPr || !Number.isInteger(Number(explicitPr)))) {
@@ -25,24 +27,56 @@ const targets = allOpen ? listOpenPullRequests() : [readPullRequest(Number(expli
 let targetedFailure = false;
 
 for (const target of targets) {
+  if (target.state && target.state !== "OPEN") {
+    console.log(`Skipping PR #${target.number} because it is ${target.state}.`);
+    continue;
+  }
+
   if (!skipPendingStatus) {
     setReviewGateStatus(target, "pending", "Review gate is evaluating review state.");
   }
   const result = runReviewGate(target.number);
 
   if (result.ok) {
+    if (result.allowedMissingHeadReview) {
+      if (hasSuccessfulReviewGateStatus(target)) {
+        setReviewGateStatus(
+          target,
+          "failure",
+          "Missing current-head review; clearing stale Review gate success.",
+        );
+      } else {
+        console.log(
+          `Skipping Review gate success for #${target.number} because the current-head review is still missing.`,
+        );
+      }
+      continue;
+    }
+
     setReviewGateStatus(target, "success", "No current-head review blockers found.");
     continue;
   }
 
-  setReviewGateStatus(target, "failure", "Unresolved review thread or requested changes found.");
+  setReviewGateStatus(
+    target,
+    "failure",
+    "Unresolved thread, requested changes, or missing current-head review found.",
+  );
   targetedFailure = true;
 }
 
 if (!allOpen && targetedFailure) process.exit(1);
 
 function readPullRequest(number) {
-  return runJson(["pr", "view", String(number), "--repo", repo, "--json", "number,headRefOid"]);
+  return runJson([
+    "pr",
+    "view",
+    String(number),
+    "--repo",
+    repo,
+    "--json",
+    "number,headRefOid,state",
+  ]);
 }
 
 function listOpenPullRequests() {
@@ -98,12 +132,15 @@ function runReviewGate(prNumber) {
       stdio: ["ignore", "pipe", "pipe"],
     });
     process.stdout.write(output);
-    return { ok: true };
+    return {
+      ok: true,
+      allowedMissingHeadReview: output.includes(ALLOWED_MISSING_HEAD_REVIEW_MARKER),
+    };
   } catch (error) {
     const failure = error;
     process.stdout.write(String(failure.stdout ?? ""));
     process.stderr.write(String(failure.stderr ?? ""));
-    return { ok: false };
+    return { ok: false, allowedMissingHeadReview: false };
   }
 }
 
@@ -132,6 +169,18 @@ function setReviewGateStatus(target, state, description) {
 function readLatestReviewGateStatus(target) {
   const statuses = runJson(["api", `repos/${repo}/commits/${target.headRefOid}/statuses`]);
   return statuses.find((status) => status.context === "Review gate") ?? null;
+}
+
+function hasSuccessfulReviewGateStatus(target) {
+  try {
+    return readLatestReviewGateStatus(target)?.state === "success";
+  } catch (error) {
+    console.warn(
+      `warn: could not read existing Review gate status for #${target.number}; leaving missing-review status unchanged.`,
+    );
+    process.stderr.write(String(error.stderr ?? ""));
+    return false;
+  }
 }
 
 function readArgValue(name) {
