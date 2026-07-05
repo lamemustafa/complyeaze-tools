@@ -35,12 +35,15 @@ GitHub branch protection rule or repository ruleset with these requirements:
   approvals are the immediate guard for pending or rejected reviews; the
   scheduled Review gate sweep is only the trusted status-refresh backstop after
   review threads are resolved, reviews are dismissed, or old statuses need to be
-  corrected. Targeted PR/manual runs must fail after waiting for Codex when no
-  formal current-head bot review object is present. Scheduled all-open sweeps may
-  use the missing-review bypass so they still catch unresolved threads and
-  requested-changes reviews without flipping every open PR red before Codex
-  responds, but they must skip writing a green status when the only passing
-  condition is an allowed missing current-head review. Do not use
+  corrected. Both targeted PR events and scheduled all-open sweeps may record an
+  audited success when no formal current-head Codex review object exists, as
+  long as the evaluated PR head exactly matches the status SHA and there are no
+  unresolved current-head review threads or requested-changes reviews. The status
+  description must make the missing Codex review explicit instead of pretending a
+  bot review happened. Required conversation resolution remains the native
+  blocker for late-arriving review threads; after resolving those threads, rerun
+  the trusted `Review gate` check or wait for the scheduled sweep so the commit
+  status reflects the current review state. Do not use
   `pull_request_review` or `pull_request_review_comment` as status-writing
   triggers; they do not provide the same trusted default-branch/write-token
   posture as `pull_request_target` and schedule. Do not expose
