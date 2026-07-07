@@ -98,7 +98,7 @@ describe("public metadata", () => {
     }
     expect(llms).toContain("Terms and disclaimer: https://tools.complyeaze.com/terms/");
     expect(llms).toContain(
-      "Sanchika design-system docs: https://tools.complyeaze.com/sanchika/",
+      "Sanchika evidence-loop page: https://tools.complyeaze.com/sanchika/",
     );
   });
 

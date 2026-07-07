@@ -44,7 +44,7 @@ controllers, founders, executives, and business owners.
 
 Repository: https://github.com/lamemustafa/complyeaze-tools
 Source register: https://tools.complyeaze.com/source/
-Sanchika design-system docs: https://tools.complyeaze.com/sanchika/
+Sanchika evidence-loop page: https://tools.complyeaze.com/sanchika/
 Security: https://tools.complyeaze.com/security/
 Privacy: https://tools.complyeaze.com/privacy/
 Terms and disclaimer: https://tools.complyeaze.com/terms/
