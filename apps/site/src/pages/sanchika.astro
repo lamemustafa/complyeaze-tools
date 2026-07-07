@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import "../styles/sanchika.css";
 
 const repositoryUrl = "https://github.com/lamemustafa/sanchika";
+const liveGalleryUrl = "https://sanchika.complyeaze.com";
 const parentStoryUrl = "https://complyeaze.com";
 const axalUrl = "https://axal.complyeaze.com";
 const packUrl = "https://pack.complyeaze.com";
@@ -14,7 +15,7 @@ const packageBoundaries = [
   },
   {
     name: "@sanchika/primitives",
-    role: "Accessible component contracts for React-first consumers, kept portable enough for other runtimes.",
+    role: "Accessible component contracts for React-first consumers, kept portable enough for other runtimes after adoption proof.",
   },
   {
     name: "@sanchika/patterns",
@@ -22,7 +23,7 @@ const packageBoundaries = [
   },
   {
     name: "@sanchika/gallery",
-    role: "Reviewable rendered examples that make package output inspectable before adoption.",
+    role: "Reviewable rendered examples that connect TrustBrief, DesignBrief, browser evidence, and adoption decisions.",
   },
 ];
 
@@ -44,8 +45,8 @@ const surfacePilots = [
   },
   {
     surface: "Tools",
-    status: "Current static page",
-    role: "Documents the design-system boundary without adding accounts, uploads, telemetry, or persistence.",
+    status: "Current public boundary",
+    role: "Documents the design-system boundary without adding accounts, uploads, telemetry, persistence, or a root-app proxy.",
   },
 ];
 
@@ -62,7 +63,7 @@ const verificationCommands = [
 
 const trustRules = [
   "Sanchika shapes interface contracts; it does not own clients, credentials, files, workspaces, filings, or audit trails.",
-  "Public pages must describe current artifacts and evidence, not future component promises.",
+  "Public pages must describe current artifacts and evidence, not future component promises or production-readiness claims.",
   "Tools stays static and browser-local: Files are processed in your browser. No account or file upload required.",
   "Consumers should adopt Sanchika through reviewed packages, tarballs, or copied design guidance, not by importing nested source at runtime.",
 ];
@@ -75,16 +76,17 @@ const trustRules = [
   <section class="sanchika-hero" aria-labelledby="sanchika-heading">
     <div class="hero-copy">
       <p class="domain-line">tools.complyeaze.com/sanchika</p>
-      <h1 id="sanchika-heading">The design system is the evidence loop.</h1>
+      <h1 id="sanchika-heading">A design system that can defend itself.</h1>
       <p class="lede">
-        Sanchika is where ComplyEaze turns product story, interface contracts,
-        rendered pilots, and browser evidence into a repeatable design-system
-        loop. The goal is not another docs shelf. The goal is source-reviewable
-        proof that a compliance interface can feel composed, trustworthy, and
-        alive without becoming vague or unsafe.
+        Tools keeps the public Sanchika boundary honest: no account, no upload,
+        no telemetry, and no imported app state. The live gallery is where
+        ComplyEaze turns product story, interface contracts, browser evidence,
+        and adoption decisions into source-reviewable proof that a compliance
+        interface can feel composed without becoming vague or unsafe.
       </p>
       <div class="hero-actions" aria-label="Sanchika primary links">
-        <a class="text-button" href={repositoryUrl}>Review Sanchika source</a>
+        <a class="text-button" href={liveGalleryUrl}>Open live gallery</a>
+        <a class="quiet-link" href={repositoryUrl}>Review Sanchika source</a>
         <a class="quiet-link" href={parentStoryUrl}>See the family story</a>
       </div>
       <div class="trust-strip" aria-label="Sanchika trust posture">
@@ -97,25 +99,25 @@ const trustRules = [
 
     <aside class="evidence-loop" aria-label="Sanchika evidence loop diagram">
       <div class="loop-topline">
-        <span>Live harness</span>
-        <strong>source-reviewable</strong>
+        <span>PR #31 proof loop</span>
+        <strong>browser verified</strong>
       </div>
       <ol>
         <li>
           <span>TrustBrief</span>
-          <p>What must be true for a compliance surface to be trusted?</p>
+          <p>Names the claim, boundary, selected patterns, non-goals, and verification gates.</p>
         </li>
         <li>
           <span>DesignBrief</span>
-          <p>What should the page feel like before code exists?</p>
+          <p>Defines first viewport signal, narrative, responsive constraints, states, and quality gates.</p>
         </li>
         <li>
-          <span>Rendered pilot</span>
-          <p>What did the browser actually paint on desktop and mobile?</p>
+          <span>Browser evidence</span>
+          <p>Records what the page actually paints on desktop and mobile before adoption claims are made.</p>
         </li>
         <li>
-          <span>Adoption evidence</span>
-          <p>Which product consumed it, and what remained honest?</p>
+          <span>Adoption decision</span>
+          <p>Tracks which product consumed it, what remained honest, and what still needs proof.</p>
         </li>
       </ol>
     </aside>
@@ -124,13 +126,13 @@ const trustRules = [
   <section class="proof-band" aria-label="Current Sanchika posture">
     <div>
       <span class="proof-label">Current truth</span>
-      <strong>Pilots are landing.</strong>
-      <p>ComplyEaze, Axal, and Pack have public story pilots. Tools now carries the static Sanchika boundary.</p>
+      <strong>The gallery now shows its proof chain.</strong>
+      <p>Sanchika PR #31 connects TrustBrief, DesignBrief, browser evidence, and adoption decisions on the live gallery.</p>
     </div>
     <div>
       <span class="proof-label">Next proof</span>
-      <strong>Repeatable harness.</strong>
-      <p>The unfinished work is scoring, browser snapshots, reusable prompts, and consumer-ready package evidence.</p>
+      <strong>Tools is the boundary, not the runtime.</strong>
+      <p>This page points to current evidence while preserving the static Tools promise: no accounts, uploads, telemetry, or persistence.</p>
     </div>
   </section>
 
@@ -181,7 +183,8 @@ const trustRules = [
       <p>
         Sanchika should produce pages that feel memorable, but its package
         output still needs type checks, build checks, artifact checks, consumer
-        checks, and publish-readiness gates before adoption claims are true.
+        checks, browser screenshots, and publish-readiness gates before adoption
+        claims are true.
       </p>
     </div>
     <div class="command-wall" aria-label="Sanchika verification commands">
@@ -215,6 +218,7 @@ const trustRules = [
       </p>
     </div>
     <div class="surface-links" aria-label="Related public surfaces">
+      <a class="text-button" href={liveGalleryUrl}>Open Sanchika</a>
       <a class="text-button" href={axalUrl}>Open Axal</a>
       <a class="text-button" href={packUrl}>Open Pack</a>
       <a class="text-button" href={repositoryUrl}>Open source</a>
