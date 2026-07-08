@@ -41,6 +41,14 @@ export const configs: Record<string, WorkbenchConfig> = {
     sample:
       "attemptedAt,timezone,action,error,retryCount,complaintReference,screenshotReference,screenshotSha256,browser,device,networkContext\n2026-07-02 20:10,Asia/Kolkata,Login,OTP page timed out,2,SR-123,retained-screenshot-1,sha256:synthetic-hash,Chrome 126,Windows laptop,office broadband\n2026-07-02 20:24,Asia/Kolkata,Save GSTR-3B,Unable to load template,1,,,,Brave 1.68,macOS desktop,home fiber",
   },
+  "/evidence-packet": {
+    inputLabel: "Packet label rows",
+    outputLabel: "Evidence packet naming draft",
+    guidance:
+      "Paste rows with clientRef, period, evidenceType, source, and reviewerLane. Optional fields include retentionNote and reviewLimit. This creates local packet names and a review checklist only.",
+    sample:
+      "clientRef,period,evidenceType,source,reviewerLane,retentionNote,reviewLimit\nsample-client,2026-06,GST return proof,Portal,ca-review,retain source files locally,professional review required\nsample-client,July Review 2026,Notice response,Client,review-desk,no upload to Tools,not portal validation",
+  },
   "/privacy/review-copy-builder": {
     inputLabel: "Review text",
     outputLabel: "Masked review copy",
@@ -149,6 +157,11 @@ const artifactDefinitions: Record<string, ToolArtifactDefinition> = {
   "/gst-portal-issue-evidence-memo": {
     requiredColumns: ["attemptedAt", "action", "error"],
     sourceLabel: "user-observed portal attempts",
+  },
+  "/evidence-packet": {
+    requiredColumns: ["clientRef", "period", "evidenceType", "source", "reviewerLane"],
+    requiredValueColumnGroups: [["clientRef"], ["period"], ["evidenceType"], ["source"], ["reviewerLane"]],
+    sourceLabel: "evidence packet label rows",
   },
   "/privacy/review-copy-builder": {
     sourceLabel: "review copy input",

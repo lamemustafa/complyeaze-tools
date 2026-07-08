@@ -210,6 +210,66 @@ export function buildGstPortalArtifact({
   };
 }
 
+export function buildEvidencePacketArtifact({
+  tool,
+  definition,
+  options,
+  parsed,
+  prepared,
+}: ToolArtifactBuilderContext): ToolArtifactResult {
+  const table = requirePreparedTable(parsed, prepared);
+  const rows = table.prepared.acceptedRows.map((row, index) => {
+    const clientRef = normalizePacketSegment(row.clientRef || `client-${index + 1}`);
+    const period = normalizePacketSegment(row.period || "period");
+    const evidenceType = normalizePacketSegment(row.evidenceType || "evidence");
+    const source = normalizePacketSegment(row.source || "source");
+    const reviewerLane = normalizePacketSegment(row.reviewerLane || "review");
+
+    return {
+      packetName: [clientRef, period, evidenceType, source, reviewerLane].join("__"),
+      clientRef: row.clientRef || "client reference missing",
+      period: row.period || "period missing",
+      evidenceType: row.evidenceType || "evidence type missing",
+      source: row.source || "source missing",
+      reviewerLane: row.reviewerLane || "reviewer lane missing",
+      retentionNote: row.retentionNote || "retain original evidence in the local/client system",
+      reviewLimit: row.reviewLimit || "professional review required",
+    };
+  });
+
+  return {
+    status: "ready",
+    text: [
+      "Evidence packet naming draft",
+      "Browser-local helper only. This draft names evidence packets and checklists; it does not upload files, validate portal status, verify GST/payment/filing positions, or create an audit trail.",
+      "",
+      ...rows.flatMap((row) => [
+        `${row.packetName}.zip`,
+        `- client reference: ${row.clientRef}`,
+        `- period/workstream: ${row.period}`,
+        `- evidence type: ${row.evidenceType}`,
+        `- source: ${row.source}`,
+        `- reviewer lane: ${row.reviewerLane}`,
+        `- retention note: ${row.retentionNote}`,
+        `- review limit: ${row.reviewLimit}`,
+        "- checklist: confirm the packet contains source files, local timestamps, reviewer notes, and a manual sign-off trail outside this tool.",
+        "",
+      ]),
+      "Boundary checklist",
+      "- Files are processed in your browser. No account or file upload required.",
+      "- Use a short client reference rather than a full legal name, PAN, GSTIN, bank account, or portal credential.",
+      "- Confirm statutory, portal, payment, filing, and retention positions in the source system or Axal before relying on the packet.",
+      buildFooter(
+        tool,
+        definition,
+        table.parsed,
+        table.prepared,
+        withColumnMappingOption({}, options.columnMapping),
+      ),
+    ].join("\n"),
+  };
+}
+
 export function buildDrc01bArtifact({
   tool,
   definition,
@@ -353,6 +413,17 @@ export function buildMahareraForm3Artifact({
 
 function formatAmount(value: number | null) {
   return value === null ? "-" : value.toFixed(2);
+}
+
+function normalizePacketSegment(value: string): string {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+
+  return normalized || "review";
 }
 
 function formatGstr2bExceptionTable(

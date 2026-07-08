@@ -75,6 +75,23 @@ const gstPortalTool: WorkbenchTool = {
   ],
 };
 
+const evidencePacketTool: WorkbenchTool = {
+  slug: "/evidence-packet",
+  h1: "Evidence Packet Name Builder",
+  officialSources: [
+    {
+      publisher: "Government of India eGazette",
+      title: "Digital Personal Data Protection Act, 2023",
+      url: "https://egazette.gov.in/WriteReadData/2023/248045.pdf",
+      lastReviewedAt: "2026-07-02",
+    },
+  ],
+  unsupportedCases: [
+    "Does not upload, store, inspect, or validate the underlying evidence files.",
+    "Does not validate portal, GST, payment, filing, statutory, or tenant-data status.",
+  ],
+};
+
 describe("tool output artifact contract", () => {
   it("includes row-count, source, boundary, and trust links for every parsed tool output", () => {
     for (const [slug, config] of Object.entries(configs)) {
@@ -172,6 +189,17 @@ describe("tool output artifact contract", () => {
       ],
       sourceLabel: "AIS/Form 26AS review rows",
     });
+    expect(getToolArtifactDefinition("/evidence-packet")).toEqual({
+      requiredColumns: ["clientRef", "period", "evidenceType", "source", "reviewerLane"],
+      requiredValueColumnGroups: [
+        ["clientRef"],
+        ["period"],
+        ["evidenceType"],
+        ["source"],
+        ["reviewerLane"],
+      ],
+      sourceLabel: "evidence packet label rows",
+    });
   });
 
   it("keeps artifact URL normalization free of regex-based path trimming", () => {
@@ -260,6 +288,27 @@ describe("tool output artifact contract", () => {
       "Rows parsed: 1; rows accepted for output: 1; blank rows skipped: 0; invalid rows needing review: 0.",
     );
     expect(output).not.toContain("required-cell-empty");
+  });
+
+  it("builds browser-local evidence packet names without validation claims", () => {
+    const output = buildOutput(
+      evidencePacketTool,
+      [
+        "clientRef,period,evidenceType,source,reviewerLane,retentionNote,reviewLimit",
+        "sample-client,July Review 2026,Notice response,Client,review-desk,no upload to Tools,not portal validation",
+      ].join("\n"),
+      configs["/evidence-packet"],
+      "",
+    );
+
+    expect(output).toContain("Evidence packet naming draft");
+    expect(output).toContain("sample-client__july-review-2026__notice-response__client__review-desk.zip");
+    expect(output).toContain("Files are processed in your browser. No account or file upload required.");
+    expect(output).toContain("Use a short client reference rather than a full legal name");
+    expect(output).toContain("not portal validation");
+    expect(output).toContain("Browser-local draft");
+    expect(output.toLowerCase()).not.toContain("filing-ready");
+    expect(output.toLowerCase()).not.toContain("government approved");
   });
 
   it("documents acquisition evidence for Schedule 112A grandfathering inputs", () => {

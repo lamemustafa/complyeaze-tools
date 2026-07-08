@@ -1117,4 +1117,76 @@ export const TOOLS: ToolMeta[] = [
     trustCopy: STANDARD_TRUST_COPY,
     bannedClaims: BANNED_PUBLIC_CLAIMS,
   },
+  {
+    slug: "/evidence-packet",
+    h1: "Evidence Packet Name Builder",
+    seoTitle: "Evidence Packet Name Builder",
+    metaDescription:
+      "Create local evidence packet names and review checklists without uploading files, creating an account, or validating statutory status.",
+    title: "Evidence Packet Name Builder",
+    status: "mvp",
+    audiences: ["CAs", "GST teams", "accountants", "MSMEs"],
+    privacyMode: "browser-only",
+    accountRequired: false,
+    fileUploadRequired: false,
+    telemetry: "none",
+    supportedInputs: [
+      "pasted packet label rows with client reference, period or workstream, evidence type, source, and reviewer lane",
+      "optional retention note and review-limit text",
+    ],
+    unsupportedCases: [
+      "Does not upload, store, inspect, or validate the underlying evidence files.",
+      "Does not validate portal, GST, payment, filing, statutory, or tenant-data status.",
+      "Does not replace a local document vault, Axal audit trail, reviewer sign-off, or retention policy.",
+    ],
+    outputArtifacts: [
+      "plain-text packet filename draft",
+      "review checklist text",
+      "browser-local boundary footer",
+    ],
+    officialSources: [dpdpAct],
+    relatedSlugs: [
+      "/gst-portal-issue-evidence-memo",
+      "/privacy/review-copy-builder",
+      "/gstr-2b-purchase-reconciliation-triage",
+    ],
+    axalUpgradePath:
+      "Use Axal when packet naming needs workspace persistence, audit trails, document custody, task assignment, or recurring review workflows.",
+    seoDepth: {
+      inputGuide: [
+        "Use one row per evidence packet with clientRef, period, evidenceType, source, and reviewerLane.",
+        "Use short internal references rather than full legal names, PAN, GSTIN, bank account numbers, portal credentials, or real file paths.",
+      ],
+      exampleWorkflow: [
+        "Paste synthetic or local packet label rows into the workbench.",
+        "Review the generated filename and checklist for each row.",
+        "Create the actual packet in your local/client document system and complete professional review outside this public tool.",
+      ],
+      commonMistakes: [
+        "Using full taxpayer identifiers in the label when a short client reference is enough.",
+        "Treating a tidy packet name as evidence that the underlying portal, filing, payment, or retention position is valid.",
+      ],
+      reviewChecklist: [
+        "Confirm the source files remain in the local/client system and were not uploaded to Tools.",
+        "Confirm the packet label avoids PAN, GSTIN, bank account numbers, credentials, and real local paths.",
+        "Confirm statutory, portal, payment, filing, and retention positions in the source system or Axal before relying on the packet.",
+      ],
+      sourceExplainer:
+        "The DPDP Act source is used only for the privacy posture and manual-review boundary; the tool does not interpret statutory retention, GST, portal, payment, or filing rules.",
+      faqItems: [
+        {
+          question: "Does this upload my evidence files?",
+          answer:
+            "No. The workbench accepts pasted label rows and generates text in the browser. Keep the actual source files in your local/client document system.",
+        },
+        {
+          question: "Does the generated packet name prove the evidence is valid?",
+          answer:
+            "No. It is a naming and checklist helper only. A reviewer still has to verify portal status, filing/payment position, source files, and retention requirements outside this tool.",
+        },
+      ],
+    },
+    trustCopy: STANDARD_TRUST_COPY,
+    bannedClaims: BANNED_PUBLIC_CLAIMS,
+  },
 ];
