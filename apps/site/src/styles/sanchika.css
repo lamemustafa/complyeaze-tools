@@ -115,14 +115,12 @@ body:has(.sanchika-stage) {
   white-space: normal;
   transition:
     background-color 180ms ease,
-    border-color 180ms ease,
-    transform 180ms ease;
+    border-color 180ms ease;
 }
 
 .sanchika-button:hover {
   background: var(--sanchika-green);
   border-color: var(--sanchika-green);
-  transform: translateY(-2px);
 }
 
 .sanchika-button.secondary {
@@ -159,9 +157,16 @@ body:has(.sanchika-stage) {
 
 .instrument-shell {
   position: relative;
+  display: grid;
+  grid-template-areas:
+    "node-1 . node-2"
+    ". core ."
+    "node-4 . node-3";
+  grid-template-columns: minmax(0, 1fr) minmax(168px, 0.72fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
   max-width: 100%;
   min-height: 570px;
-  overflow: hidden;
   border: 1px solid #11231d;
   border-radius: 18px;
   background:
@@ -182,7 +187,7 @@ body:has(.sanchika-stage) {
 
 .instrument-shell::after {
   position: absolute;
-  inset: -80px;
+  inset: 0;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
     linear-gradient(180deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
@@ -213,10 +218,9 @@ body:has(.sanchika-stage) {
 }
 
 .instrument-core {
-  position: absolute;
-  top: 50%;
-  left: 50%;
   display: grid;
+  grid-area: core;
+  justify-self: center;
   width: 178px;
   height: 178px;
   place-items: center;
@@ -226,7 +230,7 @@ body:has(.sanchika-stage) {
   color: var(--sanchika-ink);
   padding: 24px;
   text-align: center;
-  transform: translate(-50%, -50%);
+  z-index: 1;
 }
 
 .instrument-core span,
@@ -244,12 +248,13 @@ body:has(.sanchika-stage) {
 }
 
 .instrument-node {
-  position: absolute;
-  width: min(230px, 38%);
+  position: relative;
+  width: 100%;
   border: 1px solid rgba(232, 240, 236, 0.2);
   border-radius: 12px;
   background: rgba(248, 255, 249, 0.08);
   padding: 16px;
+  z-index: 1;
 }
 
 .instrument-node strong {
@@ -266,23 +271,23 @@ body:has(.sanchika-stage) {
 }
 
 .node-1 {
-  top: 34px;
-  left: 34px;
+  grid-area: node-1;
+  align-self: start;
 }
 
 .node-2 {
-  top: 64px;
-  right: 34px;
+  grid-area: node-2;
+  align-self: start;
 }
 
 .node-3 {
-  right: 44px;
-  bottom: 50px;
+  grid-area: node-3;
+  align-self: end;
 }
 
 .node-4 {
-  bottom: 34px;
-  left: 48px;
+  grid-area: node-4;
+  align-self: end;
 }
 
 .sanchika-truth {
@@ -481,6 +486,17 @@ body:has(.sanchika-stage) {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .sanchika-button {
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .sanchika-button:hover {
+    transform: translateY(-2px);
+  }
+
   .instrument-core {
     animation: core-pulse 3600ms ease-in-out infinite;
   }
@@ -559,6 +575,14 @@ body:has(.sanchika-stage) {
   }
 
   .instrument-shell {
+    grid-template-areas:
+      "core"
+      "node-1"
+      "node-2"
+      "node-3"
+      "node-4";
+    grid-template-columns: 1fr;
+    gap: 0;
     min-height: auto;
     padding: 18px;
   }
