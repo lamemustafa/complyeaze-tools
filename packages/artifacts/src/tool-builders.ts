@@ -2,6 +2,7 @@ import { buildReviewCopyArtifact } from "./review-copy-builder";
 import {
   buildAisArtifact,
   buildDrc01bArtifact,
+  buildEvidencePacketArtifact,
   buildGstPortalArtifact,
   buildGstr2bFollowUpArtifact,
   buildGstr2bReconciliationArtifact,
@@ -36,6 +37,10 @@ const tableBuilders: Record<string, ToolArtifactBuilder> = {
     inputMode: "table",
     preValidateParsed: validateGstPortalMemoCells,
     build: buildGstPortalArtifact,
+  },
+  "/evidence-packet": {
+    inputMode: "table",
+    build: buildEvidencePacketArtifact,
   },
   "/gstr1-gstr3b-liability-mismatch-pre-checker": {
     inputMode: "table",

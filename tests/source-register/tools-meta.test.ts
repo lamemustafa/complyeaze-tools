@@ -15,6 +15,7 @@ const expectedSlugs = [
   "/schedule-112a-capital-gains-csv-builder",
   "/labour-code-gratuity-wage-recalculator",
   "/maharera-form-3-withdrawal-worksheet",
+  "/evidence-packet",
 ];
 
 describe("tool source register", () => {
@@ -183,5 +184,25 @@ describe("tool source register", () => {
     expect(unsupported).toContain("Does not accept screenshots, files, PDFs, base64");
     expect(outputArtifacts.toLowerCase()).not.toContain("complaint-ready");
     expect(reviewChecklist.toLowerCase()).not.toContain("outage proof");
+  });
+
+  it("documents evidence packet naming boundaries without validation overclaims", () => {
+    const tool = TOOLS.find((candidate) => candidate.slug === "/evidence-packet");
+    const supportedInputs = tool?.supportedInputs.join(" ") ?? "";
+    const outputArtifacts = tool?.outputArtifacts.join(" ") ?? "";
+    const unsupported = tool?.unsupportedCases.join(" ") ?? "";
+    const reviewChecklist = tool?.seoDepth.reviewChecklist.join(" ") ?? "";
+
+    expect(tool?.h1).toBe("Evidence Packet Name Builder");
+    expect(supportedInputs).toContain("client reference");
+    expect(outputArtifacts).toContain("packet filename draft");
+    expect(unsupported).toContain("Does not upload, store, inspect, or validate");
+    expect(unsupported).toContain("Does not validate portal, GST, payment, filing");
+    expect(reviewChecklist).toContain("source files remain in the local/client system");
+    expect(reviewChecklist).toContain("PAN");
+    expect(reviewChecklist).toContain("GSTIN");
+    expect(`${tool?.metaDescription} ${unsupported} ${reviewChecklist}`.toLowerCase()).not.toContain(
+      "filing-ready",
+    );
   });
 });
