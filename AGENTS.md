@@ -71,6 +71,15 @@ If browser behavior changes, verify with Playwright or a real browser that no
 runtime data network calls occur and only same-origin static GET/HEAD asset
 requests are made.
 
+## Phase 0–4 Governance Freeze
+
+Until the approved master execution plan completes Phase 4, freeze governance
+growth. Make only narrowly authorized changes to existing checks, workflows,
+and agent instructions; do not add policy families, governance frameworks,
+replacement monitoring systems, or speculative repository controls. This
+freeze does not weaken existing security, privacy, source, release, or branch
+protection requirements.
+
 ## Review Matrix
 
 - Privacy/security copy, Cloudflare behavior, CSP, logs, cookies, or public
@@ -105,6 +114,7 @@ For closed or merged PR review cleanup, audit unresolved threads against current
 `main`, classify stale versus still-valid findings, create or link a GitHub issue
 for valid findings, reply with the disposition, and resolve the historical
 conversation. Fix valid findings from an isolated worktree/branch and run the
-review/rectify loop before merging. After resolving conversations without a new
-push, manually re-run `Review gate`; GitHub Actions does not expose a review
-thread resolution trigger for this workflow.
+review/rectify loop before merging. GitHub Actions does not expose a dedicated
+review-thread resolution trigger for this workflow, so after resolving or
+reopening a thread without another supported event, wait for the daily trusted
+reconciliation or re-run a trusted pull-request lifecycle run.
