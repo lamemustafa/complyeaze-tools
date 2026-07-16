@@ -39,7 +39,7 @@ Procedure, every time `deploy/docker/Dockerfile` changes a `FROM` line:
    read that file (and `docker-static.test.ts` itself) rather than trusting a
    copy here, since it drifts. If the base image's tag family changes (e.g.
    off `bookworm`, off the nginx-unprivileged minor line, or off
-   `node:22-alpine`), update the expected string to match the new pinned tag
+   `node:24-alpine`), update the expected string to match the new pinned tag
    — don't leave a stale assertion that happens to still pass on a substring.
 3. Decide explicitly whether the `apt-get upgrade` layer is still needed.
    Today's Dockerfile runs, as `USER root` right after the nginx-unprivileged

@@ -42,7 +42,7 @@ each package actually does. For a cold start:
   package is consumed by both the UI and the compliance review process —
   treat it as the single most legally sensitive package in the repo.
 - `packages/ui-react` is shared React primitives, early-stage/thin.
-- `deploy/docker` has a 2-stage Dockerfile (`node:22-alpine` builder ->
+- `deploy/docker` has a 2-stage Dockerfile (`node:24-alpine` builder ->
   `nginxinc/nginx-unprivileged` bookworm runtime, both digest-pinned) plus
   `nginx.conf` (strict CSP, security headers, `/-/health`, GET/HEAD-only).
 - `deploy/k8s/base` has namespace (restricted Pod Security Standard),

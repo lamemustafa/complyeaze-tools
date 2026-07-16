@@ -1,6 +1,6 @@
 ---
 name: docker-base-image-bump
-description: Checklist for safely bumping the base images in deploy/docker/Dockerfile (the node:22-alpine builder stage and/or the nginxinc/nginx-unprivileged runtime stage). This changes what actually runs in production, so only invoke it when a person explicitly asks for a base-image bump — do not trigger it automatically.
+description: Checklist for safely bumping the base images in deploy/docker/Dockerfile (the node:24-alpine builder stage and/or the nginxinc/nginx-unprivileged runtime stage). This changes what actually runs in production, so only invoke it when a person explicitly asks for a base-image bump — do not trigger it automatically.
 disable-model-invocation: true
 ---
 
@@ -21,7 +21,7 @@ Every `FROM` line must resolve to an exact, fully-qualified digest:
 FROM <image>:<tag>@sha256:<digest>
 ```
 
-Never land a bare tag (`nginx:mainline`, `node:22-alpine`, `node:22-alpine-latest`, etc.)
+Never land a bare tag (`nginx:mainline`, `node:24-alpine`, `node:24-alpine-latest`, etc.)
 even temporarily. Floating tags are exactly what caused the original churn — they drift
 under you with no diff to review.
 
