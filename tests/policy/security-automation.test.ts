@@ -18,8 +18,8 @@ describe("security automation", () => {
     expect(workflow).toContain("push:");
     expect(workflow).toContain("cron:");
     expect(workflow).toContain("security-events: write");
-    expect(workflow).toContain("github/codeql-action/init@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a");
-    expect(workflow).toContain("github/codeql-action/analyze@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a");
+    expect(workflow).toContain("github/codeql-action/init@99df26d4f13ea111d4ec1a7dddef6063f76b97e9");
+    expect(workflow).toContain("github/codeql-action/analyze@99df26d4f13ea111d4ec1a7dddef6063f76b97e9");
     expect(workflow).toContain("languages: javascript-typescript");
     expect(workflow).toContain("queries: security-extended,security-and-quality");
   });
@@ -47,7 +47,7 @@ describe("security automation", () => {
     expect(workflow).toContain("format: sarif");
     expect(workflow).toContain("severity: HIGH,CRITICAL");
     expect(workflow).toContain("exit-code: \"1\"");
-    expect(workflow).toContain("github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a");
+    expect(workflow).toContain("github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9");
     expect(workflow.indexOf("aquasecurity/trivy-action")).toBeLessThan(
       workflow.indexOf("Push scanned image"),
     );
