@@ -13,7 +13,7 @@ automated PRs and the digest pins below drift.
 ## Docker: digest-pinning discipline
 
 `deploy/docker/Dockerfile` is currently:
-- Builder: `node:22-alpine@sha256:16e22a55...` — installs with
+- Builder: `node:24-alpine@sha256:a0b9bf06...` — installs with
   `pnpm install --frozen-lockfile`, runs `pnpm build`.
 - Runtime: `nginxinc/nginx-unprivileged:1.29-bookworm@sha256:593a17dc...` —
   root briefly to `apt-get update && apt-get upgrade -y` (OS CVE patching),
@@ -31,14 +31,14 @@ touch either base image:
 1. Use a fully-qualified digest-pinned tag — never a floating tag.
 2. Update `deploy/docker/Dockerfile` and the matching assertions in
    `tests/config/docker-static.test.ts` (currently
-   `expect(dockerfile).toContain("FROM node:22-alpine@sha256:")` and
+   `expect(dockerfile).toContain("FROM node:24-alpine@sha256:")` and
    `expect(dockerfile).toContain("FROM nginxinc/nginx-unprivileged:1.29-bookworm@sha256:")`)
    in the **same change**. A digest bump with no matching test update is the
    classic way this breaks.
 3. Consciously decide whether the `apt-get upgrade` layer is still needed
    (this matters for Debian/bookworm-based images; an Alpine swap likely
    drops it, or replaces it with `apk upgrade`).
-4. Re-verify the `HEALTHCHECK` (`wget -qO- http://127.0.0.1:8080/-/health`)
+4. Re-verify the `HEALTHCHECK` (`curl -fsS http://127.0.0.1:8080/-/health`)
    still passes after any base swap — a base change can alter what's on
    `PATH` or how the image handles signals.
 

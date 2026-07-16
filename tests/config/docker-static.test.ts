@@ -8,7 +8,7 @@ describe("Docker static image policy", () => {
   it("builds a static nginx image with no runtime app server", () => {
     const dockerfile = readFileSync(join(dockerRoot, "Dockerfile"), "utf8");
 
-    expect(dockerfile).toContain("FROM node:22-alpine@sha256:");
+    expect(dockerfile).toContain("FROM node:24-alpine@sha256:");
     expect(dockerfile).toContain("FROM nginxinc/nginx-unprivileged:1.29-bookworm@sha256:");
     expect(dockerfile).toContain("apt-get upgrade -y --no-install-recommends");
     expect(dockerfile).toContain("USER 101");
