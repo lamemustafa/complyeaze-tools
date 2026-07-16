@@ -104,7 +104,7 @@ steps:
 
     const duplicate = workflow.replace(
       "          ref: ${{ github.event.repository.default_branch }}",
-      "          ref: ${{ github.event.repository.default_branch }}\n          ref: main",
+      "          ref: ${{ github.event.repository.default_branch }}\n          ref: master",
     );
     expect(validateTrustedCheckout(duplicate)).toContain("checkout ref must appear exactly once");
   });

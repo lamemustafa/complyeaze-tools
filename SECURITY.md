@@ -7,7 +7,7 @@ artifacts, credentials, or client records.
 
 ## Supported Versions
 
-The `main` branch and the version currently deployed at
+The `master` branch and the version currently deployed at
 `https://tools.complyeaze.com` are supported. Older commits, forks, local
 modifications, and unpublished branches are not covered by this policy unless a
 maintainer explicitly asks you to test them.

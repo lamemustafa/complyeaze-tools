@@ -53,7 +53,7 @@ git remote add origin git@github.com:lamemustafa/complyeaze-tools.git
 git push -u origin tapish-codex/tools-v0
 ```
 
-Open a PR to `main`, wait for CI, merge, then run the `Publish Image` workflow.
+Open a PR to `master`, wait for CI, merge, then run the `Publish Image` workflow.
 
 ## Production Promotion
 
