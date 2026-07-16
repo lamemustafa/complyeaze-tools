@@ -11,7 +11,7 @@ export const verificationEvidence: EvidenceRow[] = [
     check: "verify",
     evidence: "Runs pnpm audit:high and pnpm verify on pull requests and protected branches.",
     source: ".github/workflows/ci.yml",
-    cadence: "Pull request, main push, tapish-codex branch push",
+    cadence: "Pull request, master push, tapish-codex branch push",
     boundary: "Required protected check; includes typecheck, lint, tests, source freshness scan, build, and built runtime network scan.",
   },
   {
@@ -25,7 +25,7 @@ export const verificationEvidence: EvidenceRow[] = [
     check: "Analyze",
     evidence: "Runs GitHub CodeQL with security-extended and security-and-quality queries.",
     source: ".github/workflows/codeql.yml",
-    cadence: "Pull request, main push, weekly schedule",
+    cadence: "Pull request, master push, weekly schedule",
     boundary: "Static analysis signal; does not replace manual review of privacy and source claims.",
   },
   {
@@ -39,7 +39,7 @@ export const verificationEvidence: EvidenceRow[] = [
     check: "Image scan and digest promotion",
     evidence: "Builds the static image, scans it with Trivy, then publishes and deploys by immutable digest.",
     source: ".github/workflows/publish-image.yml and .github/workflows/deploy-production.yml",
-    cadence: "Main push publish; manual production deploy",
+    cadence: "Master push publish; manual production deploy",
     boundary: "Deploy requires a reviewed source SHA and published digest; this page does not expose live cluster state.",
   },
   {

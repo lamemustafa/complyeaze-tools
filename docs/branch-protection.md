@@ -1,6 +1,6 @@
 # Branch Protection
 
-Protect `main` before production promotion. The public repository should use a
+Protect `master` before production promotion. The public repository should use a
 GitHub branch protection rule or repository ruleset with these requirements:
 
 - Require pull requests before merge.
@@ -88,8 +88,8 @@ SECURITY.md, AGENTS.md
 After enabling the rules, verify:
 
 ```bash
-gh api repos/lamemustafa/complyeaze-tools/branches/main --jq '.protected'
-gh api repos/lamemustafa/complyeaze-tools/branches/main/protection --jq '.required_status_checks.contexts'
+gh api repos/lamemustafa/complyeaze-tools/branches/master --jq '.protected'
+gh api repos/lamemustafa/complyeaze-tools/branches/master/protection --jq '.required_status_checks.contexts'
 ```
 
 If applying the settings from the GitHub UI, use:
@@ -100,7 +100,7 @@ Repository settings:
 - Automatically delete head branches: enabled.
 
 Ruleset target:
-- Include default branch/main.
+- Include default branch/master.
 - Restrict deletions: enabled.
 - Require linear history: enabled.
 - Require a pull request before merging: enabled.

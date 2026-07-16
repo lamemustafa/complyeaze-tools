@@ -28,7 +28,7 @@ runtime gains data network APIs. The final published image must also pass Trivy
 HIGH/CRITICAL scanning and upload SARIF evidence from
 `.github/workflows/publish-image.yml`.
 
-`main` must be protected before production promotion. Required branch controls
+`master` must be protected before production promotion. Required branch controls
 are listed in `docs/branch-protection.md`; the required CI check name is
 `verify` and the required review-findings status context is `Review gate`.
 Same-repository review changes reconcile on events. Fork review/comment events

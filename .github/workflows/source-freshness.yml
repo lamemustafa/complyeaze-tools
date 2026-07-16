@@ -81,4 +81,4 @@ jobs:
           git add docs/source-freshness-report.md
           git commit -m "chore: update source freshness report"
           git push origin "$branch"
-          gh pr create --title "chore: update source freshness report" --body-file docs/source-freshness-report.md --head "$branch" --base main
+          gh pr create --title "chore: update source freshness report" --body-file docs/source-freshness-report.md --head "$branch" --base master

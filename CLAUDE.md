@@ -163,7 +163,7 @@ subtree.
   `packages/core`, `packages/parsers`, or the workbench islands should be
   checked against this before it's considered done.
 - **Closed-PR review cleanup.** Use the `AGENTS.md` process: classify unresolved
-  merged-PR review threads against current `main`, link valid findings to an
+  merged-PR review threads against current `master`, link valid findings to an
   issue, reply and resolve the historical thread, then fix from an isolated
   branch. `Review gate` must run from trusted base code; if comments are only
   resolved without a supported event, wait for the daily trusted reconciliation

@@ -111,7 +111,7 @@ Codex review objects are audit signals, not merge blockers, unless a guaranteed
 current-head reviewer app is configured.
 
 For closed or merged PR review cleanup, audit unresolved threads against current
-`main`, classify stale versus still-valid findings, create or link a GitHub issue
+`master`, classify stale versus still-valid findings, create or link a GitHub issue
 for valid findings, reply with the disposition, and resolve the historical
 conversation. Fix valid findings from an isolated worktree/branch and run the
 review/rectify loop before merging. GitHub Actions does not expose a dedicated

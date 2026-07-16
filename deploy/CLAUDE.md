@@ -80,7 +80,7 @@ port-forwards, or otherwise calls against the cluster:
 ## The two-workflow split
 
 - **`publish-image.yml`** (`.github/workflows/publish-image.yml`): triggered
-  on push to main/master or manual dispatch. Builds the image with
+  on push to master or manual dispatch. Builds the image with
   `docker/build-push-action`, runs Trivy (HIGH/CRITICAL, os+library,
   ignore-unfixed, `exit-code: 1` — a scan failure blocks the push), uploads
   SARIF, then pushes to `ghcr.io/lamemustafa/complyeaze-tools:<sha>` and
