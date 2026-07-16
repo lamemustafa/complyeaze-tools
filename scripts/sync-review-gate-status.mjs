@@ -9,17 +9,19 @@ const repo = readArgValue("--repo") ?? process.env.GITHUB_REPOSITORY;
 const explicitPr = readArgValue("--pr");
 const allOpen = args.has("--all-open");
 const runUrl = readArgValue("--run-url");
-const waitHeadReviewMs = readNonNegativeIntegerArg("--wait-head-review-ms", 0);
-const pollIntervalMs = readNonNegativeIntegerArg("--poll-interval-ms", 10_000);
 const strictHeadReview = args.has("--strict-head-review");
 const allowMissingHeadReview = args.has("--allow-missing-head-review");
-const skipPendingStatus = args.has("--skip-pending-status");
 const requiredReviewAuthor = readArgValue("--required-review-author");
+const REVIEW_GATE_CONTEXT = "Review gate";
+const REVIEW_GATE_STATUS_CREATOR = "github-actions[bot]";
 const ALLOWED_MISSING_HEAD_REVIEW_MARKER =
   "review-gate:allowed-missing-head-review";
 
 if (!repo || !repo.includes("/")) fail("Pass --repo owner/name.");
-if (!allOpen && (!explicitPr || !Number.isInteger(Number(explicitPr)))) {
+if (
+  !allOpen &&
+  (!explicitPr || !Number.isInteger(Number(explicitPr)) || Number(explicitPr) < 1)
+) {
   fail("Pass --pr <number> or --all-open.");
 }
 
@@ -32,27 +34,39 @@ for (const target of targets) {
     continue;
   }
 
-  if (!skipPendingStatus) {
+  const observedStatus = allOpen ? readLatestReviewGateStatus(target) : null;
+  if (!allOpen) {
     setReviewGateStatus(target, "pending", "Review gate is evaluating review state.");
   }
   const result = runReviewGate(target);
+  let finalState;
+  let finalDescription;
 
   if (result.ok) {
     if (result.allowedMissingHeadReview) {
-      setReviewGateStatus(target, "success", "No active review blockers; Codex review missing.");
-      continue;
+      finalState = "success";
+      finalDescription = "No active review blockers; Codex review missing.";
+    } else {
+      finalState = "success";
+      finalDescription = "No active review blockers found.";
     }
-
-    setReviewGateStatus(target, "success", "No active review blockers found.");
-    continue;
+  } else {
+    finalState = "failure";
+    finalDescription =
+      "Unresolved thread, requested changes, or missing current-head review found.";
+    targetedFailure = true;
   }
 
-  setReviewGateStatus(
-    target,
-    "failure",
-    "Unresolved thread, requested changes, or missing current-head review found.",
-  );
-  targetedFailure = true;
+  if (allOpen) {
+    setReviewGateStatusWithOptimisticGuard(
+      target,
+      finalState,
+      finalDescription,
+      observedStatus,
+    );
+  } else {
+    setReviewGateStatus(target, finalState, finalDescription);
+  }
 }
 
 if (!allOpen && targetedFailure) process.exit(1);
@@ -104,10 +118,6 @@ function runReviewGate(target) {
     repo,
     "--pr",
     String(target.number),
-    "--wait-head-review-ms",
-    String(waitHeadReviewMs),
-    "--poll-interval-ms",
-    String(pollIntervalMs),
     "--expected-head-oid",
     target.headRefOid,
   ];
@@ -138,8 +148,40 @@ function runReviewGate(target) {
   }
 }
 
-function setReviewGateStatus(target, state, description) {
+function setReviewGateStatusWithOptimisticGuard(
+  target,
+  state,
+  description,
+  observedStatus,
+) {
+  const currentPullRequest = readPullRequest(target.number);
+  if (
+    currentPullRequest.state !== "OPEN" ||
+    currentPullRequest.headRefOid !== target.headRefOid
+  ) {
+    console.log(
+      `PR #${target.number} changed head or closed during daily reconciliation; skipping stale write.`,
+    );
+    return;
+  }
+
   const latestStatus = readLatestReviewGateStatus(target);
+  if (!sameStatusVersion(observedStatus, latestStatus)) {
+    console.log(
+      `Review gate status changed while daily reconciliation evaluated #${target.number}; skipping stale write.`,
+    );
+    return;
+  }
+
+  setReviewGateStatus(target, state, description, latestStatus);
+}
+
+function setReviewGateStatus(
+  target,
+  state,
+  description,
+  latestStatus = readLatestReviewGateStatus(target),
+) {
   if (latestStatus?.state === state && latestStatus?.description === description) {
     console.log(`Review gate status already ${state} for #${target.number}; skipping duplicate write.`);
     return;
@@ -153,7 +195,7 @@ function setReviewGateStatus(target, state, description) {
     "-f",
     `state=${state}`,
     "-f",
-    "context=Review gate",
+    `context=${REVIEW_GATE_CONTEXT}`,
     "-f",
     `description=${description}`,
     ...(runUrl ? ["-f", `target_url=${runUrl}`] : []),
@@ -162,7 +204,29 @@ function setReviewGateStatus(target, state, description) {
 
 function readLatestReviewGateStatus(target) {
   const statuses = runJson(["api", `repos/${repo}/commits/${target.headRefOid}/statuses`]);
-  return statuses.find((status) => status.context === "Review gate") ?? null;
+  return (
+    statuses.find(
+      (status) =>
+        status.context === REVIEW_GATE_CONTEXT &&
+        status.creator?.login === REVIEW_GATE_STATUS_CREATOR,
+    ) ?? null
+  );
+}
+
+function sameStatusVersion(left, right) {
+  return statusVersion(left) === statusVersion(right);
+}
+
+function statusVersion(status) {
+  if (!status) return "none";
+  return JSON.stringify([
+    status.id ?? null,
+    status.state ?? null,
+    status.description ?? null,
+    status.target_url ?? null,
+    status.updated_at ?? status.created_at ?? null,
+    status.creator?.login ?? null,
+  ]);
 }
 
 function readArgValue(name) {
@@ -170,14 +234,6 @@ function readArgValue(name) {
   if (index === -1) return undefined;
   const value = rawArgs[index + 1];
   return value && !value.startsWith("--") ? value : undefined;
-}
-
-function readNonNegativeIntegerArg(name, fallback) {
-  const rawValue = readArgValue(name);
-  if (rawValue === undefined) return fallback;
-  const value = Number(rawValue);
-  if (!Number.isInteger(value) || value < 0) fail(`${name} must be a non-negative integer.`);
-  return value;
 }
 
 function runJson(ghArgs) {

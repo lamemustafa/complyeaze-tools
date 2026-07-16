@@ -31,6 +31,11 @@ HIGH/CRITICAL scanning and upload SARIF evidence from
 `main` must be protected before production promotion. Required branch controls
 are listed in `docs/branch-protection.md`; the required CI check name is
 `verify` and the required review-findings status context is `Review gate`.
+Same-repository review changes reconcile on events. Fork review/comment events
+and thread-only resolution or reopening changes are repaired by the trusted
+daily all-open reconciliation, with a maximum expected delay of about 24 hours.
+Do not promote while the exact current-head `Review gate` status is pending or
+failing.
 
 To go live:
 

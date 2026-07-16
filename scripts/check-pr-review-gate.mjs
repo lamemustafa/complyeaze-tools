@@ -7,8 +7,6 @@ const rawArgs = process.argv.slice(2);
 const args = new Set(rawArgs);
 const strictHeadReview = args.has("--strict-head-review");
 const allowMissingHeadReview = args.has("--allow-missing-head-review");
-const waitHeadReviewMs = readNonNegativeIntegerArg("--wait-head-review-ms", 0);
-const pollIntervalMs = readNonNegativeIntegerArg("--poll-interval-ms", 10_000);
 const requiredReviewAuthor = readArgValue("--required-review-author");
 const expectedHeadOid = readArgValue("--expected-head-oid");
 const explicitRepo = readArgValue("--repo");
@@ -26,7 +24,7 @@ if (!repo || !repo.includes("/")) fail("Could not determine GitHub repo. Pass --
 if (!Number.isInteger(prNumber) || prNumber < 1)
   fail("Could not determine PR number. Pass --pr <number>.");
 
-const { pr, unresolvedThreads, blockingReviews, headReviews } = await fetchEvaluatedPr();
+const { pr, unresolvedThreads, blockingReviews, headReviews } = fetchEvaluatedPr();
 
 reportBlockingState({ unresolvedThreads, blockingReviews });
 
@@ -54,31 +52,17 @@ if (latestReview && latestReview.commit?.oid !== pr.headRefOid) {
 
 console.log(`PR review gate passed for ${repo}#${prNumber}.`);
 
-async function fetchEvaluatedPr() {
-  const start = Date.now();
-
-  while (true) {
-    const result = fetchReviewGraph();
-    const pr = result.data?.repository?.pullRequest;
-    if (!pr) fail(`Could not fetch PR #${prNumber} from ${repo}.`);
-    if (expectedHeadOid && pr.headRefOid !== expectedHeadOid) {
-      fail(
-        `PR head changed while evaluating ${repo}#${prNumber}: expected ${expectedHeadOid}, found ${pr.headRefOid}.`,
-      );
-    }
-
-    const evaluated = evaluatePullRequestReviewState(pr);
-    if (
-      !strictHeadReview ||
-      evaluated.headReviews.length > 0 ||
-      waitHeadReviewMs <= 0 ||
-      Date.now() - start >= waitHeadReviewMs
-    ) {
-      return { pr, ...evaluated };
-    }
-
-    await sleep(Math.min(pollIntervalMs, waitHeadReviewMs));
+function fetchEvaluatedPr() {
+  const result = fetchReviewGraph();
+  const pr = result.data?.repository?.pullRequest;
+  if (!pr) fail(`Could not fetch PR #${prNumber} from ${repo}.`);
+  if (expectedHeadOid && pr.headRefOid !== expectedHeadOid) {
+    fail(
+      `PR head changed while evaluating ${repo}#${prNumber}: expected ${expectedHeadOid}, found ${pr.headRefOid}.`,
+    );
   }
+
+  return { pr, ...evaluatePullRequestReviewState(pr) };
 }
 
 function evaluatePullRequestReviewState(pr) {
@@ -324,14 +308,6 @@ function readArgValue(name) {
   return index >= 0 ? rawArgs[index + 1] : null;
 }
 
-function readNonNegativeIntegerArg(name, defaultValue) {
-  const rawValue = readArgValue(name);
-  if (rawValue === null) return defaultValue;
-  const value = Number(rawValue);
-  if (!Number.isInteger(value) || value < 0) fail(`${name} must be a non-negative integer.`);
-  return value;
-}
-
 function normaliseAuthorLogin(login) {
   return String(login ?? "").replace(/\[bot\]$/u, "");
 }
@@ -350,8 +326,4 @@ function runJson(commandArgs) {
 function fail(message) {
   console.error(message);
   process.exit(1);
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => globalThis.setTimeout(resolve, ms));
 }

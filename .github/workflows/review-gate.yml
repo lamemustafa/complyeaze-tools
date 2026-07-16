@@ -3,8 +3,12 @@ name: Review findings gate
 on:
   pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review, edited]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+  pull_request_review_comment:
+    types: [created, edited, deleted]
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "41 3 * * *"
 
 permissions:
   contents: read
@@ -18,6 +22,10 @@ concurrency:
 jobs:
   review-gate:
     name: Review gate status sync
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'pull_request_target' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 8
 
@@ -52,13 +60,13 @@ jobs:
           )
 
           if [ "${EVENT_NAME}" = "schedule" ]; then
-            args+=(--all-open --wait-head-review-ms 0 --allow-missing-head-review --skip-pending-status)
+            args+=(--all-open --allow-missing-head-review)
           else
             if [ -z "${PR_NUMBER}" ]; then
               echo "Could not determine pull request number." >&2
               exit 1
             fi
-            args+=(--pr "${PR_NUMBER}" --wait-head-review-ms 180000 --allow-missing-head-review)
+            args+=(--pr "${PR_NUMBER}" --allow-missing-head-review)
           fi
 
           node scripts/sync-review-gate-status.mjs "${args[@]}"

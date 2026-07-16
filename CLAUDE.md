@@ -166,8 +166,9 @@ subtree.
   merged-PR review threads against current `main`, link valid findings to an
   issue, reply and resolve the historical thread, then fix from an isolated
   branch. `Review gate` must run from trusted base code; if comments are only
-  resolved without a push, re-run the workflow manually because GitHub Actions
-  does not provide a review-thread resolution trigger.
+  resolved without a supported event, wait for the daily trusted reconciliation
+  or re-run a trusted pull-request lifecycle run because GitHub Actions does not
+  provide a dedicated review-thread resolution trigger.
 
 ### This repo moves fast — verify, don't recall
 

@@ -22,33 +22,33 @@ GitHub branch protection rule or repository ruleset with these requirements:
 - Require conversation resolution before merge. Codex and other automated review
   comments count through unresolved review threads, not through an approving
   reviewer requirement.
-- After resolving review conversations without pushing a new commit, manually
-  re-run the latest trusted `Review gate` check from the Checks UI; GitHub
-  Actions does not expose a review-thread resolution trigger for this workflow.
-- If an unresolved review thread is resolved but GitHub does not rerun the
-  custom check automatically, rerun the `Review gate` check from the Checks UI
-  before merging.
-- The `Review gate` workflow intentionally runs on `pull_request_target` and
-  schedule. It updates the `Review gate` commit status for
-  PR heads from trusted default-branch code without running PR-controlled
-  workflow code. Native required pull request reviews with zero required
-  approvals are the immediate guard for pending or rejected reviews; the
-  scheduled Review gate sweep is only the trusted status-refresh backstop after
-  review threads are resolved, reviews are dismissed, or old statuses need to be
-  corrected. Both targeted PR events and scheduled all-open sweeps may record an
-  audited success when no formal current-head Codex review object exists, as
-  long as the evaluated PR head exactly matches the status SHA and there are no
-  unresolved current-head review threads or requested-changes reviews. The status
-  description must make the missing Codex review explicit instead of pretending a
-  bot review happened. Required conversation resolution remains the native
-  blocker for late-arriving review threads; after resolving those threads, rerun
-  the trusted `Review gate` check or wait for the scheduled sweep so the commit
-  status reflects the current review state. Do not use
-  `pull_request_review` or `pull_request_review_comment` as status-writing
-  triggers; they do not provide the same trusted default-branch/write-token
-  posture as `pull_request_target` and schedule. Do not expose
-  `workflow_dispatch` on the privileged status-writer workflow because manual
-  dispatch can be started from a non-default workflow ref.
+- Same-repository pull request lifecycle, review, and inline review-comment
+  events reconcile immediately. Review and comment events from forks are
+  intentionally skipped because their tokens are read-only; a later trusted
+  `pull_request_target` lifecycle event or the daily default-branch sweep repairs
+  the current fork head.
+- GitHub Actions does not expose a dedicated review-thread resolution or
+  reopening event. After a thread-only change, wait for the daily sweep (a
+  maximum delay of about 24 hours) or re-run a trusted pull-request lifecycle
+  run from the Checks UI.
+- The `Review gate` workflow intentionally combines `pull_request_target`,
+  same-repository review/comment events, and one daily schedule. Every
+  status-writing path checks out and executes only trusted default-branch code;
+  it never runs PR-controlled workflow or package code. Native required pull
+  request reviews with zero required approvals are the immediate guard for
+  pending or rejected reviews. The daily all-open sweep is the bounded repair
+  path for thread-only changes, read-only fork review/comment events, and stale
+  current-head statuses; it does not poll between runs.
+- Both targeted PR events and daily all-open sweeps may record an audited success
+  when no formal current-head Codex review object exists, as long as the
+  evaluated PR head exactly matches the status SHA and there are no unresolved
+  current-head review threads or requested-changes reviews. The status
+  description must make the missing Codex review explicit instead of pretending
+  a bot review happened. The daily writer compares the latest GitHub Actions
+  `Review gate` status before its final write and skips if a newer event result
+  landed, leaving the next daily run available for repair.
+- Do not expose `workflow_dispatch` on the privileged status-writer workflow
+  because manual dispatch can be started from a non-default workflow ref.
 - Do not require an approving human review while the repo has only one eligible
   maintainer. A required self-review creates a permanent merge deadlock. Keep the
   required review count at zero unless a second eligible maintainer is active.
