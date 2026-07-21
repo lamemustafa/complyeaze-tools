@@ -25,7 +25,7 @@
     "@complyeaze-tools/safety": "workspace:*",
     "@complyeaze-tools/source-register": "workspace:*",
     "@complyeaze-tools/ui-react": "workspace:*",
-    "astro": "^7.0.9",
+    "astro": "^7.1.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   }
