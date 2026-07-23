@@ -4,195 +4,103 @@ import "../styles/sanchika.css";
 
 const repositoryUrl = "https://github.com/lamemustafa/sanchika";
 const liveGalleryUrl = "https://sanchika.complyeaze.com";
-const familyStoryUrl = "https://complyeaze.com";
 const axalUrl = "https://axal.complyeaze.com";
-const packUrl = "https://pack.complyeaze.com";
 
-const proofChain = [
+const localPath = [
   {
-    code: "trust",
-    title: "TrustBrief",
-    body: "Names the claim, custody boundary, non-goals, and gates before a pattern is treated as reusable.",
+    title: "Source",
+    body: "The Sanchika gallery and source repository show the interface contract behind this page. They are public material to inspect, not a claim about a visitor's files or work.",
   },
   {
-    code: "shape",
-    title: "DesignBrief",
-    body: "Defines the first viewport, story pressure, responsive constraints, and expected states.",
+    title: "Draft",
+    body: "Tools can shape a browser-local working artifact. It does not turn a draft into a filing position, authority decision, or stored client record.",
   },
   {
-    code: "paint",
-    title: "Browser evidence",
-    body: "Uses rendered desktop and mobile evidence to prove the surface actually paints as designed.",
+    title: "Export",
+    body: "A clear label helps a practitioner choose what leaves the browser. A saved trail, assignment, or recurring workflow belongs to Axal.",
   },
-  {
-    code: "adopt",
-    title: "Adoption decision",
-    body: "Records which product consumed the contract and what still needs proof before wider use.",
-  },
-];
-
-const packageContracts = [
-  ["tokens", "Portable variables for color, type, spacing, radius, and motion."],
-  ["primitives", "Accessible primitive contracts with platform-portable intent."],
-  ["patterns", "Compliance workflow shapes for posture, evidence, source state, and action."],
-  ["gallery", "Rendered examples that bind briefs, browser evidence, and adoption notes."],
-];
-
-const surfaces = [
-  ["ComplyEaze", "family story", "Explains why Tools, Pack, Axal, and Sanchika exist together."],
-  ["Axal", "workspace action", "Turns deadlines, source evidence, and review posture into operating flow."],
-  ["Pack", "local proof", "Keeps GST return proof local and explicit about credential/file custody."],
-  ["Tools", "public boundary", "Publishes static, browser-local surfaces without accounts, uploads, or telemetry."],
-];
-
-const verification = [
-  "pnpm validate",
-  "pnpm typecheck",
-  "pnpm build",
-  "pnpm artifact:check",
-  "pnpm consumer:check",
-  "pnpm publish:tarball-check",
-];
-
-const boundaries = [
-  "Sanchika shapes interface contracts; it does not own clients, credentials, documents, filings, or audit trails.",
-  "Tools stays static and browser-local: Files are processed in your browser. No account or file upload required.",
-  "Consumers adopt through reviewed packages, tarballs, or copied design guidance, not nested runtime imports.",
-  "Public claims must describe current evidence, not future component promises.",
 ];
 ---
 
 <BaseLayout
-  title="Sanchika Proof System | ComplyEaze Tools"
-  description="A source-reviewable Sanchika design-system proof surface for ComplyEaze, Axal, Pack, and Tools adoption without accounts, uploads, telemetry, or persistence."
+  title="Local work has a boundary | ComplyEaze Tools"
+  description="A public Sanchika proof route for browser-local ComplyEaze Tools: source-visible, explicit about drafts, and clear about what is not stored or decided."
 >
-  <section class="sanchika-stage" aria-labelledby="sanchika-heading">
-    <div class="stage-copy">
-      <p class="domain-line">sanchika.complyeaze.com</p>
-      <h1 id="sanchika-heading">Design that has to testify.</h1>
-      <p class="stage-lede">
-        Sanchika is the proof system for ComplyEaze interfaces: briefs, rendered
-        evidence, package contracts, and adoption decisions held together so a
-        beautiful compliance surface does not become a vague one.
+  <section class="tools-proof" aria-labelledby="sanchika-heading">
+    <div class="proof-heading">
+      <p class="proof-meta"><strong>ComplyEaze Tools</strong> <span aria-hidden="true">/</span> Sanchika proof</p>
+      <h1 id="sanchika-heading">Know what local work carries—and what it does not.</h1>
+      <p class="proof-lede">
+        This is a public reading surface for people who need the browser-local
+        boundary before they need a component catalogue.
       </p>
-      <div class="stage-actions" aria-label="Sanchika primary links">
-        <a class="sanchika-button" href={liveGalleryUrl}>Open Sanchika gallery</a>
-        <a class="sanchika-link" href={repositoryUrl}>Review source</a>
-        <a class="sanchika-link" href={familyStoryUrl}>Trace the family</a>
-      </div>
     </div>
 
-    <figure class="proof-instrument" aria-labelledby="instrument-title">
-      <figcaption id="instrument-title">Sanchika proof instrument</figcaption>
-      <div class="instrument-shell">
-        <div class="instrument-axis axis-x" aria-hidden="true"></div>
-        <div class="instrument-axis axis-y" aria-hidden="true"></div>
-        <div class="instrument-core">
-          <span>contract</span>
-          <strong>reviewed before reused</strong>
-        </div>
-        {proofChain.map((proof, index) => (
-          <article class={`instrument-node node-${index + 1}`}>
-            <span>{proof.code}</span>
-            <strong>{proof.title}</strong>
-            <p>{proof.body}</p>
-          </article>
-        ))}
-      </div>
-    </figure>
-  </section>
-
-  <section class="sanchika-truth" aria-label="Current Sanchika truth">
-    <p>
-      Current truth: Sanchika is framework-agnostic in contract,
-      package-backed in primitive-contract proof, and still adoption-gated. Its
-      public surface should show evidence before it asks for belief.
-    </p>
-  </section>
-
-  <section class="sanchika-narrative" aria-labelledby="narrative-heading">
-    <div class="narrative-head">
-      <h2 id="narrative-heading">A design system is not a costume.</h2>
+    <aside class="boundary-signal" aria-labelledby="boundary-signal-heading">
+      <p class="signal-kicker">Visible before any handoff</p>
+      <h2 id="boundary-signal-heading">Files are processed in your browser. No account or file upload required.</h2>
       <p>
-        ComplyEaze needs interfaces that feel different because their jobs are
-        different. Sanchika carries a shared proof grammar without forcing the
-        product family into one generic skin.
+        This page explains a public interface boundary. It does not promise an
+        automated compliance judgment, a saved client record, or a portal result.
       </p>
-    </div>
-    <div class="surface-ledger" aria-label="Product surfaces shaped by Sanchika">
-      {surfaces.map(([name, mode, body]) => (
-        <article>
-          <span>{mode}</span>
-          <h3>{name}</h3>
-          <p>{body}</p>
-        </article>
-      ))}
-    </div>
+      <a href="/privacy/">Read the privacy boundary</a>
+    </aside>
+
+    <nav class="proof-actions" aria-label="Sanchika proof links">
+      <a class="proof-action primary" href={liveGalleryUrl}>Open Sanchika gallery</a>
+      <a class="proof-action" href={repositoryUrl}>Review source</a>
+    </nav>
   </section>
 
-  <section class="contract-section" aria-labelledby="contracts-heading">
+  <section class="local-path" aria-labelledby="local-path-heading">
+    <div class="path-introduction">
+      <p>How this route should be read</p>
+      <h2 id="local-path-heading">A local artifact is useful precisely because its limits stay visible.</h2>
+    </div>
+
+    <ol class="path-list">
+      {localPath.map((entry) => (
+        <li>
+          <h3>{entry.title}</h3>
+          <p>{entry.body}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="proof-ledger" aria-labelledby="ledger-heading">
     <div>
-      <h2 id="contracts-heading">Packages are small promises.</h2>
-      <p>
-        Each layer has one job and one reason to change. That is what makes a
-        design system portable without smuggling product state, tenant data, or
-        filing behavior into consumers.
-      </p>
+      <p class="ledger-mark">Public proof, not a product workspace</p>
+      <h2 id="ledger-heading">The contract can be inspected without asking anyone to trust a hidden system.</h2>
     </div>
-    <dl class="contract-list">
-      {packageContracts.map(([name, body]) => (
-        <div>
-          <dt>@sanchika/{name}</dt>
-          <dd>{body}</dd>
-        </div>
-      ))}
+    <dl>
+      <div>
+        <dt>This route is</dt>
+        <dd>A static explanation of how the Sanchika contract helps a public Tools surface communicate source, draft state, and export boundaries.</dd>
+      </div>
+      <div>
+        <dt>This route is not</dt>
+        <dd>A filing result, a compliance conclusion, a client vault, an audit trail, or an account area.</dd>
+      </div>
+      <div>
+        <dt>When work persists</dt>
+        <dd>Use Axal for a saved workspace, collaboration, assignments, and recurring operating flow.</dd>
+      </div>
     </dl>
   </section>
 
-  <section class="verification-section" aria-labelledby="verification-heading">
-    <div class="verification-panel">
-      <h2 id="verification-heading">Beauty survives only if the gates agree.</h2>
-      <p>
-        Sanchika can be expressive, but adoption claims are earned through
-        package checks, consumer checks, browser evidence, and publish-readiness
-        gates.
-      </p>
-      <div class="command-strip" aria-label="Sanchika verification commands">
-        {verification.map((command) => (
-          <code>{command}</code>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section class="boundary-section" aria-labelledby="boundary-heading">
+  <section class="proof-close" aria-labelledby="proof-close-heading">
     <div>
-      <h2 id="boundary-heading">The boundary is part of the artifact.</h2>
+      <h2 id="proof-close-heading">Inspect the contract. Keep custody explicit.</h2>
       <p>
-        A page about craft still has to say what it will not do. That restraint
-        is not a footnote; it is how compliance design remains trustworthy.
+        The gallery shows the current interface evidence. The repository makes
+        the underlying design-system work reviewable.
       </p>
     </div>
-    <ul>
-      {boundaries.map((boundary) => (
-        <li>{boundary}</li>
-      ))}
-    </ul>
-  </section>
-
-  <section class="sanchika-close" aria-label="Sanchika related surfaces">
-    <div>
-      <h2>Inspect the loop where it lives.</h2>
-      <p>
-        The gallery shows the current evidence. The family surfaces show why the
-        system has to adapt instead of merely repeat.
-      </p>
-    </div>
-    <nav aria-label="Related public surfaces">
-      <a class="sanchika-button" href={liveGalleryUrl}>Open gallery</a>
-      <a class="sanchika-button secondary" href={axalUrl}>Axal</a>
-      <a class="sanchika-button secondary" href={packUrl}>Pack</a>
-      <a class="sanchika-button secondary" href={repositoryUrl}>Source</a>
+    <nav aria-label="Next proof routes">
+      <a class="proof-action primary" href={liveGalleryUrl}>Open gallery</a>
+      <a class="proof-action" href={repositoryUrl}>Sanchika source</a>
+      <a class="proof-action" href={axalUrl}>Go to Axal</a>
     </nav>
   </section>
 </BaseLayout>

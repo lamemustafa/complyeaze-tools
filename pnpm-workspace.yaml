@@ -9,6 +9,7 @@ allowBuilds:
 overrides:
   baseline-browser-mapping: 2.10.40
   electron-to-chromium: 1.5.383
+  svgo: 4.0.2
 
 onlyBuiltDependencies:
   - esbuild
