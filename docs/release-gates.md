@@ -66,6 +66,23 @@ state has been imported and the plan is attached to the deployment notes.
 Use `docs/go-live-runbook.md` for the exact live cutover checks and
 `docs/uptime-monitoring.md` for external monitor targets.
 
+## GitHub Pages Fallback Host
+
+`.github/workflows/pages-deploy.yml` builds `apps/site/dist` on every push to
+`master` (after `pnpm typecheck`, `pnpm lint`, `pnpm build`, and
+`pnpm scan:built-runtime-network`; `master` itself is gated by `verify`) and
+deploys it to GitHub Pages with the custom domain `tools.complyeaze.com` set
+through the Pages API. The
+`github-pages` environment only allows `master` deployments.
+
+GitHub Pages cannot set response headers. While Pages serves the host, the
+nginx CSP, `Referrer-Policy`, `X-Frame-Options`, `X-Content-Type-Options`,
+COOP/CORP, `Permissions-Policy`, and cache headers from
+`deploy/docker/nginx.conf` are not sent unless Cloudflare adds them at the edge,
+and `/-/health` does not exist. Restore the Kubernetes origin or add equivalent
+Cloudflare response-header rules before treating the Pages host as the
+long-term production origin.
+
 ## CSP Direction
 
 Production currently allows first-party inline script/style blocks because Astro
